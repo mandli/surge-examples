@@ -8,21 +8,18 @@ that will be read in by the Fortran code.
 """
 
 import os
-import clawpack.clawutil.oldclawdata as data
-import numpy as np
 import datetime
 
-import geoclaw.surge as surge
+import numpy as np
+
+import clawpack.geoclaw.surge as surge
+
+# Landfall of hurricane 1110 UTC (6:10 a.m. CDT) on Monday, August 29, 2005
+katrina_landfall = datetime.datetime(2005,8,29,6) - datetime.datetime(2005,1,1,0)
 
 #                           days   s/hour    hours/day            
 days2seconds = lambda days: days * 60.0**2 * 24.0
 seconds2days = lambda seconds: seconds / (60.0**2 * 24.0)
-
-def date2days(t_string):
-    r""""""
-    t = datetime.date(int(t_string[0:4]),int(t_string[4:6]),int(t_string[6:8]))
-    first_of_year = datetime.date(int(t_string[0:4]),1,1)
-    return (t - first_of_year).days
 
 #------------------------------
 def setrun(claw_pkg='geoclaw'):
@@ -39,10 +36,12 @@ def setrun(claw_pkg='geoclaw'):
 
     """
 
+    from clawpack.clawutil import clawdata
+
     assert claw_pkg.lower() == 'geoclaw',  "Expected claw_pkg = 'geoclaw'"
 
-    ndim = 2
-    rundata = data.ClawRunData(claw_pkg, ndim)
+    num_dim = 2
+    rundata = clawdata.ClawRunData(claw_pkg, num_dim)
 
     #------------------------------------------------------------------
     # Problem-specific parameters to be written to setprob.data:
@@ -67,33 +66,34 @@ def setrun(claw_pkg='geoclaw'):
     # ---------------
 
     # Number of space dimensions:
-    clawdata.ndim = ndim
+    clawdata.num_dim = num_dim
 
     # Lower and upper edge of computational domain:
-    clawdata.xlower = -99.0
-    clawdata.xupper = -50.0
+    clawdata.lower[0] = -99.0
+    clawdata.upper[0] = -50.0
 
-    clawdata.ylower = 8.0
-    clawdata.yupper = 32.0
+    clawdata.lower[1] = 8.0
+    clawdata.upper[1] = 32.0
 
 
     # Number of grid cells:
     degree_factor = 4 # (0.25º,0.25º) ~ (25237.5 m, 27693.2 m) resolution
-    clawdata.mx = int(clawdata.xupper - clawdata.xlower) * degree_factor
-    clawdata.my = int(clawdata.yupper - clawdata.ylower) * degree_factor
+    clawdata.num_cells[0] = int(clawdata.upper[0] - clawdata.lower[0]) * degree_factor
+    clawdata.num_cells[1] = int(clawdata.upper[1] - clawdata.lower[1]) * degree_factor
+
 
     # ---------------
     # Size of system:
     # ---------------
 
     # Number of equations in the system:
-    clawdata.meqn = 3
+    clawdata.num_eqn = 3
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
-    clawdata.maux = 9
+    clawdata.num_aux = 4 + 3 + 2
 
     # Index of aux array corresponding to capacity function, if there is one:
-    clawdata.mcapa = 2
+    clawdata.capa_index = 2
 
 
 
@@ -102,7 +102,8 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
 
     # Katrina 2005082412 20260800.000000000
-    clawdata.t0 = days2seconds(date2days('2005082412'))
+    clawdata.t0 = days2seconds(katrina_landfall.days - 4) + katrina_landfall.seconds
+    # clawdata.t0 = days2seconds(date2days('2005082412'))
     # clawdata.t0 = days2seconds(237.0)
 
 
@@ -114,29 +115,30 @@ def setrun(claw_pkg='geoclaw'):
     # Note that the time integration stops after the final output time.
     # The solution at initial time t0 is always written in addition.
 
-    clawdata.outstyle = 1
+    clawdata.output_style = 1
 
-    if clawdata.outstyle==1:
+    if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
         #                 day     s/hour  hours/day
         # Katrina 2005083012
-        clawdata.tfinal = days2seconds(241.0)
+        clawdata.tfinal = days2seconds(katrina_landfall.days + 2) + katrina_landfall.seconds
 
         # Output files per day requested
         recurrence = 24
-        clawdata.nout = int((clawdata.tfinal - clawdata.t0) 
+        clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
                                             * recurrence / (60**2 * 24))
 
-    elif clawdata.outstyle == 2:
+        clawdata.output_t0 = True  # output at initial (or restart) time?
+        
+    elif clawdata.output_style == 2:
         # Specify a list of output times.
-        clawdata.tout =  [0.5, 1.0]   # used if outstyle == 2
-        clawdata.nout = len(clawdata.tout)
+        clawdata.output_times = [0.5, 1.0]
 
-    elif clawdata.outstyle == 3:
+    elif clawdata.output_style == 3:
         # Output every iout timesteps with a total of ntot time steps:
-        iout = 1
-        ntot = 100
-        clawdata.iout = [iout, ntot]
+        clawdata.output_step_interval = 1
+        clawdata.total_steps = 1
+        clawdata.output_t0 = True
 
 
 
@@ -157,7 +159,7 @@ def setrun(claw_pkg='geoclaw'):
 
     # if dt_variable==1: variable time steps used based on cfl_desired,
     # if dt_variable==0: fixed time steps dt = dt_initial will always be used.
-    clawdata.dt_variable = 1
+    clawdata.dt_variable = True
 
     # Initial time step for variable dt.
     # If dt_variable==0 then dt=dt_initial for all steps:
@@ -172,7 +174,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.cfl_max = 1.0
 
     # Maximum number of time steps to allow between output times:
-    clawdata.max_steps = 5000
+    clawdata.steps_max = 5000
 
 
 
@@ -182,31 +184,45 @@ def setrun(claw_pkg='geoclaw'):
     # ------------------
 
     # Order of accuracy:  1 => Godunov,  2 => Lax-Wendroff plus limiters
-    clawdata.order = 1
-
-    # Transverse order for 2d or 3d (not used in 1d):
-    clawdata.order_trans = 1
+    clawdata.order = 2
+    
+    # Use dimensional splitting? (not yet available for AMR)
+    clawdata.dimensional_split = 'unsplit'
+    
+    # For unsplit method, transverse_waves can be 
+    #  0 or 'none'      ==> donor cell (only normal solver used)
+    #  1 or 'increment' ==> corner transport of waves
+    #  2 or 'all'       ==> corner transport of 2nd order corrections too
+    clawdata.transverse_waves = 2
 
     # Number of waves in the Riemann solution:
-    clawdata.mwaves = 3
+    clawdata.num_waves = 3
+    
+    # List of limiters to use for each wave family:  
+    # Required:  len(limiter) == num_waves
+    # Some options:
+    #   0 or 'none'     ==> no limiter (Lax-Wendroff)
+    #   1 or 'minmod'   ==> minmod
+    #   2 or 'superbee' ==> superbee
+    #   3 or 'mc'       ==> MC limiter
+    #   4 or 'vanleer'  ==> van Leer
+    clawdata.limiter = ['mc', 'mc', 'mc']
 
-    # List of limiters to use for each wave family:
-    # Required:  len(mthlim) == mwaves
-    clawdata.mthlim = [3,3,3]
-
+    clawdata.use_fwaves = True    # True ==> use f-wave version of algorithms
+    
     # Source terms splitting:
-    #   src_split == 0  => no source term (src routine never called)
-    #   src_split == 1  => Godunov (1st order) splitting used,
-    #   src_split == 2  => Strang (2nd order) splitting used,  not recommended.
-    clawdata.src_split = 1
-
+    #   src_split == 0 or 'none'    ==> no source term (src routine never called)
+    #   src_split == 1 or 'godunov' ==> Godunov (1st order) splitting used, 
+    #   src_split == 2 or 'strang'  ==> Strang (2nd order) splitting used,  not recommended.
+    clawdata.source_split = 'godunov'
+    # clawdata.source_split = 'strang'
 
     # --------------------
     # Boundary conditions:
     # --------------------
 
     # Number of ghost cells (usually 2)
-    clawdata.mbc = 2
+    clawdata.num_ghost = 2
 
     # Choice of BCs at xlower and xupper:
     #   0 => user specified (must modify bcN.f to use this option)
@@ -214,11 +230,11 @@ def setrun(claw_pkg='geoclaw'):
     #   2 => periodic (must specify this at both boundaries)
     #   3 => solid wall for systems where q(2) is normal velocity
 
-    clawdata.mthbc_xlower = 1
-    clawdata.mthbc_xupper = 1
+    clawdata.bc_lower[0] = 'extrap'
+    clawdata.bc_upper[0] = 'extrap'
 
-    clawdata.mthbc_ylower = 1
-    clawdata.mthbc_yupper = 1
+    clawdata.bc_lower[1] = 'extrap'
+    clawdata.bc_upper[1] = 'extrap'
 
 
     # ---------------
@@ -227,45 +243,87 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    mxnest = 5
-
-    clawdata.mxnest = -mxnest   # negative ==> anisotropic refinement in x,y,t
+    clawdata.amr_levels_max = 1
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    # Run resolution.py 2 2 4 8 16 to see approximate resolutions
-    clawdata.inratx = [2,2,3,4,8,2]
-    clawdata.inraty = [2,2,3,4,8,2]
-
-    clawdata.inratt = [2,2,3,4,8,2]
-    # Instead of setting these ratios, set:
-    # geodata.variable_dt_refinement_ratios = True
-    # in setgeo.
-    # to automatically choose refinement ratios in time based on estimate
-    # of maximum wave speed on all grids at each level.
+    clawdata.refinement_ratios_x = [2,2,3,4,4,4]
+    clawdata.refinement_ratios_y = [2,2,3,4,4,4]
+    clawdata.refinement_ratios_t = [2,2,3,4,4,4]
 
 
     # Specify type of each aux variable in clawdata.auxtype.
     # This must be a list of length maux, each element of which is one of:
     #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
 
-    clawdata.auxtype = ['center','capacity','yleft','center','center','center',
-                        'center','center','center']
+    clawdata.aux_type = ['center','capacity','yleft','center','center','center',
+                         'center', 'center', 'center']
 
 
-    clawdata.tol = -1.0     # negative ==> don't use Richardson estimator
-    clawdata.tolsp = 0.5    # used in default flag2refine subroutine
-                            # (Not used in geoclaw!)
+    # Flag using refinement routine flag2refine rather than richardson error
+    clawdata.flag_richardson = False    # use Richardson?
+    clawdata.flag2refine = True
 
-    clawdata.kcheck = 3     # how often to regrid (every kcheck steps)
-    clawdata.ibuff  = 2     # width of buffer zone around flagged points
+    # steps to take on each level L between regriddings of level L+1:
+    clawdata.regrid_interval = 3
 
+    # width of buffer zone around flagged points:
+    # (typically the same as regrid_interval so waves don't escape):
+    clawdata.regrid_buffer_width  = 2
+
+    # clustering alg. cutoff for (# flagged pts) / (total # of cells refined)
+    # (closer to 1.0 => more small grids may be needed to cover flagged cells)
+    clawdata.clustering_cutoff = 0.700000
+
+    # print info about each regridding up to this level:
+    clawdata.verbosity_regrid = 0  
+
+    # Specify when checkpoint files should be created that can be
+    # used to restart a computation.
+
+    clawdata.checkpt_style = 0
+
+    if clawdata.checkpt_style == 0:
+        # Do not checkpoint at all
+        pass
+
+    elif clawdata.checkpt_style == 1:
+        # Checkpoint only at tfinal.
+        pass
+
+    elif clawdata.checkpt_style == 2:
+        # Specify a list of checkpoint times.  
+        clawdata.checkpt_times = [0.1,0.15]
+
+    elif clawdata.checkpt_style == 3:
+        # Checkpoint every checkpt_interval timesteps (on Level 1)
+        # and at the final time.
+        clawdata.checkpt_interval = 5
+
+
+    #  ----- For developers ----- 
+    # Toggle debugging print statements:
+    clawdata.dprint = False      # print domain flags
+    clawdata.eprint = False      # print err est flags
+    clawdata.edebug = False      # even more err est flags
+    clawdata.gprint = False      # grid bisection/clustering
+    clawdata.nprint = False      # proper nesting output
+    clawdata.pprint = False      # proj. of tagged points
+    clawdata.rprint = False      # print regridding summary
+    clawdata.sprint = False      # space/memory output
+    clawdata.tprint = False      # time step reporting each level
+    clawdata.uprint = False      # update/upbnd reporting
+    
     # More AMR parameters can be set -- see the defaults in pyclaw/data.py
+    
+    # == setregions.data values ==
+    regions = rundata.regiondata.regions
+    # to specify regions of refinement append lines of the form
+    #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
 
-    # Checkpointing
-    clawdata.restart = False
-    clawdata.N_restart = 0
-    clawdata.checkpt_iousr = 10000
-    clawdata.tchk = [] 
+    # == setgauges.data values ==
+    gauges = rundata.gaugedata.gauges
+    # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
+    gauges.append([1, -89.5, 29.6,  rundata.clawdata.t0, rundata.clawdata.tfinal])
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -310,7 +368,7 @@ def setgeo(rundata):
     geodata.max_level_deep = 3
 
     # Forcing
-    geodata.friction_forcing = 1
+    geodata.friction_forcing = True
     geodata.manning_coefficient = 0.025
     geodata.friction_depth = 1.e6
     geodata.coriolis_forcing = True
@@ -333,27 +391,11 @@ def setgeo(rundata):
     # geodata.dtopofiles.append([1,3,3,'usgs100227.tt1'])
 
     # == setqinit.data values ==
-    geodata.qinit_type = 0
-    # geodata.qinit_type = 4
-    geodata.qinitfiles = []
+    rundata.qinitdata.qinit_type = 0
+    rundata.qinitdata.qinitfiles = []
     # for qinit perturbations, append lines of the form: (<= 1 allowed for now!)
     #   [minlev, maxlev, fname]
     # geodata.qinitfiles.append([1, 5, 'hump.xyz'])
-
-    # == setregions.data values ==
-    geodata.regions = []
-    # to specify regions of refinement append lines of the form
-    #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    # geodata.regions.append([1, 4, 0.0, 1e10, -99.00, -80.00, 17.00, 32.00]) # entire domain
-    # geodata.regions.append([1, 5, 0.0, 1e10, -95.40, -94.42, 29.10, 29.92]) # Galveston Bay and inland
-    # geodata.regions.append([1, 7, 0.0, 1e10, -94.84, -94.70, 29.30, 29.40]) # Channel into Galveston bay
-    # geodata.regions.append([1, 7, 0.0, 1e10, -95.37, -95.9, 29.60, 29.83]) # Houston ship channel [-95º 22',-94º 54'] x [29º 36',29º 50']
-
-    # == setgauges.data values ==
-    geodata.gauges = []
-    # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    geodata.gauges.append([1, -89.5, 29.6,  rundata.clawdata.t0, rundata.clawdata.tfinal])
-
 
     # == setfixedgrids.data values ==
     geodata.fixedgrids = []
@@ -362,31 +404,26 @@ def setgeo(rundata):
     #  ioutarrivaltimes,ioutsurfacemax]
     # geodata.fixedgrids.append([1e3,3.24e4,10,-90,-80,-30,-15,100,100,0,1])
     
-    # == Multilayer ==
-    geodata.layers = 1
-    geodata.rho = 1025.0
-    geodata.eta_init = 0.0
-    geodata.richardson_tolerance = 0.95
-    
     return rundata
     # end of function setgeo
     # ----------------------
 
-def set_storm():
+def set_storm(rundata):
 
-    data = surge.data.StormData()
+    data = rundata.stormdata
 
-   # Physics parameters
+    # Physics parameters
     data.rho_air = 1.15
     data.ambient_pressure = 101.3e3 # Nominal atmos pressure
 
-    # Source term controls
+    # Source term controls - These are currently not respected
     data.wind_forcing = True
-    data.pressure_forcing = False
+    data.drag_law = 2
+    data.pressure_forcing = True
     
     # Source term algorithm parameters
-    data.wind_tolerance = 1e-4
-    data.pressure_tolerance = 1e-4 # Pressure source term tolerance
+    # data.wind_tolerance = 1e-4
+    # data.pressure_tolerance = 1e-4 # Pressure source term tolerance
 
     # AMR parameters
     data.wind_refine = [20.0,40.0,60.0] # m/s
@@ -394,9 +431,36 @@ def set_storm():
     
     # Storm parameters
     data.storm_type = 1 # Type of storm
+    data.landfall = days2seconds(katrina_landfall.days) + katrina_landfall.seconds
 
     # Storm type 2 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'katrina.storm'))
+
+    return data
+
+
+def set_friction(rundata):
+
+    data = rundata.frictiondata
+
+    # Variable friction
+    data.variable_friction = True
+
+    # Region based friction
+    # Entire domain
+    data.friction_regions.append([rundata.clawdata.lower, 
+                                  rundata.clawdata.upper,
+                                  [np.infty,0.0,-np.infty],
+                                  [0.030, 0.022]])
+
+    # La-Tex Shelf
+    data.friction_regions.append([(-98, 25.25), (-90, 30),
+                                  [np.infty,-10.0,-200.0,-np.infty],
+                                  [0.030, 0.012, 0.022]])
+
+    
+    # 0.012 for LaTex shelf?
+    # 0.022 everywhere else?
 
     return data
 
@@ -408,8 +472,10 @@ if __name__ == '__main__':
     else:
         rundata = setrun()
 
-    rundata.write()
+    rundata.add_data(surge.data.SurgeData(),'stormdata')
+    set_storm(rundata)
+    rundata.add_data(surge.data.FrictionData(),'frictiondata')
+    set_friction(rundata)
 
-    storm_data = set_storm()
-    storm_data.write()
+    rundata.write()
 

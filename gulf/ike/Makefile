@@ -53,7 +53,6 @@ SOURCES = \
   $(GEOLIB)/storm_surge/src1d.f90 \
   $(GEOLIB)/storm_surge/setaux.f90 \
   $(GEOLIB)/storm_surge/setprob.f90 \
-  $(GEOLIB)/storm_surge/flag2refine.f90 \
   $(GEOLIB)/storm_surge/flag2refine2.f90 \
   $(GEOLIB)/storm_surge/b4step2.f90 \
   $(GEOLIB)/storm_surge/tick.f \
@@ -80,41 +79,35 @@ SOURCES = \
   $(GEOLIB)/ginit.f \
   $(GEOLIB)/getmaxspeed.f90 \
   $(GEOLIB)/advanc.f \
-  $(GEOLIB)/filval_new.f90 \
-  $(GEOLIB)/filpatch_new.f90 \
-  $(AMRLIB)/prefilp_new.f90 \
-  $(AMRLIB)/trimbd_new.f90 \
-  $(AMRLIB)/bound_new.f90 \
-  $(AMRLIB)/intfil_new.f90 \
+  $(GEOLIB)/filval.f90 \
+  $(GEOLIB)/filpatch.f90 \
+  $(AMRLIB)/prefilp.f90 \
+  $(AMRLIB)/trimbd.f90 \
+  $(AMRLIB)/bound.f90 \
+  $(AMRLIB)/intfil.f90 \
   $(AMRLIB)/amr2.f90 \
   $(AMRLIB)/quick_sort1.f \
   $(AMRLIB)/estdt.f \
   $(AMRLIB)/check4nans.f \
-  $(AMRLIB)/spest.f  \
   $(AMRLIB)/spest2.f  \
   $(AMRLIB)/init_iflags.f \
   $(AMRLIB)/igetsp.f \
   $(AMRLIB)/reclam.f \
   $(AMRLIB)/birect.f \
   $(AMRLIB)/cleanup.f \
-  $(AMRLIB)/colate.f \
   $(AMRLIB)/colate2.f \
   $(AMRLIB)/errest.f \
-  $(AMRLIB)/bufnst.f \
   $(AMRLIB)/bufnst2.f \
   $(AMRLIB)/errf1.f \
   $(AMRLIB)/fixcapaq.f \
-  $(AMRLIB)/flglvl.f \
   $(AMRLIB)/flglvl2.f \
   $(AMRLIB)/fluxad.f \
   $(AMRLIB)/fluxsv.f \
   $(AMRLIB)/grdfit2.f \
   $(AMRLIB)/moment.f \
-  $(AMRLIB)/nestck.f \
   $(AMRLIB)/nestck2.f \
   $(AMRLIB)/prepc.f \
   $(AMRLIB)/prepf.f \
-  $(AMRLIB)/projec.f \
   $(AMRLIB)/projec2.f \
   $(AMRLIB)/signs.f \
   $(AMRLIB)/findcut.f \
@@ -137,7 +130,6 @@ SOURCES = \
   $(AMRLIB)/fss.f \
   $(AMRLIB)/zeroin.f \
   $(AMRLIB)/setflags.f \
-  $(AMRLIB)/shiftset.f \
   $(AMRLIB)/shiftset2.f \
   $(AMRLIB)/conck.f \
   $(AMRLIB)/domshrink.f \

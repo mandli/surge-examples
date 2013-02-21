@@ -145,7 +145,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.output_format == 'ascii'      # 'ascii' or 'netcdf' 
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
-    clawdata.output_aux_components = 'none'  # could be list
+    clawdata.output_aux_components = 'None' # could be list
     clawdata.output_aux_onlyonce = True    # output aux arrays only at t0
 
 
@@ -254,7 +254,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    clawdata.amr_levels_max = 5
+    clawdata.amr_levels_max = 1
 
     # List of refinement ratios at each level (length at least mxnest-1)
     clawdata.refinement_ratios_x = [2,2,3,4,4,4]
@@ -432,7 +432,7 @@ def setgeo(rundata):
     # == Forcing Options
     geodata.coriolis_forcing = True
     geodata.friction_forcing = True
-    geodata.manning_coefficient = 0.025
+    geodata.manning_coefficient = 0.025 # Overridden below
     geodata.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
@@ -443,7 +443,7 @@ def setgeo(rundata):
     # geodata.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
     geodata.speed_tolerance = [1.0,2.0,3.0]
     geodata.deep_depth = 200.0
-    geodata.max_level_deep = 2
+    geodata.max_level_deep = 5
 
     # == settopo.data values ==
     geodata.topofiles = []
@@ -451,9 +451,9 @@ def setgeo(rundata):
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for the
     # smaller domains
-    geodata.topofiles.append([3, 1, 3, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
                               '../bathy/gulf_caribbean.tt3'])
-    geodata.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal,
                               '../bathy/NOAA_Galveston_Houston.tt3'])
     # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
     #                           '../bathy/galveston_channel.tt3'])
