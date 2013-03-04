@@ -232,7 +232,7 @@ def setplot(plotdata):
     # Friction field
     plotfigure = plotdata.new_plotfigure(name='Friction',
                                          figno=fig_num_counter.get_counter())
-    plotfigure.show = friction_data.variable_friction and False
+    plotfigure.show = friction_data.variable_friction and True
 
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.xlimits = full_xlimits

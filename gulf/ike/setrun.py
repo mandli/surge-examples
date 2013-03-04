@@ -194,7 +194,7 @@ def setrun(claw_pkg='geoclaw'):
     # ------------------
 
     # Order of accuracy:  1 => Godunov,  2 => Lax-Wendroff plus limiters
-    clawdata.order = 2
+    clawdata.order = 1
     
     # Use dimensional splitting? (not yet available for AMR)
     clawdata.dimensional_split = 'unsplit'
@@ -203,7 +203,7 @@ def setrun(claw_pkg='geoclaw'):
     #  0 or 'none'      ==> donor cell (only normal solver used)
     #  1 or 'increment' ==> corner transport of waves
     #  2 or 'all'       ==> corner transport of 2nd order corrections too
-    clawdata.transverse_waves = 2
+    clawdata.transverse_waves = 1
 
     # Number of waves in the Riemann solution:
     clawdata.num_waves = 3
@@ -254,7 +254,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    clawdata.amr_levels_max = 1
+    clawdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
     clawdata.refinement_ratios_x = [2,2,3,4,4,4]
@@ -330,9 +330,12 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    # Galveston Sub-Domain
+    # Galveston Sub-Domains
     regions.append([1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, 
                                             -95.8666, -93.4, 28.63333, 30.2])
+    regions.append([1, 6, rundata.clawdata.t0, rundata.clawdata.tfinal,
+                                            -95.3723, -94.5939, 29.2467, 29.9837])
+
     # Galveston Channel Entrance (galveston_channel)
     regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
                                                 -94.84, -94.70, 29.30, 29.40])
@@ -442,7 +445,7 @@ def setgeo(rundata):
     # geodata.wave_tolerance = 0.5
     # geodata.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
     geodata.speed_tolerance = [1.0,2.0,3.0]
-    geodata.deep_depth = 200.0
+    geodata.deep_depth = 1e6
     geodata.max_level_deep = 5
 
     # == settopo.data values ==
@@ -541,10 +544,6 @@ def set_friction(rundata):
     data.friction_regions.append([(-98, 25.25), (-90, 30),
                                   [np.infty,-10.0,-200.0,-np.infty],
                                   [0.030, 0.012, 0.022]])
-
-    
-    # 0.012 for LaTex shelf?
-    # 0.022 everywhere else?
 
     return data
 

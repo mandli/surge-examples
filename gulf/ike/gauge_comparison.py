@@ -86,7 +86,7 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
     return gauges
 
 
-def plot_comparison(gauge_path,geoclaw_path):
+def plot_comparison(gauge_path, geoclaw_path, single_plot=True, format='png'):
 
     # Parameters
     surface_offset = 0.27
@@ -103,13 +103,19 @@ def plot_comparison(gauge_path,geoclaw_path):
                                              base_path=geoclaw_path)
 
     # Plot each matching gauge
-    fig = plt.figure(figsize=(16,10),dpi=80)
-    fig.suptitle('Surface from Sea Level')
+    if single_plot:
+        fig = plt.figure(figsize=(16,10),dpi=80)
+        fig.suptitle('Surface from Sea Level')
     index = 0
     for (name,kennedy_gauge) in kennedy_gauges.iteritems():
         geoclaw_gauge = geoclaw_gauges[kennedy_gauge['gauge_no']]
         index = index + 1
-        axes = fig.add_subplot(2,len(kennedy_gauges)/2,index)
+        if single_plot:
+            axes = fig.add_subplot(2,len(kennedy_gauges)/2,index)
+        else:
+            fig = plt.figure(figsize=(16,10),dpi=80)
+            fig.suptitle('Surface from Sea Level')
+        axes = fig.add_subplot(111)
 
         axes.plot(kennedy_gauge['t'] - seconds2days(date2seconds(landfall[0])),
                   kennedy_gauge['mean_water'] + kennedy_gauge['depth'], 'k')
@@ -125,6 +131,10 @@ def plot_comparison(gauge_path,geoclaw_path):
         axes.set_ylim([-1,5])
         axes.grid(True)
 
+        if not single_plot:
+            plt.savefig("gauge%s.%s" % (kennedy_gauge['gauge_no'],format))
+
+    plt.savefig("gauge_comparison.%s" % format)
     return fig
 
 
@@ -137,5 +147,5 @@ if __name__ == '__main__':
             kennedy_gauge_path = sys.argv[2]
 
     # Plot Andrew Kennedy's gauge data versus corresponding GeoClaw data
-    figure = plot_comparison(kennedy_gauge_path,geoclaw_output_path)
+    figure = plot_comparison(kennedy_gauge_path, geoclaw_output_path)
     plt.show()
