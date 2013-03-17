@@ -68,10 +68,10 @@ def setrun(claw_pkg='geoclaw'):
 
     # Lower and upper edge of computational domain:
     clawdata.lower[0] = 0.0
-    clawdata.upper[0] = 1000e3
+    clawdata.upper[0] = 40.0 * 25000.0
     
     clawdata.lower[1] = 0.0
-    clawdata.upper[1] = 1000e3
+    clawdata.upper[1] = 40.0 * 25000.0
 
     # Number of grid cells:
     clawdata.num_cells[0] = 100
@@ -121,7 +121,7 @@ def setrun(claw_pkg='geoclaw'):
 
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
-        clawdata.tfinal = days2seconds(400.0)
+        clawdata.tfinal = days2seconds(10.0)
         clawdata.num_output_times = 25
 
         clawdata.output_t0 = True  # output at initial (or restart) time?
@@ -234,11 +234,11 @@ def setrun(claw_pkg='geoclaw'):
     #   2 => periodic (must specify this at both boundaries)
     #   3 => solid wall for systems where q(2) is normal velocity
 
-    clawdata.bc_lower[0] = 'wall'
-    clawdata.bc_upper[0] = 'wall'
+    clawdata.bc_lower[0] = 'extrap'
+    clawdata.bc_upper[0] = 'extrap'
 
-    clawdata.bc_lower[1] = 'wall'
-    clawdata.bc_upper[1] = 'wall'
+    clawdata.bc_lower[1] = 'extrap'
+    clawdata.bc_upper[1] = 'extrap'
 
 
     # ---------------
@@ -247,7 +247,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    clawdata.amr_levels_max = 5
+    clawdata.amr_levels_max = 1
 
     # List of refinement ratios at each level (length at least mxnest-1)
     clawdata.refinement_ratios_x = [2,2,3,4,4,4]
@@ -385,7 +385,7 @@ def set_storm(rundata):
     data.R_refine = [60.0e3,40e3,20e3]
     
     # Storm parameters
-    data.storm_type = 3 # Stommel wind field
+    data.storm_type = 0 # Stommel wind field
 
     # Stommel wind field
     data.A = 0.2 / 1.2

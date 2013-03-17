@@ -39,8 +39,8 @@ def setplot(plotdata):
     full_ylimits = [amrdata.lower[1],amrdata.upper[1]]
 
     # Color limits
-    surface_range = 1e-5
-    speed_range = 6.4e-3
+    surface_range = 1.0
+    speed_range = 1.0e-3
 
     xlimits = full_xlimits
     ylimits = full_ylimits

@@ -13,11 +13,11 @@ CLAWMAKE = $(CLAWUTIL)/src/Makefile.common
 # ----------------------------------
 
 CLAW_PKG = geoclaw                  # Clawpack package to use
-CLAW_EXE = xgeoclaw                 # Executable to create
-CLAW_setrun_file = setrun.py        # File containing function to make data
-CLAW_OUTDIR = _output               # Directory for output
-CLAW_setplot_file = setplot.py      # File containing function to set plots
-CLAW_PLOTDIR = _plots               # Directory for plots
+EXE = xgeoclaw                 # Executable to create
+SETRUN_FILE = setrun.py        # File containing function to make data
+OUTDIR = _output               # Directory for output
+SETPLOT_FILE = setplot.py      # File containing function to set plots
+PLOTDIR = _plots               # Directory for plots
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
 FC ?= gfortran
@@ -47,17 +47,17 @@ MODULES = \
  $(GEOLIB)/storm_surge/storm_module.f90 \
  $(GEOLIB)/storm_surge/friction_module.f90
 
+
 SOURCES = \
-  $(GEOLIB)/storm_surge/src2.f90 \
+  ./src2.f90 \
   $(GEOLIB)/storm_surge/src1d.f90 \
-  $(GEOLIB)/storm_surge/setaux.f90 \
-  $(GEOLIB)/storm_surge/setprob.f90 \
-  $(GEOLIB)/storm_surge/flag2refine.f90 \
+  $(GEOLIB)/setaux.f90 \
+  $(GEOLIB)/setprob.f90 \
   $(GEOLIB)/storm_surge/flag2refine2.f90 \
   $(GEOLIB)/storm_surge/b4step2.f90 \
   $(GEOLIB)/storm_surge/tick.f \
   $(GEOLIB)/storm_surge/valout.f \
-  $(GEOLIB)/qinit.f90 \
+  ./qinit.f90 \
   $(GEOLIB)/bc2amr.f \
   $(GEOLIB)/movetopo.f \
   $(GEOLIB)/allowflag.f90 \
@@ -79,41 +79,35 @@ SOURCES = \
   $(GEOLIB)/ginit.f \
   $(GEOLIB)/getmaxspeed.f90 \
   $(GEOLIB)/advanc.f \
-  $(GEOLIB)/filval_new.f90 \
-  $(GEOLIB)/filpatch_new.f90 \
-  $(AMRLIB)/prefilp_new.f90 \
-  $(AMRLIB)/trimbd_new.f90 \
-  $(AMRLIB)/bound_new.f90 \
-  $(AMRLIB)/intfil_new.f90 \
+  $(GEOLIB)/filval.f90 \
+  $(GEOLIB)/filpatch.f90 \
+  $(AMRLIB)/prefilp.f90 \
+  $(AMRLIB)/trimbd.f90 \
+  $(AMRLIB)/bound.f90 \
+  $(AMRLIB)/intfil.f90 \
   $(AMRLIB)/amr2.f90 \
   $(AMRLIB)/quick_sort1.f \
   $(AMRLIB)/estdt.f \
   $(AMRLIB)/check4nans.f \
-  $(AMRLIB)/spest.f  \
   $(AMRLIB)/spest2.f  \
   $(AMRLIB)/init_iflags.f \
   $(AMRLIB)/igetsp.f \
   $(AMRLIB)/reclam.f \
   $(AMRLIB)/birect.f \
   $(AMRLIB)/cleanup.f \
-  $(AMRLIB)/colate.f \
   $(AMRLIB)/colate2.f \
   $(AMRLIB)/errest.f \
-  $(AMRLIB)/bufnst.f \
   $(AMRLIB)/bufnst2.f \
   $(AMRLIB)/errf1.f \
   $(AMRLIB)/fixcapaq.f \
-  $(AMRLIB)/flglvl.f \
   $(AMRLIB)/flglvl2.f \
   $(AMRLIB)/fluxad.f \
   $(AMRLIB)/fluxsv.f \
   $(AMRLIB)/grdfit2.f \
   $(AMRLIB)/moment.f \
-  $(AMRLIB)/nestck.f \
   $(AMRLIB)/nestck2.f \
   $(AMRLIB)/prepc.f \
   $(AMRLIB)/prepf.f \
-  $(AMRLIB)/projec.f \
   $(AMRLIB)/projec2.f \
   $(AMRLIB)/signs.f \
   $(AMRLIB)/findcut.f \
@@ -136,7 +130,6 @@ SOURCES = \
   $(AMRLIB)/fss.f \
   $(AMRLIB)/zeroin.f \
   $(AMRLIB)/setflags.f \
-  $(AMRLIB)/shiftset.f \
   $(AMRLIB)/shiftset2.f \
   $(AMRLIB)/conck.f \
   $(AMRLIB)/domshrink.f \
@@ -174,11 +167,6 @@ SOURCES = \
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
-
-# Construct the topography data
-.PHONY: topo
-topo: .data
-	python maketopo.py
 
 ### DO NOT remove this line - make depends on it ###
 
