@@ -247,8 +247,8 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.bc_lower[0] = 'extrap'
     clawdata.bc_upper[0] = 'extrap'
 
-    clawdata.bc_lower[1] = 'wall'
-    clawdata.bc_upper[1] = 'wall'
+    clawdata.bc_lower[1] = 'extrap'
+    clawdata.bc_upper[1] = 'extrap'
 
 
     # ---------------
@@ -412,6 +412,7 @@ def set_storm(rundata):
 
     # Source term controls
     data.wind_forcing = True
+    data.drag_law = 2
     data.pressure_forcing = True
     
     # Source term algorithm parameters
