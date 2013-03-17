@@ -5,6 +5,7 @@ import sys
 import datetime
 
 import scipy.io
+import numpy as np
 import matplotlib.pyplot as plt
 
 import clawpack.clawutil.clawdata as clawdata
@@ -17,7 +18,7 @@ seconds2days = lambda secs: secs / (24.0 * 60.0**2)
 min2deg = lambda minutes: minutes / 60.0
 ft2m = lambda x:0.3048 * x
 
-def read_Ike_gauge_data(base_path, skiprows=5, verbose=True):
+def read_tide_gauge_data(base_path, skiprows=5, verbose=True):
     r"""Read the gauge info data file.
 
     Returns a dictionary for each gauge in the table.
@@ -58,6 +59,26 @@ def read_Ike_gauge_data(base_path, skiprows=5, verbose=True):
     return stations
 
 
+def read_dgadcirc_gauge_data(only_gauges=None, base_path="", verbose=True):
+    r""""""
+
+    if only_gauges is None:
+        gauge_list = [11, 12, 13, 14]
+    else:
+        gauge_list = only_gauges
+
+    gauge_file_list = [os.path.join(base_path, "stat%s.dat" % str(i).zfill(4)) 
+                 for i in gauge_list]
+
+    stations = {}
+    for (i,gauge_file) in enumerate(gauge_file_list):
+        data = np.loadtxt(gauge_file)
+        stations[i+1] = data
+
+    return stations
+
+
+
 def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True):
     r"""Load all gauge data in gauge file at base_path/fort.gauge
 
@@ -89,18 +110,25 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
 def plot_comparison(gauge_path, geoclaw_path, single_plot=True, format='png'):
 
     # Parameters
-    surface_offset = 0.27
+    surface_offset = [0.27, 0.0]
     landfall = []
     landfall.append(datetime.datetime(2008,9,13 + 1,7) 
                                                 - datetime.datetime(2008,1,1,0))
     landfall.append(datetime.datetime(2008,9,13 - 1,7) 
                                                 - datetime.datetime(2008,1,1,0))
+    landfall.append(days2seconds(4.25))
 
     # Load gauge data
-    kennedy_gauges = read_Ike_gauge_data(gauge_path)
+    kennedy_gauges = read_tide_gauge_data(gauge_path)
+    keys = kennedy_gauges.keys()
+    for gauge_label in keys:
+        if kennedy_gauges[gauge_label]['gauge_no'] not in [1, 2, 3, 4]:
+            kennedy_gauges.pop(gauge_label)
     gauge_list = [gauge['gauge_no'] for gauge in kennedy_gauges.itervalues()]
-    geoclaw_gauges = load_geoclaw_gauge_data(only_gauges=gauge_list,
-                                             base_path=geoclaw_path)
+
+    dgadcirc_gauges = read_dgadcirc_gauge_data(base_path=gauge_path)
+    geoclaw_gauges = load_geoclaw_gauge_data(base_path=geoclaw_path,
+                                             only_gauges=gauge_list)
 
     # Plot each matching gauge
     if single_plot:
@@ -109,18 +137,29 @@ def plot_comparison(gauge_path, geoclaw_path, single_plot=True, format='png'):
     index = 0
     for (name,kennedy_gauge) in kennedy_gauges.iteritems():
         geoclaw_gauge = geoclaw_gauges[kennedy_gauge['gauge_no']]
+        dgadcirc_gauge = dgadcirc_gauges[kennedy_gauge['gauge_no']]
         index = index + 1
         if single_plot:
             axes = fig.add_subplot(2,len(kennedy_gauges)/2,index)
         else:
             fig = plt.figure(figsize=(16,10),dpi=80)
             fig.suptitle('Surface from Sea Level')
-        axes = fig.add_subplot(111)
+            axes = fig.add_subplot(111)
 
+        # Plot actual gauge data
         axes.plot(kennedy_gauge['t'] - seconds2days(date2seconds(landfall[0])),
-                  kennedy_gauge['mean_water'] + kennedy_gauge['depth'], 'k')
+                  kennedy_gauge['mean_water'] + kennedy_gauge['depth'], 'k', 
+                  label="Gauge Data")
+
+        # Plot GeoClaw gauge data
         axes.plot(seconds2days(geoclaw_gauge.t - date2seconds(landfall[1])),
-                  geoclaw_gauge.q[3,:] + surface_offset, 'r')
+                  geoclaw_gauge.q[3,:] + surface_offset[0], 'r', 
+                  label="GeoClaw")
+
+        # Plot DG-ADCIRC gauge data
+        axes.plot(seconds2days(dgadcirc_gauge[:,0] - landfall[2]),
+                  dgadcirc_gauge[:,1] + surface_offset[1], 'g', 
+                  label="DG-ADCIRC")
 
         axes.set_xlabel('Landfall Day')
         axes.set_ylabel('Surface (m)')
@@ -130,6 +169,7 @@ def plot_comparison(gauge_path, geoclaw_path, single_plot=True, format='png'):
         axes.set_xlim([-2,2])
         axes.set_ylim([-1,5])
         axes.grid(True)
+        axes.legend()
 
         if not single_plot:
             plt.savefig("gauge%s.%s" % (kennedy_gauge['gauge_no'],format))
