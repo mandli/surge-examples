@@ -282,7 +282,7 @@ def plot_water(path,fill_path,sea_level=0.0):
 
 
 if __name__ == "__main__":
-    base_bathy_file = 'houston_ship_channel.xyz'
+    base_bathy_file = 'gulf_caribbean.tt3'
     region_bathy = 'NOAA_Galveston_Houston.tt3'
     force = False
     if len(sys.argv) == 2:
