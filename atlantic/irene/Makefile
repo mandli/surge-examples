@@ -21,18 +21,7 @@ PLOTDIR = _plots               # Directory for plots
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
 FC ?= gfortran
-FFLAGS ?=
-MAKELEVEL ?= 0
-ifeq ($(MAKELEVEL),0)
-	# If you want to include NetCDF output add these flags
-	# Note that the NETCDF_INC should point to the location of the hearder files
-	# for NetCDF
-	# NETCDF_INC ?= /usr/include
-	# FFLAGS += -I$(NETCDF_INC) -lnetcdf -lnetcdff
-
-	# Threading flags
-	# FFLAGS += $(OMP_FLAG)
-endif
+FFLAGS ?= -W -Wall -fbounds-check -pedantic-errors -Wunderflow -ffpe-trap=zero,overflow -g
 
 # ---------------------------------
 # List of sources for this program:
@@ -55,20 +44,20 @@ MODULES = \
  $(GEOLIB)/storm_surge/holland_storm_module.f90 \
  $(GEOLIB)/storm_surge/constant_storm_module.f90 \
  $(GEOLIB)/storm_surge/stommel_storm_module.f90 \
- $(GEOLIB)/storm_surge/storm_module.f90
+ $(GEOLIB)/storm_surge/storm_module.f90 \
+ $(GEOLIB)/storm_surge/friction_module.f90
 
-# Switch source file grdfit2.f and grdfit.f to change flagging strategy
+
 SOURCES = \
   $(GEOLIB)/storm_surge/src2.f90 \
   $(GEOLIB)/storm_surge/src1d.f90 \
   $(GEOLIB)/storm_surge/setaux.f90 \
   $(GEOLIB)/storm_surge/setprob.f90 \
-  $(GEOLIB)/storm_surge/qinit.f90 \
-  $(GEOLIB)/storm_surge/flag2refine.f90 \
   $(GEOLIB)/storm_surge/flag2refine2.f90 \
   $(GEOLIB)/storm_surge/b4step2.f90 \
   $(GEOLIB)/storm_surge/tick.f \
   $(GEOLIB)/storm_surge/valout.f \
+  $(GEOLIB)/qinit.f90 \
   $(GEOLIB)/bc2amr.f \
   $(GEOLIB)/movetopo.f \
   $(GEOLIB)/allowflag.f90 \
@@ -82,8 +71,6 @@ SOURCES = \
   $(GEOLIB)/step2.f \
   $(GEOLIB)/flux2fw.f \
   $(GEOLIB)/qad.f \
-  $(GEOLIB)/filval_new.f90 \
-  $(GEOLIB)/filpatch_new.f90 \
   $(GEOLIB)/update.f \
   $(GEOLIB)/dumpgauge.f \
   $(GEOLIB)/upbnd.f  \
@@ -92,38 +79,35 @@ SOURCES = \
   $(GEOLIB)/ginit.f \
   $(GEOLIB)/getmaxspeed.f90 \
   $(GEOLIB)/advanc.f \
+  $(GEOLIB)/filval.f90 \
+  $(GEOLIB)/filpatch.f90 \
+  $(AMRLIB)/prefilp.f90 \
+  $(AMRLIB)/trimbd.f90 \
+  $(AMRLIB)/bound.f90 \
+  $(AMRLIB)/intfil.f90 \
   $(AMRLIB)/amr2.f90 \
-  $(AMRLIB)/prefilp_new.f90 \
   $(AMRLIB)/quick_sort1.f \
   $(AMRLIB)/estdt.f \
-  $(AMRLIB)/bound_new.f90 \
   $(AMRLIB)/check4nans.f \
-  $(AMRLIB)/spest.f  \
   $(AMRLIB)/spest2.f  \
   $(AMRLIB)/init_iflags.f \
   $(AMRLIB)/igetsp.f \
   $(AMRLIB)/reclam.f \
   $(AMRLIB)/birect.f \
   $(AMRLIB)/cleanup.f \
-  $(AMRLIB)/colate.f \
   $(AMRLIB)/colate2.f \
   $(AMRLIB)/errest.f \
-  $(AMRLIB)/bufnst.f \
   $(AMRLIB)/bufnst2.f \
   $(AMRLIB)/errf1.f \
   $(AMRLIB)/fixcapaq.f \
-  $(AMRLIB)/flglvl.f \
   $(AMRLIB)/flglvl2.f \
   $(AMRLIB)/fluxad.f \
   $(AMRLIB)/fluxsv.f \
   $(AMRLIB)/grdfit2.f \
-  $(AMRLIB)/intfil_new.f90 \
   $(AMRLIB)/moment.f \
-  $(AMRLIB)/nestck.f \
   $(AMRLIB)/nestck2.f \
   $(AMRLIB)/prepc.f \
   $(AMRLIB)/prepf.f \
-  $(AMRLIB)/projec.f \
   $(AMRLIB)/projec2.f \
   $(AMRLIB)/signs.f \
   $(AMRLIB)/findcut.f \
@@ -133,7 +117,6 @@ SOURCES = \
   $(AMRLIB)/regrid.f \
   $(AMRLIB)/setuse.f \
   $(AMRLIB)/stst1.f \
-  $(AMRLIB)/trimbd_new.f90 \
   $(AMRLIB)/nodget.f \
   $(AMRLIB)/basic.f \
   $(AMRLIB)/outval.f \
@@ -147,7 +130,6 @@ SOURCES = \
   $(AMRLIB)/fss.f \
   $(AMRLIB)/zeroin.f \
   $(AMRLIB)/setflags.f \
-  $(AMRLIB)/shiftset.f \
   $(AMRLIB)/shiftset2.f \
   $(AMRLIB)/conck.f \
   $(AMRLIB)/domshrink.f \

@@ -8,21 +8,18 @@ that will be read in by the Fortran code.
 """
 
 import os
-import numpy as np
 import datetime
 
-import clawpack.clawutil.clawdata as data
-import geoclaw.surge as surge
+import numpy as np
+
+import clawpack.geoclaw.surge as surge
+
+# August 27, 2011 at 7:30 am EDT (11:30 UTC)
+irene_landfall = datetime.datetime(2011,8,27,7,30) - datetime.datetime(2011,1,1,0)
 
 #                           days   s/hour    hours/day            
 days2seconds = lambda days: days * 60.0**2 * 24.0
 seconds2days = lambda seconds: seconds / (60.0**2 * 24.0)
-
-def date2days(t_string):
-    r""""""
-    t = datetime.date(int(t_string[0:4]),int(t_string[4:6]),int(t_string[6:8]))
-    first_of_year = datetime.date(int(t_string[0:4]),1,1)
-    return (t - first_of_year).days
 
 #------------------------------
 def setrun(claw_pkg='geoclaw'):
@@ -72,7 +69,7 @@ def setrun(claw_pkg='geoclaw'):
 
     # Lower and upper edge of computational domain:
     clawdata.lower[0] = -85.0      # west longitude
-    clawdata.upper[0] = -45.0      # east longitude
+    clawdata.upper[0] = -55.0      # east longitude
 
     clawdata.lower[1] = 13.0       # south latitude
     clawdata.upper[1] = 45.0      # north latitude
@@ -91,7 +88,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_eqn = 3
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
-    clawdata.num_aux = 4 + 1 + 3
+    clawdata.num_aux = 9
 
     # Index of aux array corresponding to capacity function, if there is one:
     clawdata.capa_index = 2
@@ -102,7 +99,7 @@ def setrun(claw_pkg='geoclaw'):
     # Initial time:
     # -------------
 
-    clawdata.t0 = days2seconds(232.0)
+    clawdata.t0 = days2seconds(irene_landfall.days - 5) + irene_landfall.seconds
 
 
     # Restart from checkpoint file of a previous run?
@@ -129,9 +126,9 @@ def setrun(claw_pkg='geoclaw'):
         # Output nout frames at equally spaced times up to tfinal:
         #                 day     s/hour  hours/day
         
-        clawdata.tfinal = days2seconds(241)
+        clawdata.tfinal = days2seconds(irene_landfall.days + 1) + irene_landfall.seconds
 
-        # Ike 2008091400 = 257 days
+        # Output occurrence per day, 24 = every hour, 4 = every 6 hours
         recurrence = 24
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
                                             * recurrence / (60**2 * 24))
@@ -165,7 +162,7 @@ def setrun(claw_pkg='geoclaw'):
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
     #   (E.g. verbosity == 2 means print only on levels 1 and 2.)
-    clawdata.verbosity = 7
+    clawdata.verbosity = 1
 
 
 
@@ -186,11 +183,12 @@ def setrun(claw_pkg='geoclaw'):
 
     # Desired Courant number if variable dt used, and max to allow without
     # retaking step with a smaller dt:
+    # clawdata.cfl_desired = 0.75
     clawdata.cfl_desired = 0.75
     clawdata.cfl_max = 1.0
 
     # Maximum number of time steps to allow between output times:
-    clawdata.steps_max = 5000
+    clawdata.steps_max = 2**16
 
 
 
@@ -200,7 +198,7 @@ def setrun(claw_pkg='geoclaw'):
     # ------------------
 
     # Order of accuracy:  1 => Godunov,  2 => Lax-Wendroff plus limiters
-    clawdata.order = 2
+    clawdata.order = 1
     
     # Use dimensional splitting? (not yet available for AMR)
     clawdata.dimensional_split = 'unsplit'
@@ -209,7 +207,7 @@ def setrun(claw_pkg='geoclaw'):
     #  0 or 'none'      ==> donor cell (only normal solver used)
     #  1 or 'increment' ==> corner transport of waves
     #  2 or 'all'       ==> corner transport of 2nd order corrections too
-    clawdata.transverse_waves = 2
+    clawdata.transverse_waves = 1
 
     # Number of waves in the Riemann solution:
     clawdata.num_waves = 3
@@ -224,7 +222,7 @@ def setrun(claw_pkg='geoclaw'):
     #   4 or 'vanleer'  ==> van Leer
     clawdata.limiter = ['mc', 'mc', 'mc']
 
-    clawdata.fwave = True    # True ==> use f-wave version of algorithms
+    clawdata.use_fwaves = True    # True ==> use f-wave version of algorithms
     
     # Source terms splitting:
     #   src_split == 0 or 'none'    ==> no source term (src routine never called)
@@ -272,7 +270,8 @@ def setrun(claw_pkg='geoclaw'):
     #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
 
     clawdata.aux_type = ['center','capacity','yleft','center','center','center',
-                         'center','center']
+                         'center', 'center', 'center']
+
 
 
     # Flag using refinement routine flag2refine rather than richardson error
@@ -339,8 +338,8 @@ def setrun(claw_pkg='geoclaw'):
     
     # == setgauges.data values ==
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    rundata.gaugedata.add_gauge([1,-74.0,40.55,clawdata.t0,clawdata.tfinal])
-
+    rundata.gaugedata.gauges.append([1,-74.0,40.55,clawdata.t0,clawdata.tfinal])
+    rundata.gaugedata.gauges.append([2,-63.0,43.5,clawdata.t0,clawdata.tfinal])
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -377,18 +376,15 @@ def setgeo(rundata):
     geodata.coriolis_forcing = True
 
     # == Algorithm and Initial Conditions ==
-    geodata.eta_init = 0.0
-    geodata.dry_tolerance = 1.e-3
-    geodata.wave_tolerance = 0.5
-    geodata.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
+    geodata.sea_level = 0.0
+    geodata.dry_tolerance = 1.e-2
+    geodata.wave_tolerance = 1.0
+    geodata.speed_tolerance = [1.0,2.0,3.0,4.0]
     geodata.deep_depth = 100.0
     geodata.max_level_deep = 2
     geodata.friction_forcing = True
-    geodata.wet_manning_coefficient = 0.025
-    geodata.dry_manning_coefficient = 0.050
+    geodata.manning_coefficient = 0.025
     geodata.friction_depth = 1e6
-
-
 
     # == settopo.data values ==
     geodata.topofiles = []
@@ -410,8 +406,8 @@ def setgeo(rundata):
     #   [topotype, minlevel,maxlevel,fname]
 
     # == setqinit.data values ==
-    geodata.qinit_type = 0
-    geodata.qinitfiles = []
+    rundata.qinitdata.qinit_type = 0
+    rundata.qinitdata.qinitfiles = []
     # for qinit perturbations, append lines of the form: (<= 1 allowed for now!)
     #   [minlev, maxlev, fname]
 
@@ -421,35 +417,27 @@ def setgeo(rundata):
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]
     
-    # == Multilayer ==
-    geodata.num_layers = 1
-    geodata.rho = 1025.0
-    geodata.richardson_tolerance = 0.95
-
     return rundata
     # end of function setgeo
     # ----------------------
 
 
-<<<<<<< HEAD
-    import geoclaw.surge as surge
-=======
-def set_storm():
->>>>>>> rjleveque/omp-tests
+def set_storm(rundata):
 
-    data = surge.data.SurgeData()
+    data = rundata.stormdata
 
-   # Physics parameters
+    # Physics parameters
     data.rho_air = 1.15
     data.ambient_pressure = 101.3e3 # Nominal atmos pressure
 
-    # Source term controls
+    # Source term controls - These are currently not respected
     data.wind_forcing = True
+    data.drag_law = 1
     data.pressure_forcing = True
     
     # Source term algorithm parameters
-    data.wind_tolerance = 1e-4
-    data.pressure_tolerance = 1e-4 # Pressure source term tolerance
+    # data.wind_tolerance = 1e-4
+    # data.pressure_tolerance = 1e-4 # Pressure source term tolerance
 
     # AMR parameters
     data.wind_refine = [20.0,40.0,60.0] # m/s
@@ -457,9 +445,27 @@ def set_storm():
     
     # Storm parameters
     data.storm_type = 1 # Type of storm
+    data.landfall = days2seconds(irene_landfall.days) + irene_landfall.seconds
 
     # Storm type 2 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'irene.storm'))
+
+    return data
+
+
+def set_friction(rundata):
+
+    data = rundata.frictiondata
+
+    # Variable friction
+    data.variable_friction = True
+
+    # Region based friction
+    # Entire domain
+    data.friction_regions.append([rundata.clawdata.lower, 
+                                  rundata.clawdata.upper,
+                                  [np.infty,0.0,-np.infty],
+                                  [0.050, 0.025]])
 
     return data
 
@@ -472,8 +478,9 @@ if __name__ == '__main__':
     else:
         rundata = setrun()
 
+    rundata.add_data(surge.data.SurgeData(),'stormdata')
+    set_storm(rundata)
+    rundata.add_data(surge.data.FrictionData(),'frictiondata')
+    set_friction(rundata)
+
     rundata.write()
-
-    storm_data = set_storm()
-    storm_data.write()
-
