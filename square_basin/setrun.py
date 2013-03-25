@@ -387,6 +387,7 @@ def setgeo(rundata):
     geodata.x1 = 450e3
     geodata.x2 = 480e3
     geodata.basin_depth = -3000.0
+    # geodata.basin_depth = -100.0
     geodata.shelf_depth = -200.0
     geodata.beach_slope = 0.05
 
@@ -412,7 +413,7 @@ def set_storm(rundata):
 
     # Source term controls
     data.wind_forcing = True
-    data.drag_law = 2
+    data.drag_law = 1
     data.pressure_forcing = True
     
     # Source term algorithm parameters
