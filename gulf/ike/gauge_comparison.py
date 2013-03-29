@@ -110,7 +110,7 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
 def plot_comparison(gauge_path, geoclaw_path, single_plot=True, format='png'):
 
     # Parameters
-    surface_offset = [0.27, 0.0]
+    surface_offset = [0.0, 0.0]
     landfall = []
     landfall.append(datetime.datetime(2008,9,13 + 1,7) 
                                                 - datetime.datetime(2008,1,1,0))
@@ -187,5 +187,5 @@ if __name__ == '__main__':
             kennedy_gauge_path = sys.argv[2]
 
     # Plot Andrew Kennedy's gauge data versus corresponding GeoClaw data
-    figure = plot_comparison(kennedy_gauge_path, geoclaw_output_path)
+    figure = plot_comparison(kennedy_gauge_path, geoclaw_output_path, single_plot=False)
     plt.show()

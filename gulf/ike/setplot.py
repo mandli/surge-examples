@@ -225,6 +225,8 @@ def setplot(plotdata):
     surge.plot.add_speed(plotaxes,bounds=speed_limits,shrink=houston_shrink)
     surge.plot.add_land(plotaxes)
     # surge.plot.add_bathy_contours(plotaxes)
+    plotaxes.plotitem_dict['speed'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
+    plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
 
     # ========================================================================
     # Hurricane forcing - Entire gulf
@@ -280,7 +282,7 @@ def setplot(plotdata):
     plotfigure = plotdata.new_plotfigure(name='Surge Field', 
                                          figno=fig_num_counter.get_counter())
     plotfigure.show = ((surge_data.wind_forcing or surge_data.pressure_forcing) 
-                        and True)
+                        and False)
     
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.xlimits = full_xlimits
@@ -304,7 +306,7 @@ def setplot(plotdata):
 
     plotfigure = plotdata.new_plotfigure(name='Friction/Coriolis Source', 
                                          figno=fig_num_counter.get_counter())
-    plotfigure.show = True
+    plotfigure.show = False
     
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.xlimits = full_xlimits

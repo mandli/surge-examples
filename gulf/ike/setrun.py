@@ -97,7 +97,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
     # Initial time:
     # -------------
-    clawdata.t0 = days2seconds(ike_landfall.days - 5) + ike_landfall.seconds
+    clawdata.t0 = days2seconds(ike_landfall.days - 3) + ike_landfall.seconds
     # clawdata.t0 = days2seconds(ike_landfall.days - 1) + ike_landfall.seconds
 
     # Restart from checkpoint file of a previous run?
@@ -254,7 +254,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    clawdata.amr_levels_max = 6
+    clawdata.amr_levels_max = 7
 
     # List of refinement ratios at each level (length at least mxnest-1)
     clawdata.refinement_ratios_x = [2,2,3,4,4,4]
@@ -439,7 +439,7 @@ def setgeo(rundata):
     geodata.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geodata.sea_level = 0.0
+    geodata.sea_level = 0.27  # Due to seasonal swelling of gulf
     geodata.dry_tolerance = 1.e-2
     geodata.wave_tolerance = 1.0
     # geodata.wave_tolerance = 0.5
@@ -454,9 +454,9 @@ def setgeo(rundata):
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for the
     # smaller domains
-    geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    geodata.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, 
                               '../bathy/gulf_caribbean.tt3'])
-    geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    geodata.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
                               '../bathy/NOAA_Galveston_Houston.tt3'])
     # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
     #                           '../bathy/galveston_channel.tt3'])
@@ -505,7 +505,7 @@ def set_storm(rundata):
 
     # Source term controls - These are currently not respected
     data.wind_forcing = True
-    data.drag_law = 2
+    data.drag_law = 1
     data.pressure_forcing = True
     
     # Source term algorithm parameters

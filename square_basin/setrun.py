@@ -9,7 +9,7 @@ that will be read in by the Fortran code.
 
 import os
 
-import numpy as np
+import datetime
 
 import clawpack.clawutil.clawdata as data
 import clawpack.geoclaw.surge as surge
@@ -18,7 +18,9 @@ import clawpack.geoclaw.surge as surge
 days2seconds = lambda days: days * 60.0**2 * 24.0
 seconds2days = lambda seconds: seconds / (60.0**2 * 24.0)
 
-RAMP_UP_TIME = days2seconds(-0.5)
+RAMP_UP_TIME = 0.5  # In days
+# In this case we simply use the default base_date in the surge.data module
+tracy_landfall = datetime.datetime(2008, 8, 1, 12) - datetime.datetime(2008,1,1,0)
 
 #------------------------------
 def setrun(claw_pkg='geoclaw'):
@@ -47,12 +49,6 @@ def setrun(claw_pkg='geoclaw'):
     #probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
 
     #------------------------------------------------------------------
-    # GeoClaw specific parameters:
-    #------------------------------------------------------------------
-
-    rundata = setgeo(rundata)   # Defined below
-
-    #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
     #   (or to amr2ez.data for AMR)
     #------------------------------------------------------------------
@@ -72,16 +68,15 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_dim = ndim
 
     # Lower and upper edge of computational domain:
-    clawdata.lower[0] = -200e3
-    clawdata.upper[0] = 500e3
+    clawdata.lower[0] = -90.0
+    clawdata.upper[0] = -85.0
     
-    clawdata.lower[1] = -300e3
-    clawdata.upper[1] = 300e3
+    clawdata.lower[1] = 20.0
+    clawdata.upper[1] = 25.0
 
     # Number of grid cells:
-    clawdata.num_cells[0] = 70
-    clawdata.num_cells[1] = 60
-
+    clawdata.num_cells[0] = 64
+    clawdata.num_cells[1] = 64
     # ---------------
     # Size of system:
     # ---------------
@@ -93,7 +88,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_aux = 4 + 3 + 2
 
     # Index of aux array corresponding to capacity function, if there is one:
-    clawdata.capa_index = 0
+    clawdata.capa_index = 2
 
 
 
@@ -101,7 +96,7 @@ def setrun(claw_pkg='geoclaw'):
     # Initial time:
     # -------------
 
-    clawdata.t0 = RAMP_UP_TIME
+    clawdata.t0 = days2seconds(tracy_landfall.days - RAMP_UP_TIME) + tracy_landfall.seconds
 
     # Restart from checkpoint file of a previous run?
     # Note: If restarting, you must also change the Makefile to set:
@@ -127,7 +122,7 @@ def setrun(claw_pkg='geoclaw'):
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(2)
+        clawdata.tfinal = days2seconds(tracy_landfall.days + 2) + tracy_landfall.seconds
         recurrence = 24
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
                                             * recurrence / (60**2 * 24))
@@ -244,11 +239,11 @@ def setrun(claw_pkg='geoclaw'):
     #   2 => periodic (must specify this at both boundaries)
     #   3 => solid wall for systems where q(2) is normal velocity
 
-    clawdata.bc_lower[0] = 'extrap'
-    clawdata.bc_upper[0] = 'extrap'
+    clawdata.bc_lower[0] = 'wall'
+    clawdata.bc_upper[0] = 'wall'
 
-    clawdata.bc_lower[1] = 'extrap'
-    clawdata.bc_upper[1] = 'extrap'
+    clawdata.bc_lower[1] = 'wall'
+    clawdata.bc_upper[1] = 'wall'
 
 
     # ---------------
@@ -270,8 +265,8 @@ def setrun(claw_pkg='geoclaw'):
     # This must be a list of length maux, each element of which is one of:
     #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
 
-    clawdata.aux_type = ['center','center','center','center','center','center',
-                         'center','center','center']
+    clawdata.aux_type = ['center','capacity','center','center','center',
+                         'center','center','center','center']
 
 
     # Flag using refinement routine flag2refine rather than richardson error
@@ -335,11 +330,16 @@ def setrun(claw_pkg='geoclaw'):
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
     N_gauges = 21
     for i in xrange(0,N_gauges):
-        x = 455e3 # This is right where the shelf turns into beach, 100 meter of water
-        # x = -80.0 * (23e3 / 180) + 500e3 - 5e3  # 1 km off shore
-        y = 550e3 / (N_gauges + 1) * (i+1) + -275e3       # Start 25 km inside domain
+        x = clawdata.lower[0] + 4.55 # This is right where the shelf turns into beach, 100 meter of water
+        y = clawdata.lower[1] + 5.0 / (N_gauges + 1) * (i+1)       # Start 25 km inside domain
         gauges.append([i, x, y, 0.0, 1e10])
-        print "Gauge %s: (%s,%s)" % (i,x/1e3,y/1e3)
+        print "Gauge %s: (%s,%s)" % (i,x,y)
+
+    #------------------------------------------------------------------
+    # GeoClaw specific parameters:
+    #------------------------------------------------------------------
+
+    rundata = setgeo(rundata)   # Defined below
 
 
     return rundata
@@ -365,10 +365,9 @@ def setgeo(rundata):
     geodata.variable_dt_refinement_ratios = True
 
     geodata.gravity = 9.81
-    geodata.coordinate_system = 1
+    geodata.coordinate_system = 2
     geodata.earth_radius = 6367.5e3
     geodata.coriolis_forcing = True
-    geodata.theta_0 = 45.0
 
     # == settsunami.data values ==
     geodata.dry_tolerance = 1.e-2
@@ -383,13 +382,19 @@ def setgeo(rundata):
     # == settopo.data values ==
     geodata.test_topography = 2
     geodata.topofiles = []
-    geodata.x0 = 350e3
-    geodata.x1 = 450e3
-    geodata.x2 = 480e3
+    # Based on approximately 100 km = 1 degree of long
+    # geodata.x0 = rundata.clawdata.lower[0] + 3.5
+    # geodata.x1 = rundata.clawdata.lower[0] + 4.5
+    # geodata.x2 = rundata.clawdata.lower[0] + 4.8
+    geodata.x0 = rundata.clawdata.lower[0] + 3.5
+    geodata.x1 = rundata.clawdata.lower[0] + 3.6
+    geodata.x2 = rundata.clawdata.lower[0] + 3.8
+
     geodata.basin_depth = -3000.0
     # geodata.basin_depth = -100.0
-    geodata.shelf_depth = -200.0
-    geodata.beach_slope = 0.05
+    geodata.shelf_depth = -500.0
+    beach_height = 300.0
+    geodata.beach_slope = -(beach_height + geodata.shelf_depth) / (rundata.clawdata.upper[0] - geodata.x2)
 
     # == setqinit.data values ==
     rundata.qinitdata.qinit_type = 0
@@ -413,30 +418,29 @@ def set_storm(rundata):
 
     # Source term controls
     data.wind_forcing = True
-    data.drag_law = 1
+    data.drag_law = 2
     data.pressure_forcing = True
-    
-    # Source term algorithm parameters
-    # data.wind_tolerance = 1e-6
-    # data.pressure_tolerance = 1e-4 # Pressure source term tolerance
 
     # AMR parameters, in m/s and meters respectively
     data.wind_refine = [20.0,40.0,60.0]
     data.R_refine = [60.0e3,40e3,20e3]
     
     # Storm parameters
-    data.storm_type = 2 # Type of storm
+    data.storm_type = 1 # Type of storm
+    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'tracy.storm'))
+    data.landfall = days2seconds(tracy_landfall.days) + tracy_landfall.seconds
 
-    # Idealized storm with explicit track and Holland parameters
-    velocity = 5.0
-    angle = 0.0
-
-    data.ramp_up_t = RAMP_UP_TIME
-    data.velocity = (velocity * np.cos(angle),velocity * np.sin(angle))
-    data.R_eye_init = (0.0,0.0)
+    # Storm parameters, not written out but used to write the tracy.data file
+    data.ramp_up_t = days2seconds(RAMP_UP_TIME)
+    # Convert from 5.0 m/s to degrees/s at lat 25N
+    data.velocity = [4.9603e-05, 0.0]
+    # Assume domain (-90, 20) to (-85, 25) (W and N respectively)
+    data.R_eye_init = [-89, 22.5]
     data.A = 23.0
     data.B = 1.5
     data.Pc = 950.0 * 1e2 # Have to convert this to Pa instead of millibars
+
+    surge.data.write_idealized_holland_storm_data(data.storm_file, data)
 
     return rundata
 

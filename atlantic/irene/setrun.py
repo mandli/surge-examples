@@ -99,7 +99,7 @@ def setrun(claw_pkg='geoclaw'):
     # Initial time:
     # -------------
 
-    clawdata.t0 = days2seconds(irene_landfall.days - 5) + irene_landfall.seconds
+    clawdata.t0 = days2seconds(irene_landfall.days - 3) + irene_landfall.seconds
 
 
     # Restart from checkpoint file of a previous run?
@@ -257,7 +257,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    clawdata.amr_levels_max = 7
+    clawdata.amr_levels_max = 5
 
     # List of refinement ratios at each level (length at least mxnest-1)
     clawdata.refinement_ratios_x = [2,2,3,4,8,2]
