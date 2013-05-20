@@ -63,7 +63,8 @@ def read_dgadcirc_gauge_data(only_gauges=None, base_path="", verbose=True):
     r""""""
 
     if only_gauges is None:
-        gauge_list = [11, 12, 13, 14]
+        # gauge_list = [11, 12, 13, 14]
+        gauge_list = [120, 121, 122, 123]
     else:
         gauge_list = only_gauges
 
@@ -76,7 +77,6 @@ def read_dgadcirc_gauge_data(only_gauges=None, base_path="", verbose=True):
         stations[i+1] = data
 
     return stations
-
 
 
 def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True):
@@ -107,7 +107,7 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
     return gauges
 
 
-def plot_comparison(gauge_path, geoclaw_path, single_plot=True, format='png'):
+def plot_comparison(gauge_path, dgadcirc_path, geoclaw_path, single_plot=True, format='png'):
 
     # Parameters
     surface_offset = [0.0, 0.0]
@@ -126,7 +126,7 @@ def plot_comparison(gauge_path, geoclaw_path, single_plot=True, format='png'):
             kennedy_gauges.pop(gauge_label)
     gauge_list = [gauge['gauge_no'] for gauge in kennedy_gauges.itervalues()]
 
-    dgadcirc_gauges = read_dgadcirc_gauge_data(base_path=gauge_path)
+    dgadcirc_gauges = read_dgadcirc_gauge_data(base_path=dgadcirc_path)
     geoclaw_gauges = load_geoclaw_gauge_data(base_path=geoclaw_path,
                                              only_gauges=gauge_list)
 
@@ -174,18 +174,20 @@ def plot_comparison(gauge_path, geoclaw_path, single_plot=True, format='png'):
         if not single_plot:
             plt.savefig("gauge%s.%s" % (kennedy_gauge['gauge_no'],format))
 
-    plt.savefig("gauge_comparison.%s" % format)
+    plt.savefig("tide_gauge_comparison.%s" % format)
     return fig
 
 
 if __name__ == '__main__':
     kennedy_gauge_path = './Ike_gauge_data'
     geoclaw_output_path = "./_output"
+    dgadcirc_gauge_path = "./Ike_gauge_data/new_DG_data"
     if len(sys.argv) > 1:
         geoclaw_output_path = sys.argv[1]
         if len(sys.argv) > 2:
             kennedy_gauge_path = sys.argv[2]
 
     # Plot Andrew Kennedy's gauge data versus corresponding GeoClaw data
-    figure = plot_comparison(kennedy_gauge_path, geoclaw_output_path, single_plot=False)
+    figure = plot_comparison(kennedy_gauge_path, dgadcirc_gauge_path, 
+                             geoclaw_output_path, single_plot=False)
     plt.show()
