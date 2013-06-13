@@ -59,7 +59,7 @@ def read_tide_gauge_data(base_path, skiprows=5, verbose=True):
     return stations
 
 
-def read_dgadcirc_gauge_data(only_gauges=None, base_path="", verbose=True):
+def read_adcirc_gauge_data(only_gauges=None, base_path="", verbose=True):
     r""""""
 
     if only_gauges is None:
@@ -75,6 +75,8 @@ def read_dgadcirc_gauge_data(only_gauges=None, base_path="", verbose=True):
     for (i,gauge_file) in enumerate(gauge_file_list):
         data = np.loadtxt(gauge_file)
         stations[i+1] = data
+        if verbose:
+            print "Read in ADCIRC gauge file %s" % gauge_file
 
     return stations
 
@@ -107,7 +109,7 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
     return gauges
 
 
-def plot_comparison(gauge_path, dgadcirc_path, geoclaw_path, single_plot=True, format='png'):
+def plot_comparison(gauge_path, adcirc_path, geoclaw_path, single_plot=True, format='png'):
 
     # Parameters
     surface_offset = [0.0, 0.0]
@@ -126,7 +128,10 @@ def plot_comparison(gauge_path, dgadcirc_path, geoclaw_path, single_plot=True, f
             kennedy_gauges.pop(gauge_label)
     gauge_list = [gauge['gauge_no'] for gauge in kennedy_gauges.itervalues()]
 
-    dgadcirc_gauges = read_dgadcirc_gauge_data(base_path=dgadcirc_path)
+    adcirc_gauges = read_adcirc_gauge_data(base_path=
+                                           os.path.join(adcirc_path,'old_data'))
+    new_adcirc_gauges = read_adcirc_gauge_data(base_path=
+                                           os.path.join(adcirc_path,'new_data'))
     geoclaw_gauges = load_geoclaw_gauge_data(base_path=geoclaw_path,
                                              only_gauges=gauge_list)
 
@@ -137,7 +142,7 @@ def plot_comparison(gauge_path, dgadcirc_path, geoclaw_path, single_plot=True, f
     index = 0
     for (name,kennedy_gauge) in kennedy_gauges.iteritems():
         geoclaw_gauge = geoclaw_gauges[kennedy_gauge['gauge_no']]
-        dgadcirc_gauge = dgadcirc_gauges[kennedy_gauge['gauge_no']]
+        adcirc_gauge = adcirc_gauges[kennedy_gauge['gauge_no']]
         index = index + 1
         if single_plot:
             axes = fig.add_subplot(2,len(kennedy_gauges)/2,index)
@@ -156,10 +161,17 @@ def plot_comparison(gauge_path, dgadcirc_path, geoclaw_path, single_plot=True, f
                   geoclaw_gauge.q[3,:] + surface_offset[0], 'r', 
                   label="GeoClaw")
 
-        # Plot DG-ADCIRC gauge data
-        axes.plot(seconds2days(dgadcirc_gauge[:,0] - landfall[2]),
-                  dgadcirc_gauge[:,1] + surface_offset[1], 'g', 
-                  label="DG-ADCIRC")
+        # Plot ADCIRC gauge data
+        axes.plot(seconds2days(adcirc_gauge[:,0] - landfall[2]),
+                  adcirc_gauge[:,1] + surface_offset[1], 'g', 
+                  label="ADCIRC[1]")
+
+        # Plot new ADCIRC gauge data
+        axes.plot(seconds2days(new_adcirc_gauge[:,0] - landfall[2]),
+                  new_adcirc_gauge[:,1] + surface_offset[1], 'g', 
+                  label="ADCIRC[2]")
+
+        # Plot new ADCIRC gauge data
 
         axes.set_xlabel('Landfall Day')
         axes.set_ylabel('Surface (m)')
@@ -179,15 +191,15 @@ def plot_comparison(gauge_path, dgadcirc_path, geoclaw_path, single_plot=True, f
 
 
 if __name__ == '__main__':
-    kennedy_gauge_path = './Ike_gauge_data'
+    kennedy_gauge_path = './gauge_data'
     geoclaw_output_path = "./_output"
-    dgadcirc_gauge_path = "./Ike_gauge_data/new_DG_data"
+    adcirc_gauge_path = "./gauge_data"
     if len(sys.argv) > 1:
         geoclaw_output_path = sys.argv[1]
         if len(sys.argv) > 2:
             kennedy_gauge_path = sys.argv[2]
 
     # Plot Andrew Kennedy's gauge data versus corresponding GeoClaw data
-    figure = plot_comparison(kennedy_gauge_path, dgadcirc_gauge_path, 
+    figure = plot_comparison(kennedy_gauge_path, adcirc_gauge_path, 
                              geoclaw_output_path, single_plot=False)
     plt.show()
