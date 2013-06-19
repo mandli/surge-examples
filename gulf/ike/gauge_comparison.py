@@ -8,7 +8,7 @@ import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
 
-import clawpack.clawutil.clawdata as clawdata
+import clawpack.amrclaw.data as amrclaw
 import clawpack.visclaw.gaugetools as gaugetools
 
 # Conversion shortcuts
@@ -63,7 +63,6 @@ def read_adcirc_gauge_data(only_gauges=None, base_path="", verbose=True):
     r""""""
 
     if only_gauges is None:
-        # gauge_list = [11, 12, 13, 14]
         gauge_list = [120, 121, 122, 123]
     else:
         gauge_list = only_gauges
@@ -90,7 +89,7 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
     gauges = {}
 
     # Read in gauge.data file
-    gauge_info_file = clawdata.GaugeData()
+    gauge_info_file = amrclaw.GaugeData()
     gauge_info_file.read(data_path=base_path,file_name='gauges.data')
 
     if only_gauges is None:
@@ -143,6 +142,7 @@ def plot_comparison(gauge_path, adcirc_path, geoclaw_path, single_plot=True, for
     for (name,kennedy_gauge) in kennedy_gauges.iteritems():
         geoclaw_gauge = geoclaw_gauges[kennedy_gauge['gauge_no']]
         adcirc_gauge = adcirc_gauges[kennedy_gauge['gauge_no']]
+        new_adcirc_gauge = new_adcirc_gauges[kennedy_gauge['gauge_no']]
         index = index + 1
         if single_plot:
             axes = fig.add_subplot(2,len(kennedy_gauges)/2,index)

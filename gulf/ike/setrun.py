@@ -247,47 +247,6 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.bc_lower[1] = 'extrap'
     clawdata.bc_upper[1] = 'extrap'
 
-
-    # ---------------
-    # AMR parameters:
-    # ---------------
-
-
-    # max number of refinement levels:
-    clawdata.amr_levels_max = 7
-
-    # List of refinement ratios at each level (length at least mxnest-1)
-    clawdata.refinement_ratios_x = [2,2,3,4,4,4]
-    clawdata.refinement_ratios_y = [2,2,3,4,4,4]
-    clawdata.refinement_ratios_t = [2,2,3,4,4,4]
-
-
-    # Specify type of each aux variable in clawdata.auxtype.
-    # This must be a list of length maux, each element of which is one of:
-    #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
-
-    clawdata.aux_type = ['center','capacity','yleft','center','center','center',
-                         'center', 'center', 'center']
-
-
-    # Flag using refinement routine flag2refine rather than richardson error
-    clawdata.flag_richardson = False    # use Richardson?
-    clawdata.flag2refine = True
-
-    # steps to take on each level L between regriddings of level L+1:
-    clawdata.regrid_interval = 3
-
-    # width of buffer zone around flagged points:
-    # (typically the same as regrid_interval so waves don't escape):
-    clawdata.regrid_buffer_width  = 2
-
-    # clustering alg. cutoff for (# flagged pts) / (total # of cells refined)
-    # (closer to 1.0 => more small grids may be needed to cover flagged cells)
-    clawdata.clustering_cutoff = 0.700000
-
-    # print info about each regridding up to this level:
-    clawdata.verbosity_regrid = 0  
-
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
 
@@ -311,18 +270,59 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.checkpt_interval = 5
 
 
+    # ---------------
+    # AMR parameters:
+    # ---------------
+    amrdata = rundata.amrdata
+
+    # max number of refinement levels:
+    amrdata.amr_levels_max = 7
+
+    # List of refinement ratios at each level (length at least mxnest-1)
+    amrdata.refinement_ratios_x = [2,2,3,4,4,4]
+    amrdata.refinement_ratios_y = [2,2,3,4,4,4]
+    amrdata.refinement_ratios_t = [2,2,3,4,4,4]
+
+
+    # Specify type of each aux variable in amrdata.auxtype.
+    # This must be a list of length maux, each element of which is one of:
+    #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
+
+    amrdata.aux_type = ['center','capacity','yleft','center','center','center',
+                         'center', 'center', 'center']
+
+
+    # Flag using refinement routine flag2refine rather than richardson error
+    amrdata.flag_richardson = False    # use Richardson?
+    amrdata.flag2refine = True
+
+    # steps to take on each level L between regriddings of level L+1:
+    amrdata.regrid_interval = 3
+
+    # width of buffer zone around flagged points:
+    # (typically the same as regrid_interval so waves don't escape):
+    amrdata.regrid_buffer_width  = 2
+
+    # clustering alg. cutoff for (# flagged pts) / (total # of cells refined)
+    # (closer to 1.0 => more small grids may be needed to cover flagged cells)
+    amrdata.clustering_cutoff = 0.700000
+
+    # print info about each regridding up to this level:
+    amrdata.verbosity_regrid = 0  
+
+
     #  ----- For developers ----- 
     # Toggle debugging print statements:
-    clawdata.dprint = False      # print domain flags
-    clawdata.eprint = False      # print err est flags
-    clawdata.edebug = False      # even more err est flags
-    clawdata.gprint = False      # grid bisection/clustering
-    clawdata.nprint = False      # proper nesting output
-    clawdata.pprint = False      # proj. of tagged points
-    clawdata.rprint = False      # print regridding summary
-    clawdata.sprint = False      # space/memory output
-    clawdata.tprint = False      # time step reporting each level
-    clawdata.uprint = False      # update/upbnd reporting
+    amrdata.dprint = False      # print domain flags
+    amrdata.eprint = False      # print err est flags
+    amrdata.edebug = False      # even more err est flags
+    amrdata.gprint = False      # grid bisection/clustering
+    amrdata.nprint = False      # proper nesting output
+    amrdata.pprint = False      # proj. of tagged points
+    amrdata.rprint = False      # print regridding summary
+    amrdata.sprint = False      # space/memory output
+    amrdata.tprint = False      # time step reporting each level
+    amrdata.uprint = False      # update/upbnd reporting
     
     # More AMR parameters can be set -- see the defaults in pyclaw/data.py
 
@@ -335,6 +335,7 @@ def setrun(claw_pkg='geoclaw'):
                                             -95.8666, -93.4, 28.63333, 30.2])
     regions.append([1, 6, rundata.clawdata.t0, rundata.clawdata.tfinal,
                                             -95.3723, -94.5939, 29.2467, 29.9837])
+        
 
     # Galveston Channel Entrance (galveston_channel)
     regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
@@ -376,12 +377,12 @@ def setrun(claw_pkg='geoclaw'):
     rundata.gaugedata.gauges.append([2, -94.71, 29.28, rundata.clawdata.t0, rundata.clawdata.tfinal])
     rundata.gaugedata.gauges.append([3, -94.39, 29.49, rundata.clawdata.t0, rundata.clawdata.tfinal])
     rundata.gaugedata.gauges.append([4, -94.13, 29.58, rundata.clawdata.t0, rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([5, -95.00, 29.70, rundata.clawdata.t0, rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([6, -95.14, 29.74, rundata.clawdata.t0, rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([7, -95.08, 29.55, rundata.clawdata.t0, rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([8, -94.75, 29.76, rundata.clawdata.t0, rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([9, -95.27, 29.72, rundata.clawdata.t0, rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([10, -94.51, 29.52, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([5, -95.00, 29.70, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([6, -95.14, 29.74, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([7, -95.08, 29.55, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([8, -94.75, 29.76, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([9, -95.27, 29.72, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([10, -94.51, 29.52, rundata.clawdata.t0, rundata.clawdata.tfinal])
     
     # Stations from Andrew Kennedy
     # Station R - 82
@@ -420,43 +421,46 @@ def setgeo(rundata):
     """
 
     try:
-        geodata = rundata.geodata
+        geo_data = rundata.geo_data
     except:
-        print "*** Error, this rundata has no geodata attribute"
-        raise AttributeError("Missing geodata attribute")
-
-    geodata.variable_dt_refinement_ratios = True
+        print "*** Error, this rundata has no geo_data attribute"
+        raise AttributeError("Missing geo_data attribute")
        
     # == Physics ==
-    geodata.gravity = 9.81
-    geodata.coordinate_system = 2
-    geodata.earth_radius = 6367.5e3
+    geo_data.gravity = 9.81
+    geo_data.coordinate_system = 2
+    geo_data.earth_radius = 6367.5e3
 
     # == Forcing Options
-    geodata.coriolis_forcing = True
-    geodata.friction_forcing = True
-    geodata.manning_coefficient = 0.025 # Overridden below
-    geodata.friction_depth = 1e10
+    geo_data.coriolis_forcing = True
+    geo_data.friction_forcing = True
+    geo_data.manning_coefficient = 0.025 # Overridden below
+    geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geodata.sea_level = 0.27  # Due to seasonal swelling of gulf
-    geodata.dry_tolerance = 1.e-2
-    geodata.wave_tolerance = 1.0
-    # geodata.wave_tolerance = 0.5
-    # geodata.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
-    geodata.speed_tolerance = [1.0,2.0,3.0]
-    geodata.deep_depth = 1e6
-    geodata.max_level_deep = 5
+    geo_data.sea_level = 0.28  # Due to seasonal swelling of gulf
+    geo_data.dry_tolerance = 1.e-2
+
+    # Refinement Criteria
+    refine_data = rundata.refinement_data
+    refine_data.wave_tolerance = 1.0
+    # refine_data.wave_tolerance = 0.5
+    refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
+    # refine_data.speed_tolerance = [1.0,2.0,3.0]
+    refine_data.deep_depth = 1e6
+    refine_data.max_level_deep = 5
+    refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
-    geodata.topofiles = []
+    topo_data = rundata.topo_data
+    topo_data.topofiles = []
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for the
     # smaller domains
-    geodata.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, 
                               '../bathy/gulf_caribbean.tt3'])
-    geodata.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
                               '../bathy/NOAA_Galveston_Houston.tt3'])
     # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
     #                           '../bathy/galveston_channel.tt3'])
@@ -474,18 +478,19 @@ def setgeo(rundata):
     #                           '../bathy/upper_galveston_bay.tt3'])
 
     # == setdtopo.data values ==
-    geodata.dtopofiles = []
+    dtopo_data = rundata.dtopo_data
+    dtopo_data.dtopofiles = []
     # for moving topography, append lines of the form :   (<= 1 allowed for now!)
     #   [topotype, minlevel,maxlevel,fname]
 
     # == setqinit.data values ==
-    rundata.qinitdata.qinit_type = 0
-    rundata.qinitdata.qinitfiles = []
+    rundata.qinit_data.qinit_type = 0
+    rundata.qinit_data.qinitfiles = []
     # for qinit perturbations, append lines of the form: (<= 1 allowed for now!)
     #   [minlev, maxlev, fname]
 
     # == setfixedgrids.data values ==
-    geodata.fixedgrids = []
+    rundata.fixed_grid_data.fixedgrids = []
     # for fixed grids append lines of the form
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]
@@ -542,7 +547,7 @@ def set_friction(rundata):
 
     # La-Tex Shelf
     data.friction_regions.append([(-98, 25.25), (-90, 30),
-                                  [np.infty,-10.0,-200.0,-np.infty],
+                                  [np.infty,-5.0,-200.0,-np.infty],
                                   [0.030, 0.012, 0.022]])
 
     return data

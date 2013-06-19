@@ -16,7 +16,9 @@ import matplotlib.pyplot as plt
 import datetime
 
 from clawpack.visclaw import colormaps
-import clawpack.clawutil.clawdata as clawdata
+import clawpack.clawutil.clawdata as clawutil
+import clawpack.amrclaw.data as amrclaw
+import clawpack.geoclaw.data as geodata
 
 import clawpack.geoclaw.surge as surge
 
@@ -34,9 +36,11 @@ def setplot(plotdata):
     fig_num_counter = surge.plot.figure_counter()
 
     # Load data from output
-    amrdata = clawdata.AmrclawInputData(2)
+    clawdata = clawutil.ClawInputData(2)
+    clawdata.read('claw.data')
+    amrdata = amrclaw.AmrclawInputData(clawdata)
     amrdata.read(os.path.join(plotdata.outdir,'amrclaw.data'))
-    physics = clawdata.GeoclawInputData(2)
+    physics = geodata.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
     surge_data = surge.data.SurgeData()
     surge_data.read(os.path.join(plotdata.outdir,'surge.data'))
@@ -55,8 +59,8 @@ def setplot(plotdata):
                                         track, landfall, plot_direction=False)
 
     # Limits for plots
-    full_xlimits = [amrdata.lower[0],amrdata.upper[0]]
-    full_ylimits = [amrdata.lower[1],amrdata.upper[1]]
+    full_xlimits = [clawdata.lower[0],clawdata.upper[0]]
+    full_ylimits = [clawdata.lower[1],clawdata.upper[1]]
     full_shrink = 0.5
     latex_xlimits = [-97.5,-88.5]
     latex_ylimits = [27.5,30.5]
@@ -77,9 +81,9 @@ def setplot(plotdata):
     surface_limits = [eta[0]-surface_range,eta[0]+surface_range]
     speed_limits = [0.0,speed_range]
     
-    wind_limits = [0,40]
+    wind_limits = [0,64]
     # wind_limits = [-0.002,0.002]
-    pressure_limits = [966,1013]
+    pressure_limits = [935,1013]
     friction_bounds = [0.01,0.04]
     # vorticity_limits = [-1.e-2,1.e-2]
 
@@ -339,7 +343,7 @@ def setplot(plotdata):
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     # try:
-        # plotaxes.xlimits = [amrdata.t0,amrdata.tfinal]
+        # plotaxes.xlimits = [clawdata.t0,clawdata.tfinal]
     # except:
         # pass
     # plotaxes.ylimits = [0,150.0]
