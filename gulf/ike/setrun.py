@@ -445,8 +445,8 @@ def setgeo(rundata):
     refine_data = rundata.refinement_data
     refine_data.wave_tolerance = 1.0
     # refine_data.wave_tolerance = 0.5
-    refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
-    # refine_data.speed_tolerance = [1.0,2.0,3.0]
+    #refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
+    refine_data.speed_tolerance = [1.0,2.0,3.0]
     refine_data.deep_depth = 1e6
     refine_data.max_level_deep = 5
     refine_data.variable_dt_refinement_ratios = True
@@ -547,7 +547,7 @@ def set_friction(rundata):
 
     # La-Tex Shelf
     data.friction_regions.append([(-98, 25.25), (-90, 30),
-                                  [np.infty,-5.0,-200.0,-np.infty],
+                                  [np.infty,-10.0,-200.0,-np.infty],
                                   [0.030, 0.012, 0.022]])
 
     return data
