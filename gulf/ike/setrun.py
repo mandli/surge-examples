@@ -445,8 +445,9 @@ def setgeo(rundata):
     refine_data = rundata.refinement_data
     refine_data.wave_tolerance = 1.0
     # refine_data.wave_tolerance = 0.5
-    #refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
-    refine_data.speed_tolerance = [1.0,2.0,3.0]
+    # refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
+    # refine_data.speed_tolerance = [0.5,1.0,1.5,2.0,2.5,3.0]
+    refine_data.speed_tolerance = [1.0,2.0,3.0,4.0]
     refine_data.deep_depth = 1e6
     refine_data.max_level_deep = 5
     refine_data.variable_dt_refinement_ratios = True

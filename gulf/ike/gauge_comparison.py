@@ -6,6 +6,25 @@ import datetime
 
 import scipy.io
 import numpy as np
+
+# Plot customization
+import matplotlib
+
+# Markers and line widths
+matplotlib.rcParams['lines.linewidth'] = 2.0
+matplotlib.rcParams['lines.markersize'] = 6
+matplotlib.rcParams['lines.markersize'] = 8
+
+# Font Sizes
+matplotlib.rcParams['font.size'] = 16
+matplotlib.rcParams['axes.labelsize'] = 16
+matplotlib.rcParams['legend.fontsize'] = 12
+matplotlib.rcParams['xtick.labelsize'] = 16
+matplotlib.rcParams['ytick.labelsize'] = 16
+
+# DPI of output images
+matplotlib.rcParams['savefig.dpi'] = 300
+
 import matplotlib.pyplot as plt
 
 import clawpack.amrclaw.data as amrclaw
@@ -97,14 +116,40 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
     else:
         gauge_list = only_gauges
 
+    locations = {}
+    for (n,gauge) in enumerate(gauge_info_file.gauges):
+        locations[gauge[0]] = gauge[1:3]
+
     # Read in each gauge solution
+    import time
+    import sys
+    start = time.clock()
     for (i,gauge_no) in enumerate(gauge_list):
         gauge = gaugetools.GaugeSolution(gauge_no, location=gauge_info_file.gauges[i][1:3])
         gauge.read(output_path=base_path, file_name='fort.gauge')
         gauges[gauge_no] = gauge
         if verbose:
             print "Read in GeoClaw gauge %s" % gauge_no
+    elapsed = (time.clock() - start)
+    print "Single gauge reading elapsed time = %s" % elapsed
+    
+    start = time.clock()
+    raw_data = np.loadtxt(os.path.join(base_path,'fort.gauge'))
+    raw_numbers = np.array([int(value) for value in raw_data[:,0]])
+    for n in gauge_list:
+        gauge = gaugetools.GaugeSolution(n, 
+                                         location=locations[n])
+        gauge_indices = np.nonzero(n == raw_numbers)[0]
 
+        gauge.level = [int(value) for value in raw_data[gauge_indices,1]]
+        gauge.t = raw_data[gauge_indices,2]
+        gauge.q = raw_data[gauge_indices,3:].transpose()
+        # gauge_read_string = " ".join((gauge_read_string,str(n)))
+
+        # self.gaugesoln_dict[(n, outdir)] = gauge
+
+    elapsed = (time.clock() - start)
+    print "All gauges reading elapsed time = %s" % elapsed
     return gauges
 
 
@@ -118,6 +163,9 @@ def plot_comparison(gauge_path, adcirc_path, geoclaw_path, single_plot=True, for
     landfall.append(datetime.datetime(2008,9,13 - 1,7) 
                                                 - datetime.datetime(2008,1,1,0))
     landfall.append(days2seconds(4.25))
+
+    # Gauge name translation
+    gauge_name_trans = {"W":1, "X":2, "Y":3, "Z":4}
 
     # Load gauge data
     kennedy_gauges = read_tide_gauge_data(gauge_path)
@@ -162,20 +210,21 @@ def plot_comparison(gauge_path, adcirc_path, geoclaw_path, single_plot=True, for
                   label="GeoClaw")
 
         # Plot ADCIRC gauge data
-        axes.plot(seconds2days(adcirc_gauge[:,0] - landfall[2]),
-                  adcirc_gauge[:,1] + surface_offset[1], 'g', 
-                  label="ADCIRC[1]")
+        # axes.plot(seconds2days(adcirc_gauge[:,0] - landfall[2]),
+        #           adcirc_gauge[:,1] + surface_offset[1], 'g', 
+        #           label="ADCIRC[1]")
 
         # Plot new ADCIRC gauge data
         axes.plot(seconds2days(new_adcirc_gauge[:,0] - landfall[2]),
                   new_adcirc_gauge[:,1] + surface_offset[1], 'g', 
-                  label="ADCIRC[2]")
+                  label="ADCIRC")
+                  # label="ADCIRC[2]")
 
         # Plot new ADCIRC gauge data
 
         axes.set_xlabel('Landfall Day')
         axes.set_ylabel('Surface (m)')
-        axes.set_title("Station %s" % name)
+        axes.set_title("Station %s" % gauge_name_trans[name])
         axes.set_xticks([-2,-1,0,1,2])
         axes.set_xticklabels([-2,-1,0,1,2])
         axes.set_xlim([-2,2])
