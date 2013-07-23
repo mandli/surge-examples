@@ -96,8 +96,12 @@ SOURCES = \
   $(AMRLIB)/birect.f \
   $(AMRLIB)/cleanup.f \
   $(AMRLIB)/colate2.f \
+  $(AMRLIB)/flagregions2.f90  \
   $(AMRLIB)/errest.f \
+  $(AMRLIB)/prepregstep.f \
+  $(AMRLIB)/prepbigstep.f \
   $(AMRLIB)/bufnst2.f \
+  $(AMRLIB)/flagger.f \
   $(AMRLIB)/errf1.f \
   $(AMRLIB)/fixcapaq.f \
   $(AMRLIB)/flglvl2.f \
