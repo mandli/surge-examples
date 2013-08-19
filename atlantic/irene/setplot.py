@@ -15,7 +15,9 @@ import matplotlib.pyplot as plt
 import datetime
 
 from clawpack.visclaw import colormaps
-import clawpack.clawutil.clawdata as clawdata
+import clawpack.clawutil.data
+import clawpack.amrclaw.data
+import clawpack.geoclaw.data
 
 import clawpack.geoclaw.surge as surge
 
@@ -33,13 +35,13 @@ def setplot(plotdata):
     fig_num_counter = surge.plot.figure_counter()
 
     # Load data from output
-    amrdata = clawdata.AmrclawInputData(2)
-    amrdata.read(os.path.join(plotdata.outdir,'amrclaw.data'))
-    physics = clawdata.GeoclawInputData(2)
+    clawdata = clawpack.clawutil.data.ClawInputData(2)
+    clawdata.read('claw.data')
+    physics = clawpack.geoclaw.data.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
     surge_data = surge.data.SurgeData()
     surge_data.read(os.path.join(plotdata.outdir,'surge.data'))
-    friction_data = surge.data.FrictionData()
+    friction_data = clawpack.geoclaw.surge.data.FrictionData()
     friction_data.read(os.path.join(plotdata.outdir,'friction.data'))
 
     # Load storm track
@@ -53,8 +55,8 @@ def setplot(plotdata):
     surge_afteraxes = lambda cd: surge.plot.surge_afteraxes(cd, 
                                         track, landfall, plot_direction=False)
     # Limits for plots
-    full_xlimits = [amrdata.lower[0],amrdata.upper[0]]
-    full_ylimits = [amrdata.lower[1],amrdata.upper[1]]
+    full_xlimits = [clawdata.lower[0],clawdata.upper[0]]
+    full_ylimits = [clawdata.lower[1],clawdata.upper[1]]
     full_shrink = 0.8
     newyork_xlimits = [-74.5,-71.0]
     newyork_ylimits = [40.0,41.5]

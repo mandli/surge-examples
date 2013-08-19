@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 import datetime
 
 from clawpack.visclaw import colormaps
-import clawpack.clawutil.clawdata as clawutil
+import clawpack.clawutil.data as clawutil
 import clawpack.amrclaw.data as amrclaw
 import clawpack.geoclaw.data as geodata
 

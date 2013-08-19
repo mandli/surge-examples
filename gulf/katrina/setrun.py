@@ -36,7 +36,7 @@ def setrun(claw_pkg='geoclaw'):
 
     """
 
-    from clawpack.clawutil import clawdata
+    from clawpack.clawutil import data as clawdata
 
     assert claw_pkg.lower() == 'geoclaw',  "Expected claw_pkg = 'geoclaw'"
 
@@ -236,47 +236,6 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.bc_lower[1] = 'extrap'
     clawdata.bc_upper[1] = 'extrap'
 
-
-    # ---------------
-    # AMR parameters:
-    # ---------------
-
-
-    # max number of refinement levels:
-    clawdata.amr_levels_max = 1
-
-    # List of refinement ratios at each level (length at least mxnest-1)
-    clawdata.refinement_ratios_x = [2,2,3,4,4,4]
-    clawdata.refinement_ratios_y = [2,2,3,4,4,4]
-    clawdata.refinement_ratios_t = [2,2,3,4,4,4]
-
-
-    # Specify type of each aux variable in clawdata.auxtype.
-    # This must be a list of length maux, each element of which is one of:
-    #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
-
-    clawdata.aux_type = ['center','capacity','yleft','center','center','center',
-                         'center', 'center', 'center']
-
-
-    # Flag using refinement routine flag2refine rather than richardson error
-    clawdata.flag_richardson = False    # use Richardson?
-    clawdata.flag2refine = True
-
-    # steps to take on each level L between regriddings of level L+1:
-    clawdata.regrid_interval = 3
-
-    # width of buffer zone around flagged points:
-    # (typically the same as regrid_interval so waves don't escape):
-    clawdata.regrid_buffer_width  = 2
-
-    # clustering alg. cutoff for (# flagged pts) / (total # of cells refined)
-    # (closer to 1.0 => more small grids may be needed to cover flagged cells)
-    clawdata.clustering_cutoff = 0.700000
-
-    # print info about each regridding up to this level:
-    clawdata.verbosity_regrid = 0  
-
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
 
@@ -300,18 +259,60 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.checkpt_interval = 5
 
 
+    # ---------------
+    # AMR parameters:
+    # ---------------
+    amrdata = rundata.amrdata
+
+
+    # max number of refinement levels:
+    amrdata.amr_levels_max = 1
+
+    # List of refinement ratios at each level (length at least mxnest-1)
+    amrdata.refinement_ratios_x = [2,2,3,4,4,4]
+    amrdata.refinement_ratios_y = [2,2,3,4,4,4]
+    amrdata.refinement_ratios_t = [2,2,3,4,4,4]
+
+
+    # Specify type of each aux variable in amrdata.auxtype.
+    # This must be a list of length maux, each element of which is one of:
+    #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
+
+    amrdata.aux_type = ['center','capacity','yleft','center','center','center',
+                         'center', 'center', 'center']
+
+
+    # Flag using refinement routine flag2refine rather than richardson error
+    amrdata.flag_richardson = False    # use Richardson?
+    amrdata.flag2refine = True
+
+    # steps to take on each level L between regriddings of level L+1:
+    amrdata.regrid_interval = 3
+
+    # width of buffer zone around flagged points:
+    # (typically the same as regrid_interval so waves don't escape):
+    amrdata.regrid_buffer_width  = 2
+
+    # clustering alg. cutoff for (# flagged pts) / (total # of cells refined)
+    # (closer to 1.0 => more small grids may be needed to cover flagged cells)
+    amrdata.clustering_cutoff = 0.700000
+
+    # print info about each regridding up to this level:
+    amrdata.verbosity_regrid = 0  
+
+
     #  ----- For developers ----- 
     # Toggle debugging print statements:
-    clawdata.dprint = False      # print domain flags
-    clawdata.eprint = False      # print err est flags
-    clawdata.edebug = False      # even more err est flags
-    clawdata.gprint = False      # grid bisection/clustering
-    clawdata.nprint = False      # proper nesting output
-    clawdata.pprint = False      # proj. of tagged points
-    clawdata.rprint = False      # print regridding summary
-    clawdata.sprint = False      # space/memory output
-    clawdata.tprint = False      # time step reporting each level
-    clawdata.uprint = False      # update/upbnd reporting
+    amrdata.dprint = False      # print domain flags
+    amrdata.eprint = False      # print err est flags
+    amrdata.edebug = False      # even more err est flags
+    amrdata.gprint = False      # grid bisection/clustering
+    amrdata.nprint = False      # proper nesting output
+    amrdata.pprint = False      # proj. of tagged points
+    amrdata.rprint = False      # print regridding summary
+    amrdata.sprint = False      # space/memory output
+    amrdata.tprint = False      # time step reporting each level
+    amrdata.uprint = False      # update/upbnd reporting
     
     # More AMR parameters can be set -- see the defaults in pyclaw/data.py
     
@@ -345,60 +346,57 @@ def setgeo(rundata):
     """
 
     try:
-        geodata = rundata.geodata
+        geo_data = rundata.geo_data
     except:
         print "*** Error, this rundata has no geodata attribute"
         raise AttributeError("Missing geodata attribute")
+       
+    # == Physics ==
+    geo_data.gravity = 9.81
+    geo_data.coordinate_system = 2
+    geo_data.earth_radius = 6367.5e3
 
-    # == setgeo.data values ==
-    geodata.variable_dt_refinement_ratios = True
+    # == Forcing Options
+    geo_data.coriolis_forcing = True
+    geo_data.friction_forcing = True
+    geo_data.manning_coefficient = 0.025 # Overridden below
+    geo_data.friction_depth = 1e10
 
-    geodata.gravity = 9.81
-    geodata.coordinate_system = 2
-    # geodata.earth_radius = 6367.5e3
-    geodata.earth_radius = 6378.2064e3
+    # == Algorithm and Initial Conditions ==
+    geo_data.sea_level = 0.28  # Due to seasonal swelling of gulf
+    geo_data.dry_tolerance = 1.e-2
 
-    # == settsunami.data values ==
-    geodata.dry_tolerance = 1.e-2
-
-    # Flagging
-    geodata.wave_tolerance = 5.e-1
-    geodata.speed_tolerance = [1.0,2.0,3.0,4.0]
-    geodata.deep_depth = 1.e2
-    geodata.max_level_deep = 3
-
-    # Forcing
-    geodata.friction_forcing = True
-    geodata.manning_coefficient = 0.025
-    geodata.friction_depth = 1.e6
-    geodata.coriolis_forcing = True
+    # Refinement Criteria
+    refine_data = rundata.refinement_data
+    refine_data.wave_tolerance = 1.0
+    # refine_data.wave_tolerance = 0.5
+    # refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
+    # refine_data.speed_tolerance = [0.5,1.0,1.5,2.0,2.5,3.0]
+    refine_data.speed_tolerance = [1.0,2.0,3.0,4.0]
+    refine_data.deep_depth = 1e6
+    refine_data.max_level_deep = 5
+    refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
-    geodata.topofiles = []
+    topo_data = rundata.topo_data
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
-    geodata.topofiles.append([3, 1, 3, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, rundata.clawdata.tfinal, 
                               '../bathy/gulf_caribbean.tt3'])
     # geodata.topofiles.append([3, 1, 3, 0., 1.e10, \
     #                           './bathy/gulf_coarse_bathy.tt3'])
-    geodata.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
                               '../bathy/NewOrleans_3s.tt3'])
 
-    # == setdtopo.data values ==
-    geodata.dtopofiles = []
-    # for moving topography, append lines of the form:  (<= 1 allowed for now!)
-    #   [topotype, minlevel,maxlevel,fname]
-    # geodata.dtopofiles.append([1,3,3,'usgs100227.tt1'])
-
     # == setqinit.data values ==
-    rundata.qinitdata.qinit_type = 0
-    rundata.qinitdata.qinitfiles = []
+    rundata.qinit_data.qinit_type = 0
+    rundata.qinit_data.qinitfiles = []
     # for qinit perturbations, append lines of the form: (<= 1 allowed for now!)
     #   [minlev, maxlev, fname]
     # geodata.qinitfiles.append([1, 5, 'hump.xyz'])
 
     # == setfixedgrids.data values ==
-    geodata.fixedgrids = []
+    rundata.fixed_grid_data.fixedgrids = []
     # for fixed grids append lines of the form
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]

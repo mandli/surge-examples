@@ -13,7 +13,10 @@ import matplotlib.pyplot as plt
 import datetime
 
 from clawpack.visclaw import colormaps
-import clawpack.clawutil.clawdata as clawdata
+import clawpack.clawutil.data
+import clawpack.amrclaw.data
+import clawpack.geoclaw.data
+import clawpack.geoclaw.surge.data
 
 import clawpack.geoclaw.surge as surge
 
@@ -31,13 +34,11 @@ def setplot(plotdata):
     fig_num_counter = surge.plot.figure_counter()
 
     # Load data from output
-    amrdata = clawdata.AmrclawInputData(2)
-    amrdata.read(os.path.join(plotdata.outdir,'amrclaw.data'))
-    physics = clawdata.GeoclawInputData(2)
+    physics = clawpack.geoclaw.data.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
     surge_data = surge.data.SurgeData()
     surge_data.read(os.path.join(plotdata.outdir,'surge.data'))
-    friction_data = surge.data.FrictionData()
+    friction_data = clawpack.geoclaw.surge.data.FrictionData()
     friction_data.read(os.path.join(plotdata.outdir,'friction.data'))
 
     # Load storm track
