@@ -14,8 +14,8 @@ import numpy as np
 
 import clawpack.geoclaw.surge as surge
 
-# August 27, 2011 at 7:30 am EDT (11:30 UTC)
-irene_landfall = datetime.datetime(2011,8,27,7,30) - datetime.datetime(2011,1,1,0)
+# October 29, 2012 at 8:00 pm EDT (October 30, 2012 0:00 am UTC)
+sandy_landfall = datetime.datetime(2012,10,29,8,0) - datetime.datetime(2012,1,1,0)
 
 #                           days   s/hour    hours/day            
 days2seconds = lambda days: days * 60.0**2 * 24.0
@@ -99,7 +99,7 @@ def setrun(claw_pkg='geoclaw'):
     # Initial time:
     # -------------
 
-    clawdata.t0 = days2seconds(irene_landfall.days - 3) + irene_landfall.seconds
+    clawdata.t0 = days2seconds(sandy_landfall.days - 3) + sandy_landfall.seconds
 
 
     # Restart from checkpoint file of a previous run?
@@ -126,7 +126,7 @@ def setrun(claw_pkg='geoclaw'):
         # Output nout frames at equally spaced times up to tfinal:
         #                 day     s/hour  hours/day
         
-        clawdata.tfinal = days2seconds(irene_landfall.days + 1) + irene_landfall.seconds
+        clawdata.tfinal = days2seconds(sandy_landfall.days + 1) + sandy_landfall.seconds
 
         # Output occurrence per day, 24 = every hour, 4 = every 6 hours
         recurrence = 24
@@ -402,7 +402,7 @@ def setgeo(rundata):
     #                                    '../bathy/atlantic_2min.tt3'])
     topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
-                                       '../bathy/atlantic_2min_new.tt3'])
+                                       '../bathy/atlantic_2min.tt3'])
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
                                        '../bathy/newyork_3s.tt3'])
@@ -447,10 +447,10 @@ def set_storm(rundata):
     
     # Storm parameters
     data.storm_type = 1 # Type of storm
-    data.landfall = days2seconds(irene_landfall.days) + irene_landfall.seconds
+    data.landfall = days2seconds(sandy_landfall.days) + sandy_landfall.seconds
 
     # Storm type 2 - Idealized storm track
-    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'irene.storm'))
+    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'sandy.storm'))
 
     return data
 
