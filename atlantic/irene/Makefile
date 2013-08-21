@@ -2,7 +2,7 @@
 # Makefile for Clawpack code in this directory.
 # This version only sets the local files and frequently changed
 # options, and then includes the standard makefile pointed to by CLAWMAKE.
-CLAWMAKE = $(CLAWUTIL)/src/Makefile.common
+CLAWMAKE = $(CLAW)/clawutil/src/Makefile.common
 
 # See the above file for details and a list of make options, or type
 #   make .help
@@ -20,15 +20,15 @@ SETPLOT_FILE = setplot.py      # File containing function to set plots
 PLOTDIR = _plots               # Directory for plots
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
-FC ?= gfortran
 FFLAGS ?= -W -Wall -fbounds-check -pedantic-errors -Wunderflow -ffpe-trap=zero,overflow -g
 
 # ---------------------------------
 # List of sources for this program:
 # ---------------------------------
 
-AMRLIB = $(AMRCLAW)/src/2d
-GEOLIB = $(GEOCLAW)/src/2d
+AMRLIB = $(CLAW)/amrclaw/src/2d
+GEOLIB = $(CLAW)/geoclaw/src/2d/shallow
+RIEMANN = $(CLAW)/riemann/src
 
 MODULES = \
  $(GEOLIB)/utility_module.f90 \
@@ -41,22 +41,21 @@ MODULES = \
  $(GEOLIB)/qinit_module.f90 \
  $(GEOLIB)/refinement_module.f90 \
  $(GEOLIB)/fixedgrids_module.f90 \
- $(GEOLIB)/storm_surge/holland_storm_module.f90 \
- $(GEOLIB)/storm_surge/constant_storm_module.f90 \
- $(GEOLIB)/storm_surge/stommel_storm_module.f90 \
- $(GEOLIB)/storm_surge/storm_module.f90 \
- $(GEOLIB)/storm_surge/friction_module.f90
-
+ $(GEOLIB)/surge/holland_storm_module.f90 \
+ $(GEOLIB)/surge/constant_storm_module.f90 \
+ $(GEOLIB)/surge/stommel_storm_module.f90 \
+ $(GEOLIB)/surge/storm_module.f90 \
+ $(GEOLIB)/surge/friction_module.f90
 
 SOURCES = \
-  $(GEOLIB)/storm_surge/src2.f90 \
-  $(GEOLIB)/storm_surge/src1d.f90 \
-  $(GEOLIB)/storm_surge/setaux.f90 \
-  $(GEOLIB)/storm_surge/setprob.f90 \
-  $(GEOLIB)/storm_surge/flag2refine2.f90 \
-  $(GEOLIB)/storm_surge/b4step2.f90 \
-  $(GEOLIB)/storm_surge/tick.f \
-  $(GEOLIB)/storm_surge/valout.f \
+  $(GEOLIB)/surge/src2.f90 \
+  $(GEOLIB)/surge/src1d.f90 \
+  $(GEOLIB)/surge/setaux.f90 \
+  $(GEOLIB)/surge/setprob.f90 \
+  $(GEOLIB)/surge/flag2refine2.f90 \
+  $(GEOLIB)/surge/b4step2.f90 \
+  $(GEOLIB)/surge/tick.f \
+  $(GEOLIB)/surge/valout.f \
   $(GEOLIB)/qinit.f90 \
   $(GEOLIB)/bc2amr.f \
   $(GEOLIB)/movetopo.f \
@@ -65,9 +64,9 @@ SOURCES = \
   $(GEOLIB)/topointegral.f \
   $(GEOLIB)/bilinearintegral.f \
   $(GEOLIB)/stepgrid.f \
-  $(GEOLIB)/rpn2.f \
-  $(GEOLIB)/riemannsolvers.f \
-  $(GEOLIB)/rpt2.f \
+  $(RIEMANN)/rpn2_geoclaw.f \
+  $(RIEMANN)/rpt2_geoclaw.f \
+  $(RIEMANN)/geoclaw_riemann_utils.f \
   $(GEOLIB)/step2.f \
   $(GEOLIB)/flux2fw.f \
   $(GEOLIB)/qad.f \
@@ -96,8 +95,12 @@ SOURCES = \
   $(AMRLIB)/birect.f \
   $(AMRLIB)/cleanup.f \
   $(AMRLIB)/colate2.f \
+  $(AMRLIB)/flagregions2.f90  \
   $(AMRLIB)/errest.f \
+  $(AMRLIB)/prepregstep.f \
+  $(AMRLIB)/prepbigstep.f \
   $(AMRLIB)/bufnst2.f \
+  $(AMRLIB)/flagger.f \
   $(AMRLIB)/errf1.f \
   $(AMRLIB)/fixcapaq.f \
   $(AMRLIB)/flglvl2.f \

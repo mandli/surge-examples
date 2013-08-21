@@ -402,7 +402,7 @@ def setgeo(rundata):
     #                                    '../bathy/atlantic_2min.tt3'])
     topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
-                                       '../bathy/atlantic_2min_new.tt3'])
+                                       '../bathy/atlantic_2min.tt3'])
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
                                        '../bathy/newyork_3s.tt3'])
