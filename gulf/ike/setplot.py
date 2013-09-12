@@ -9,7 +9,7 @@ function setplot is called to set the plot parameters.
 
 import os
 
-# import numpy as np
+import numpy
 
 # Plot customization
 import matplotlib
@@ -54,7 +54,7 @@ def setplot(plotdata):
 
     # Load data from output
     clawdata = clawutil.ClawInputData(2)
-    clawdata.read('claw.data')
+    clawdata.read(os.path.join(plotdata.outdir,'claw.data'))
     amrdata = amrclaw.AmrclawInputData(clawdata)
     amrdata.read(os.path.join(plotdata.outdir,'amrclaw.data'))
     physics = geodata.GeoClawData()
@@ -82,7 +82,14 @@ def setplot(plotdata):
     if not isinstance(eta,list):
         eta = [eta]
     surface_limits = [eta[0]-surface_range,eta[0]+surface_range]
+    # surface_contours = numpy.linspace(-surface_range, surface_range,11)
+    surface_contours = [-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5]
+    surface_ticks = [-5,-4,-3,-2,-1,0,1,2,3,4,5]
+    surface_labels = [str(value) for value in surface_ticks]
     speed_limits = [0.0,speed_range]
+    speed_contours = numpy.linspace(0.0,speed_range,13)
+    speed_ticks = [0,1,2,3]
+    speed_labels = [str(value) for value in speed_ticks]
     
     wind_limits = [0,64]
     # wind_limits = [-0.002,0.002]
@@ -96,6 +103,10 @@ def setplot(plotdata):
     
     def contour_afteraxes(current_data):
         surge_afteraxes(current_data)
+
+    def add_custom_colorbar_ticks_to_axes(axes, item_name, ticks, tick_labels=None):
+        axes.plotitem_dict[item_name].colorbar_ticks = ticks
+        axes.plotitem_dict[item_name].colorbar_tick_labels = tick_labels
 
     # ==========================================================================
     # ==========================================================================
@@ -127,9 +138,12 @@ def setplot(plotdata):
     plotaxes.ylimits = gulf_ylimits
     plotaxes.afteraxes = gulf_after_axes
 
-    surge.plot.add_surface_elevation(plotaxes,bounds=surface_limits,shrink=gulf_shrink)
+    surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
+                                               contours=surface_contours,
+                                               shrink=gulf_shrink)
     surge.plot.add_land(plotaxes,topo_min=-10.0,topo_max=5.0)
     surge.plot.add_bathy_contours(plotaxes)
+    add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks, surface_labels)
 
     #
     #  Water Speed
@@ -147,12 +161,233 @@ def setplot(plotdata):
     plotaxes.afteraxes = gulf_after_axes
 
     # Speed
-    surge.plot.add_speed(plotaxes,bounds=speed_limits,shrink=gulf_shrink)
+    surge.plot.add_speed(plotaxes, plot_type='contourf', 
+                                   contours=speed_contours, 
+                                   shrink=gulf_shrink)
+    add_custom_colorbar_ticks_to_axes(plotaxes, 'speed', speed_ticks, speed_labels)
 
     # Land
     surge.plot.add_land(plotaxes)
     surge.plot.add_bathy_contours(plotaxes)    
 
+    #
+    # Friction field
+    #
+    plotfigure = plotdata.new_plotfigure(name='Friction',
+                                         figno=fig_num_counter.get_counter())
+    plotfigure.show = friction_data.variable_friction and True
+
+    def friction_after_axes(cd):
+        plt.subplots_adjust(left=0.08, bottom=0.04, right=0.97, top=0.96)
+        plt.title(r"Manning's $n$ Coefficient")
+        # surge_afteraxes(cd)
+
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = gulf_xlimits
+    plotaxes.ylimits = gulf_ylimits
+    # plotaxes.title = "Manning's N Coefficient"
+    plotaxes.afteraxes = friction_after_axes
+    plotaxes.scaled = True
+
+    surge.plot.add_friction(plotaxes,bounds=friction_bounds,shrink=0.9)
+    plotaxes.plotitem_dict['friction'].amr_patchedges_show = [0,0,0,0,0,0,0]
+    plotaxes.plotitem_dict['friction'].colorbar_label = ""
+
+
+    # ========================================================================
+    #  LaTex Shelf
+    # ========================================================================
+    latex_xlimits = [-97.5,-88.5]
+    latex_ylimits = [27.5,30.5]
+    latex_shrink = 1.0
+    def latex_after_axes(cd):
+        plt.subplots_adjust(right=1.0)
+        surge_afteraxes(cd)
+    #
+    # Surface
+    #
+    plotfigure = plotdata.new_plotfigure(name='Surface - LaTex Shelf', 
+                                         figno=fig_num_counter.get_counter())
+    plotfigure.show = True
+    plotfigure.kwargs = {'figsize':(9,2.7), 'facecolor':'none'}
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.title = 'Surface'
+    plotaxes.scaled = True
+    plotaxes.xlimits = latex_xlimits
+    plotaxes.ylimits = latex_ylimits
+    plotaxes.afteraxes = latex_after_axes
+    
+    surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
+                                               contours=surface_contours,
+                                               shrink=latex_shrink)
+    add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks, surface_labels)
+    # plotaxes.plotitem_dict['surface'].contour_cmap = plt.get_cmap('OrRd')
+    # surge.plot.add_surface_elevation(plotaxes,plot_type='contour')
+    surge.plot.add_land(plotaxes)
+    plotaxes.plotitem_dict['surface'].amr_patchedges_show = [1,1,1,0,0,0,0]
+    plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,0,0,0,0]
+
+    # Plot using jet and 0.0 to 5.0 to match figgen generated ADCIRC results
+    # plotaxes.plotitem_dict['surface'].pcolor_cmin = 0.0
+    # plotaxes.plotitem_dict['surface'].pcolor_cmax = 5.0
+    # plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('jet')
+
+    #
+    # Water Speed
+    #
+    plotfigure = plotdata.new_plotfigure(name='Currents - LaTex Shelf',  
+                                         figno=fig_num_counter.get_counter())
+    plotfigure.show = True
+    plotfigure.kwargs = {'figsize':(9,2.7), 'facecolor':'none'}
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.title = 'Currents'
+    plotaxes.scaled = True
+    plotaxes.xlimits = latex_xlimits
+    plotaxes.ylimits = latex_ylimits
+    plotaxes.afteraxes = latex_after_axes
+    
+    surge.plot.add_speed(plotaxes, plot_type='contourf', 
+                                   contours=speed_contours, 
+                                   shrink=latex_shrink)
+    add_custom_colorbar_ticks_to_axes(plotaxes, 'speed', speed_ticks, speed_labels)
+    # surge.plot.add_surface_elevation(plotaxes,plot_type='contour')
+    surge.plot.add_land(plotaxes)
+    plotaxes.plotitem_dict['speed'].amr_patchedges_show = [1,1,0,0,0,0,0]
+    plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,0,0,0,0]
+
+
+    # ========================================================================
+    #  Houston/Galveston
+    # ========================================================================
+    houston_xlimits = [-(95.0 + 26.0 / 60.0), -(94.0 + 25.0 / 60.0)]
+    houston_ylimits = [29.1, 29.0 + 55.0 / 60.0]
+    houston_shrink = 0.9
+    def houston_after_axes(cd):
+        plt.subplots_adjust(left=0.12, bottom=0.06, right=0.97, top=0.97)
+        surge_afteraxes(cd)
+        # surge.plot.gauge_locations(cd)
+    
+    #
+    # Surface Elevations
+    #
+    plotfigure = plotdata.new_plotfigure(name='Surface - Houston/Galveston',  
+                                         figno=fig_num_counter.get_counter())
+    plotfigure.show = True
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.title = 'Surface'
+    plotaxes.scaled = True
+    plotaxes.xlimits = houston_xlimits
+    plotaxes.ylimits = houston_ylimits
+    plotaxes.afteraxes = houston_after_axes
+    
+    surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
+                                               contours=surface_contours,
+                                               shrink=houston_shrink)
+    add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks, surface_labels)
+    surge.plot.add_land(plotaxes)
+    # surge.plot.add_bathy_contours(plotaxes)
+
+    # Plot using jet and 0.0 to 5.0 to match figgen generated ADCIRC results
+    # plotaxes.plotitem_dict['surface'].pcolor_cmin = 0.0
+    # plotaxes.plotitem_dict['surface'].pcolor_cmax = 5.0
+    # plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('jet')
+
+    #
+    # Water Speed
+    #
+    plotfigure = plotdata.new_plotfigure(name='Currents - Houston/Galveston',  
+                                         figno=fig_num_counter.get_counter())
+    plotfigure.show = True
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.title = 'Currents'
+    plotaxes.scaled = True
+    plotaxes.xlimits = houston_xlimits
+    plotaxes.ylimits = houston_ylimits
+    plotaxes.afteraxes = houston_after_axes
+    
+    surge.plot.add_speed(plotaxes, plot_type='contourf', 
+                                   contours=speed_contours,
+                                   shrink=houston_shrink)
+    add_custom_colorbar_ticks_to_axes(plotaxes, 'speed', speed_ticks, speed_labels)
+    surge.plot.add_land(plotaxes)
+    # surge.plot.add_bathy_contours(plotaxes)
+    # plotaxes.plotitem_dict['speed'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
+    # plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
+
+
+    # ========================================================================
+    #  Figures for gauges
+    # ========================================================================
+    plotfigure = plotdata.new_plotfigure(name='Surface & topo', figno=300, \
+                    type='each_gauge')
+    plotfigure.show = True
+    plotfigure.clf_each_gauge = True
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    # try:
+        # plotaxes.xlimits = [clawdata.t0,clawdata.tfinal]
+    # except:
+        # pass
+    # plotaxes.ylimits = [0,150.0]
+    plotaxes.ylimits = 'auto'
+    plotaxes.title = 'Surface'
+    plotaxes.afteraxes = surge.plot.gauge_afteraxes
+
+    # Plot surface as blue curve:
+    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+    plotitem.plot_var = 3
+    plotitem.plotstyle = 'b-'
+
+    # =====================
+    #  Gauge Location Plot
+    # =====================
+    gauge_xlimits = [-95.5, -94.0]
+    gauge_ylimits = [29.0, 30.0]
+    houston_shrink = 0.9
+    def gauge_after_axes(cd):
+        # plt.subplots_adjust(left=0.12, bottom=0.06, right=0.97, top=0.97)
+        surge_afteraxes(cd)
+        surge.plot.gauge_locations(cd)
+        plt.title("Gauge Locations")
+
+    plotfigure = plotdata.new_plotfigure(name='Gauge Locations',  
+                                         figno=fig_num_counter.get_counter())
+    plotfigure.show = True
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.title = 'Surface'
+    plotaxes.scaled = True
+    plotaxes.xlimits = gauge_xlimits
+    plotaxes.ylimits = gauge_ylimits
+    plotaxes.afteraxes = gauge_after_axes
+    
+    surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
+                                               contours=surface_contours,
+                                               shrink=houston_shrink)
+    # surge.plot.add_surface_elevation(plotaxes, plot_type="contourf")
+    add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks, surface_labels)
+    surge.plot.add_land(plotaxes)
+    # plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0,0,0,0,0,0,0]
+    # plotaxes.plotitem_dict['surface'].add_colorbar = False
+    # plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('jet')
+    # plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('gist_yarg')
+    # plotaxes.plotitem_dict['surface'].pcolor_cmin = 0.0
+    # plotaxes.plotitem_dict['surface'].pcolor_cmax = 5.0
+    plotaxes.plotitem_dict['land'].amr_patchedges_show = [0,0,0,0,0,0,0]
+
+    # ==============================================================
+    #  Debugging Plots, only really work if using interactive plots
+    # ==============================================================
     #
     # Water Velocity Components
     #
@@ -313,204 +548,6 @@ def setplot(plotdata):
     plotitem.amr_patchedges_show = [1,1,1,1,1,0,0]
     
     surge.plot.add_land(plotaxes)
-
-    #
-    # Friction field
-    #
-    plotfigure = plotdata.new_plotfigure(name='Friction',
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = friction_data.variable_friction and True
-
-    def friction_after_axes(cd):
-        plt.subplots_adjust(left=0.08, bottom=0.04, right=0.97, top=0.96)
-        plt.title(r"Manning's $n$ Coefficient")
-        # surge_afteraxes(cd)
-
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = gulf_xlimits
-    plotaxes.ylimits = gulf_ylimits
-    # plotaxes.title = "Manning's N Coefficient"
-    plotaxes.afteraxes = friction_after_axes
-    plotaxes.scaled = True
-
-    surge.plot.add_friction(plotaxes,bounds=friction_bounds,shrink=0.9)
-    plotaxes.plotitem_dict['friction'].amr_patchedges_show = [0,0,0,0,0,0,0]
-    plotaxes.plotitem_dict['friction'].colorbar_label = ""
-
-
-    # ========================================================================
-    #  LaTex Shelf
-    # ========================================================================
-    latex_xlimits = [-97.5,-88.5]
-    latex_ylimits = [27.5,30.5]
-    latex_shrink = 1.0
-    def latex_after_axes(cd):
-        plt.subplots_adjust(right=1.0)
-        surge_afteraxes(cd)
-    #
-    # Surface
-    #
-    plotfigure = plotdata.new_plotfigure(name='Surface - LaTex Shelf',  
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = True
-    plotfigure.kwargs = {'figsize':(9,2.7)}#, 'facecolor':}
-
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.title = 'Surface'
-    plotaxes.scaled = True
-    plotaxes.xlimits = latex_xlimits
-    plotaxes.ylimits = latex_ylimits
-    plotaxes.afteraxes = latex_after_axes
-    
-    surge.plot.add_surface_elevation(plotaxes,bounds=surface_limits,shrink=latex_shrink)
-    # surge.plot.add_surface_elevation(plotaxes,plot_type='contour')
-    surge.plot.add_land(plotaxes)
-    plotaxes.plotitem_dict['surface'].amr_patchedges_show = [1,1,1,0,0,0,0]
-    plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,0,0,0,0]
-
-    # Plot using jet and 0.0 to 5.0 to match figgen generated ADCIRC results
-    plotaxes.plotitem_dict['surface'].pcolor_cmin = 0.0
-    plotaxes.plotitem_dict['surface'].pcolor_cmax = 5.0
-    plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('jet')
-
-    #
-    # Water Speed
-    #
-    plotfigure = plotdata.new_plotfigure(name='Currents - LaTex Shelf',  
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = True
-    plotfigure.kwargs = {'figsize':(9,2.7), 'facecolor':'none'}
-
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.title = 'Currents'
-    plotaxes.scaled = True
-    plotaxes.xlimits = latex_xlimits
-    plotaxes.ylimits = latex_ylimits
-    plotaxes.afteraxes = latex_after_axes
-    
-    surge.plot.add_speed(plotaxes,bounds=speed_limits,shrink=latex_shrink)
-    # surge.plot.add_surface_elevation(plotaxes,plot_type='contour')
-    surge.plot.add_land(plotaxes)
-    plotaxes.plotitem_dict['speed'].amr_patchedges_show = [1,1,1,0,0,0,0]
-    plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,0,0,0,0]
-
-
-    # ========================================================================
-    #  Houston/Galveston
-    # ========================================================================
-    houston_xlimits = [-(95.0 + 26.0 / 60.0), -(94.0 + 25.0 / 60.0)]
-    houston_ylimits = [29.1, 29.0 + 55.0 / 60.0]
-    houston_shrink = 0.9
-    def houston_after_axes(cd):
-        plt.subplots_adjust(left=0.12, bottom=0.06, right=0.97, top=0.97)
-        surge_afteraxes(cd)
-        # surge.plot.gauge_locations(cd)
-    
-    #
-    # Surface Elevations
-    #
-    plotfigure = plotdata.new_plotfigure(name='Surface - Houston/Galveston',  
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = True
-
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.title = 'Surface'
-    plotaxes.scaled = True
-    plotaxes.xlimits = houston_xlimits
-    plotaxes.ylimits = houston_ylimits
-    plotaxes.afteraxes = houston_after_axes
-    
-    surge.plot.add_surface_elevation(plotaxes,bounds=surface_limits,shrink=houston_shrink)
-    surge.plot.add_land(plotaxes)
-    # surge.plot.add_bathy_contours(plotaxes)
-
-    # Plot using jet and 0.0 to 5.0 to match figgen generated ADCIRC results
-    plotaxes.plotitem_dict['surface'].pcolor_cmin = 0.0
-    plotaxes.plotitem_dict['surface'].pcolor_cmax = 5.0
-    plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('jet')
-
-    #
-    # Water Speed
-    #
-    plotfigure = plotdata.new_plotfigure(name='Currents - Houston/Galveston',  
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = True
-
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.title = 'Currents'
-    plotaxes.scaled = True
-    plotaxes.xlimits = houston_xlimits
-    plotaxes.ylimits = houston_ylimits
-    plotaxes.afteraxes = houston_after_axes
-    
-    surge.plot.add_speed(plotaxes,bounds=speed_limits,shrink=houston_shrink)
-    surge.plot.add_land(plotaxes)
-    # surge.plot.add_bathy_contours(plotaxes)
-    plotaxes.plotitem_dict['speed'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
-    plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
-
-
-    # ========================================================================
-    #  Figures for gauges
-    # ========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Surface & topo', figno=300, \
-                    type='each_gauge')
-    plotfigure.show = True
-    plotfigure.clf_each_gauge = True
-
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    # try:
-        # plotaxes.xlimits = [clawdata.t0,clawdata.tfinal]
-    # except:
-        # pass
-    # plotaxes.ylimits = [0,150.0]
-    plotaxes.ylimits = 'auto'
-    plotaxes.title = 'Surface'
-    plotaxes.afteraxes = surge.plot.gauge_afteraxes
-
-    # Plot surface as blue curve:
-    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = 3
-    plotitem.plotstyle = 'b-'
-
-    # =====================
-    #  Gauge Location Plot
-    # =====================
-    gauge_xlimits = [-95.5, -94.0]
-    gauge_ylimits = [29.0, 30.0]
-    houston_shrink = 0.9
-    def gauge_after_axes(cd):
-        # plt.subplots_adjust(left=0.12, bottom=0.06, right=0.97, top=0.97)
-        surge_afteraxes(cd)
-        surge.plot.gauge_locations(cd)
-        plt.title("Gauge Locations")
-
-    plotfigure = plotdata.new_plotfigure(name='Gauge Locations',  
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = True
-
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.title = 'Surface'
-    plotaxes.scaled = True
-    plotaxes.xlimits = gauge_xlimits
-    plotaxes.ylimits = gauge_ylimits
-    plotaxes.afteraxes = gauge_after_axes
-    
-    surge.plot.add_surface_elevation(plotaxes)
-    surge.plot.add_land(plotaxes)
-    plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0,0,0,0,0,0,0]
-    plotaxes.plotitem_dict['surface'].add_colorbar = False
-    plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('jet')
-    # plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('gist_yarg')
-    plotaxes.plotitem_dict['surface'].pcolor_cmin = 0.0
-    plotaxes.plotitem_dict['surface'].pcolor_cmax = 5.0
-    plotaxes.plotitem_dict['land'].amr_patchedges_show = [0,0,0,0,0,0,0]
 
     #-----------------------------------------
     
