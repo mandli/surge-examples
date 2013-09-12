@@ -139,6 +139,13 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.output_step_interval = 1
         clawdata.total_steps = 1
         clawdata.output_t0 = True
+        
+
+    clawdata.output_format == 'ascii'      # 'ascii' or 'netcdf' 
+
+    clawdata.output_q_components = 'all'   # could be list such as [True,True]
+    clawdata.output_aux_components = 'all' # could be list
+    clawdata.output_aux_onlyonce = False    # output aux arrays only at t0
 
 
 
