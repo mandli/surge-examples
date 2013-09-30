@@ -10,6 +10,7 @@ function setplot is called to set the plot parameters.
 import os
 
 import numpy
+import scipy.io
 
 # Plot customization
 import matplotlib
@@ -27,7 +28,8 @@ matplotlib.rcParams['xtick.labelsize'] = 16
 matplotlib.rcParams['ytick.labelsize'] = 16
 
 # DPI of output images
-matplotlib.rcParams['savefig.dpi'] = 300
+# matplotlib.rcParams['savefig.dpi'] = 300
+matplotlib.rcParams['savefig.dpi'] = 100
 
 import matplotlib.pyplot as plt
 import datetime
@@ -43,6 +45,98 @@ try:
     from setplotfg import setplotfg
 except:
     setplotfg = None
+
+# Gauge support
+days2seconds = lambda days: days * 60.0**2 * 24.0
+date2seconds = lambda date: days2seconds(date.days) + date.seconds
+seconds2days = lambda secs: secs / (24.0 * 60.0**2)
+min2deg = lambda minutes: minutes / 60.0
+ft2m = lambda x:0.3048 * x
+def read_tide_gauge_data(base_path, skiprows=5, verbose=False):
+    r"""Read the gauge info data file.
+
+    Returns a dictionary for each gauge in the table.
+      Keys: 'location': (tuple), 'depth': float, 'gauge_no': int
+            'mean_water': (ndarray), 't': (ndarray)
+
+    """
+    stations = {}
+    station_info_file = open(os.path.join(base_path,'Ike_Gauges_web.txt'),'r')
+
+    # Skip past header
+    for i in xrange(skiprows):
+        station_info_file.readline()
+
+    # Read in each station
+    for line in station_info_file:
+        data_line = line.split()
+        if data_line[6] == "OK":
+            stations[data_line[0]] = {
+                    'location':[float(data_line[4]) + min2deg(float(data_line[5])),
+                                float(data_line[2]) + min2deg(float(data_line[3]))],
+                         'depth':float(data_line[8]) + float(data_line[9]),
+                      'gauge_no':0}
+            if data_line[1] == '-':
+                stations[data_line[0]]['gauge_no'] = ord(data_line[0])
+            else:
+                stations[data_line[0]]['gauge_no'] = int(data_line[1])
+            if verbose:
+                print "Station %s: %s" % (data_line[0],stations[data_line[0]])
+            
+            # Load and extract real station data
+            data = scipy.io.loadmat(os.path.join(base_path,'result_%s.mat' % data_line[0]))
+            stations[data_line[0]]['t'] = data['yd_processed'][0,:]
+            stations[data_line[0]]['mean_water'] = data['mean_water'].transpose()[0,:]
+
+    station_info_file.close()
+
+    return stations
+
+
+def read_adcirc_gauge_data(only_gauges=None, base_path="", verbose=False):
+    r""""""
+
+    if only_gauges is None:
+        gauge_list = [120, 121, 122, 123]
+    else:
+        gauge_list = only_gauges
+
+    gauge_file_list = [os.path.join(base_path, "stat%s.dat" % str(i).zfill(4)) 
+                 for i in gauge_list]
+
+    stations = {}
+    for (i,gauge_file) in enumerate(gauge_file_list):
+        data = numpy.loadtxt(gauge_file)
+        stations[i+1] = data
+        if verbose:
+            print "Read in ADCIRC gauge file %s" % gauge_file
+
+    return stations
+
+# Gauge name translation
+gauge_name_trans = {1:"W", 2:"X", 3:"Y", 4:"Z"}
+gauge_surface_offset = [0.0, 0.0]
+gauge_landfall = []
+gauge_landfall.append(datetime.datetime(2008,9,13 + 1,7) 
+                                            - datetime.datetime(2008,1,1,0))
+gauge_landfall.append(datetime.datetime(2008,9,13 - 1,7) 
+                                            - datetime.datetime(2008,1,1,0))
+gauge_landfall.append(days2seconds(4.25))
+
+# Read in Kennedy et al Gauges
+kennedy_gauge_path = './gauge_data'
+kennedy_gauges = read_tide_gauge_data(kennedy_gauge_path)
+keys = kennedy_gauges.keys()
+for gauge_label in keys:
+    if kennedy_gauges[gauge_label]['gauge_no'] not in [1, 2, 3, 4]:
+        kennedy_gauges.pop(gauge_label)
+gauge_list = [gauge['gauge_no'] for gauge in kennedy_gauges.itervalues()]
+
+# Read in ADCIRC gauges
+adcirc_path = "./gauge_data"
+ADCIRC_gauges = read_adcirc_gauge_data(base_path=os.path.join(adcirc_path,'new_data'))
+
+
 
 def setplot(plotdata):
     r"""Setplot function for surge plotting"""
@@ -119,7 +213,7 @@ def setplot(plotdata):
     # ========================================================================
     gulf_xlimits = [clawdata.lower[0],clawdata.upper[0]]
     gulf_ylimits = [clawdata.lower[1],clawdata.upper[1]]
-    gulf_shrink = 1.0
+    gulf_shrink = 0.9
     def gulf_after_axes(cd):
         plt.subplots_adjust(left=0.08, bottom=0.04, right=0.97, top=0.96)
         surge_afteraxes(cd)
@@ -142,8 +236,9 @@ def setplot(plotdata):
                                                contours=surface_contours,
                                                shrink=gulf_shrink)
     surge.plot.add_land(plotaxes,topo_min=-10.0,topo_max=5.0)
-    surge.plot.add_bathy_contours(plotaxes)
+    # surge.plot.add_bathy_contours(plotaxes)
     add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks, surface_labels)
+    plotaxes.plotitem_dict['surface'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
 
     #
     #  Water Speed
@@ -191,7 +286,7 @@ def setplot(plotdata):
 
     surge.plot.add_friction(plotaxes,bounds=friction_bounds,shrink=0.9)
     plotaxes.plotitem_dict['friction'].amr_patchedges_show = [0,0,0,0,0,0,0]
-    plotaxes.plotitem_dict['friction'].colorbar_label = ""
+    plotaxes.plotitem_dict['friction'].colorbar_label = "$n$"
 
 
     # ========================================================================
@@ -222,7 +317,8 @@ def setplot(plotdata):
     surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
                                                contours=surface_contours,
                                                shrink=latex_shrink)
-    add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks, surface_labels)
+    add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', [-5,-2.5,0,2.5,5.0], 
+                                    ["-5.0","-2.5"," 0"," 2.5"," 5.0"])
     # plotaxes.plotitem_dict['surface'].contour_cmap = plt.get_cmap('OrRd')
     # surge.plot.add_surface_elevation(plotaxes,plot_type='contour')
     surge.plot.add_land(plotaxes)
@@ -322,6 +418,40 @@ def setplot(plotdata):
     # plotaxes.plotitem_dict['speed'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
     # plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
 
+    # ==========================
+    #  Hurricane Forcing fields
+    # ==========================
+    
+    # Pressure field
+    plotfigure = plotdata.new_plotfigure(name='Pressure',  
+                                         figno=fig_num_counter.get_counter())
+    plotfigure.show = surge_data.pressure_forcing and True
+    
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = gulf_xlimits
+    plotaxes.ylimits = gulf_ylimits
+    plotaxes.title = "Pressure Field"
+    plotaxes.afteraxes = gulf_after_axes
+    plotaxes.scaled = True
+    
+    surge.plot.add_pressure(plotaxes, bounds=pressure_limits, shrink=gulf_shrink)
+    surge.plot.add_land(plotaxes)
+    
+    # Wind field
+    plotfigure = plotdata.new_plotfigure(name='Wind Speed', 
+                                         figno=fig_num_counter.get_counter())
+    plotfigure.show = surge_data.wind_forcing and True
+    
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = gulf_xlimits
+    plotaxes.ylimits = gulf_ylimits
+    plotaxes.title = "Wind Field"
+    plotaxes.afteraxes = gulf_after_axes
+    plotaxes.scaled = True
+    
+    surge.plot.add_wind(plotaxes, bounds=wind_limits, plot_type='pcolor',
+                                  shrink=gulf_shrink)
+    surge.plot.add_land(plotaxes)
 
     # ========================================================================
     #  Figures for gauges
@@ -330,17 +460,53 @@ def setplot(plotdata):
                     type='each_gauge')
     plotfigure.show = True
     plotfigure.clf_each_gauge = True
+    plotfigure.kwargs['figsize'] = (16,10)
+
+    def gauge_after_axes(cd):
+
+        if cd.gaugeno in [1,2,3,4]:
+            axes = plt.gca()
+            # Add Kennedy gauge data
+            kennedy_gauge = kennedy_gauges[gauge_name_trans[cd.gaugeno]]
+            axes.plot(kennedy_gauge['t'] - seconds2days(date2seconds(gauge_landfall[0])), 
+                     kennedy_gauge['mean_water'] + kennedy_gauge['depth'], 'k-', 
+                     label='Gauge Data')
+
+            # Add GeoClaw gauge data
+            geoclaw_gauge = cd.gaugesoln
+            axes.plot(seconds2days(geoclaw_gauge.t - date2seconds(gauge_landfall[1])),
+                  geoclaw_gauge.q[3,:] + gauge_surface_offset[0], 'b--', 
+                  label="GeoClaw")
+
+            # Add ADCIRC gauge data
+            ADCIRC_gauge = ADCIRC_gauges[kennedy_gauge['gauge_no']]
+            axes.plot(seconds2days(ADCIRC_gauge[:,0] - gauge_landfall[2]), 
+                     ADCIRC_gauge[:,1] + gauge_surface_offset[1], 'r-.', label="ADCIRC")
+
+            # Fix up plot
+            axes.set_title('Station %s' % gauge_name_trans[cd.gaugeno])
+            axes.set_xlabel('Days relative to landfall')
+            axes.set_ylabel('Surface (m)')
+            axes.set_xlim([-2,1])
+            axes.set_ylim([-1,5])
+            axes.set_xticks([-2,-1,0,1])
+            axes.set_xticklabels([-2,-1,0,1])
+            axes.grid(True)
+            axes.legend()
+
+            plt.hold(False)
+
+        # surge.plot.gauge_afteraxes(cd)
+
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-    # try:
-        # plotaxes.xlimits = [clawdata.t0,clawdata.tfinal]
-    # except:
-        # pass
-    # plotaxes.ylimits = [0,150.0]
-    plotaxes.ylimits = 'auto'
+    plotaxes.xlimits = [-2,1]
+    # plotaxes.xlabel = "Days from landfall"
+    # plotaxes.ylabel = "Surface (m)"
+    plotaxes.ylimits = [-1,5]
     plotaxes.title = 'Surface'
-    plotaxes.afteraxes = surge.plot.gauge_afteraxes
+    plotaxes.afteraxes = gauge_after_axes
 
     # Plot surface as blue curve:
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
@@ -350,13 +516,13 @@ def setplot(plotdata):
     # =====================
     #  Gauge Location Plot
     # =====================
-    gauge_xlimits = [-95.5, -94.0]
+    gauge_xlimits = [-95.5, -94]
     gauge_ylimits = [29.0, 30.0]
-    houston_shrink = 0.9
+    gauge_location_shrink = 0.75
     def gauge_after_axes(cd):
         # plt.subplots_adjust(left=0.12, bottom=0.06, right=0.97, top=0.97)
         surge_afteraxes(cd)
-        surge.plot.gauge_locations(cd)
+        surge.plot.gauge_locations(cd, gaugenos=[1, 2, 3, 4])
         plt.title("Gauge Locations")
 
     plotfigure = plotdata.new_plotfigure(name='Gauge Locations',  
@@ -373,7 +539,7 @@ def setplot(plotdata):
     
     surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
                                                contours=surface_contours,
-                                               shrink=houston_shrink)
+                                               shrink=gauge_location_shrink)
     # surge.plot.add_surface_elevation(plotaxes, plot_type="contourf")
     add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks, surface_labels)
     surge.plot.add_land(plotaxes)
@@ -383,8 +549,9 @@ def setplot(plotdata):
     # plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('gist_yarg')
     # plotaxes.plotitem_dict['surface'].pcolor_cmin = 0.0
     # plotaxes.plotitem_dict['surface'].pcolor_cmax = 5.0
+    plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0,0,0,0,0,0,0]
     plotaxes.plotitem_dict['land'].amr_patchedges_show = [0,0,0,0,0,0,0]
-
+    
     # ==============================================================
     #  Debugging Plots, only really work if using interactive plots
     # ==============================================================
@@ -461,43 +628,6 @@ def setplot(plotdata):
     plotitem.add_colorbar = True
     plotitem.amr_celledges_show = [0,0,0]
     plotitem.amr_patchedges_show = [1,1,1,1,1,1,1,1,1]
-
-    #
-    # Hurricane forcing
-    #
-    # Pressure field
-    plotfigure = plotdata.new_plotfigure(name='Pressure',  
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = surge_data.pressure_forcing and True
-    
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = gulf_xlimits
-    plotaxes.ylimits = gulf_ylimits
-    plotaxes.title = "Pressure Field"
-    plotaxes.afteraxes = gulf_after_axes
-    plotaxes.scaled = True
-    
-    surge.plot.add_pressure(plotaxes, bounds=pressure_limits, shrink=gulf_shrink)
-    # add_pressure(plotaxes)
-    surge.plot.add_land(plotaxes)
-    
-    # Wind field
-    plotfigure = plotdata.new_plotfigure(name='Wind Speed', 
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = surge_data.wind_forcing and True
-    
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = gulf_xlimits
-    plotaxes.ylimits = gulf_ylimits
-    plotaxes.title = "Wind Field"
-    plotaxes.afteraxes = gulf_after_axes
-    plotaxes.scaled = True
-    
-    surge.plot.add_wind(plotaxes, bounds=wind_limits, plot_type='imshow',
-                                  shrink=gulf_shrink)
-    # add_wind(plotaxes,bounds=wind_limits,plot_type='contour')
-    # add_wind(plotaxes,bounds=wind_limits,plot_type='quiver')
-    surge.plot.add_land(plotaxes)
     
     # Surge field
     plotfigure = plotdata.new_plotfigure(name='Surge Field', 
@@ -557,7 +687,7 @@ def setplot(plotdata):
     plotdata.printfigs = True                # print figures
     plotdata.print_format = 'png'            # file format
     plotdata.print_framenos = 'all'            # list of frames to print
-    plotdata.print_gaugenos = 'all'          # list of gauges to print
+    plotdata.print_gaugenos = [1,2,3,4]          # list of gauges to print
     plotdata.print_fignos = 'all'            # list of figures to print
     plotdata.html = True                     # create html files of plots?
     plotdata.html_homelink = '../README.html'   # pointer for top of index
