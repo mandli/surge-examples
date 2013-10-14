@@ -87,7 +87,9 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_eqn = 3
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
-    clawdata.num_aux = 4 + 3 + 2
+    # First three are from shallow GeoClaw, fourth is friction and last 3 are
+    # storm fields
+    clawdata.num_aux = 3 + 1 + 3
 
     # Index of aux array corresponding to capacity function, if there is one:
     clawdata.capa_index = 2
@@ -123,7 +125,7 @@ def setrun(claw_pkg='geoclaw'):
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(ike_landfall.days + 1) + ike_landfall.seconds
+        clawdata.tfinal = days2seconds(ike_landfall.days + 0.75) + ike_landfall.seconds
         recurrence = 24
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
                                             * recurrence / (60**2 * 24))
@@ -145,7 +147,8 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.output_format == 'ascii'      # 'ascii' or 'netcdf' 
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
-    clawdata.output_aux_components = 'all' # could be list
+    # Output the bathymetry, the friction, and the computed storm fields
+    clawdata.output_aux_components = [0,3,4,5,6]
     clawdata.output_aux_onlyonce = False    # output aux arrays only at t0
 
 
@@ -276,12 +279,12 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 7
+    amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [2,2,3,4,4,4]
-    amrdata.refinement_ratios_y = [2,2,3,4,4,4]
-    amrdata.refinement_ratios_t = [2,2,3,4,4,4]
+    amrdata.refinement_ratios_x = [2,2,3,4,16]
+    amrdata.refinement_ratios_y = [2,2,3,4,16]
+    amrdata.refinement_ratios_t = [2,2,3,4,16]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -330,41 +333,48 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
+    # Latex shelf
+    # regions.append([1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    #                                         -97.5, -88.5, 27.5, 30.5])
+
+    # Galveston region
+
     # Galveston Sub-Domains
-    regions.append([1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                                            -95.8666, -93.4, 28.63333, 30.2])
-    regions.append([1, 6, rundata.clawdata.t0, rundata.clawdata.tfinal,
-                                            -95.3723, -94.5939, 29.2467, 29.9837])
-        
+    # regions.append([1, 4, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                         -95.8666, -93.4, 28.63333, 30.2])
+    # regions.append([1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    #                                         -95.3723, -94.5939, 29.2467, 29.9837])
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    #                                             -95.25, -94.3, 28.85, 29.8])
 
     # Galveston Channel Entrance (galveston_channel)
-    regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                                                -94.84, -94.70, 29.30, 29.40])
-    # Galveston area (galveston)
-    regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                                    -94.922600000000003, -94.825786176806162, 
-                                                 29.352,  29.394523768822882])
-    # Lower Galveston Bay channel (lower_galveston_bay)
-    regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                                    -94.903199999999998, -94.775835119593594, 
-                                     29.383199999999999, 29.530588208444357])
-    # Middle Galveston Bay Channel (upper_galveston_bay)
-    regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                                    -94.959199999999996, -94.859496211934697, 
-                                     29.517700000000001,  29.617610214127549])
-    # Upper Galveston bay channel (houston_channel_2)
-    regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                                    -95.048400000000001, -94.903076052178108, 
-                                     29.602699999999999,  29.688573241894751])
-    # Lower Houston channel (houston_channel_3)
-    regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                                    -95.094899999999996, -94.892808885060177,
-                                                29.6769,  29.832958103058733])
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                             -94.84, -94.70, 29.30, 29.40])
+    # # Galveston area (galveston)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -94.922600000000003, -94.825786176806162, 
+    #                                              29.352,  29.394523768822882])
+    # # Lower Galveston Bay channel (lower_galveston_bay)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -94.903199999999998, -94.775835119593594, 
+    #                                  29.383199999999999, 29.530588208444357])
+    # # Middle Galveston Bay Channel (upper_galveston_bay)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -94.959199999999996, -94.859496211934697, 
+    #                                  29.517700000000001,  29.617610214127549])
+    # # Upper Galveston bay channel (houston_channel_2)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -95.048400000000001, -94.903076052178108, 
+    #                                  29.602699999999999,  29.688573241894751])
+    # # Lower Houston channel (houston_channel_3)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -95.094899999999996, -94.892808885060177,
+    #                                             29.6769,  29.832958103058733])
 
-    # Upper Houston channel (houston_harbor)
-    regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                                    -95.320999999999998, -95.074527281677078,
-                                     29.699999999999999,  29.830461271340102])
+    # # Upper Houston channel (houston_harbor)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -95.320999999999998, -95.074527281677078,
+    #                                  29.699999999999999,  29.830461271340102])
 
     # == setgauges.data values ==
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
@@ -448,8 +458,8 @@ def setgeo(rundata):
     # refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
     # refine_data.speed_tolerance = [0.5,1.0,1.5,2.0,2.5,3.0]
     refine_data.speed_tolerance = [1.0,2.0,3.0,4.0]
-    refine_data.deep_depth = 1e6
-    refine_data.max_level_deep = 5
+    refine_data.deep_depth = 300.0
+    refine_data.max_level_deep = 4
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
@@ -463,6 +473,8 @@ def setgeo(rundata):
                               '../bathy/gulf_caribbean.tt3'])
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
                               '../bathy/NOAA_Galveston_Houston.tt3'])
+    topo_data.topofiles.append([3, 1, 6, rundata.clawdata.t0, rundata.clawdata.tfinal,
+                              '../bathy/Galveston_DEM_1072/galveston_tx.asc'])
     # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
     #                           '../bathy/galveston_channel.tt3'])
     # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
