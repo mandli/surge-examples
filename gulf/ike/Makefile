@@ -45,7 +45,8 @@ MODULES = \
  $(GEOLIB)/surge/constant_storm_module.f90 \
  $(GEOLIB)/surge/stommel_storm_module.f90 \
  $(GEOLIB)/surge/storm_module.f90 \
- $(GEOLIB)/surge/friction_module.f90
+ $(GEOLIB)/surge/friction_module.f90 \
+ $(GEOLIB)/fgmax_module.f90
 
 SOURCES = \
   $(GEOLIB)/surge/src2.f90 \
@@ -85,6 +86,11 @@ SOURCES = \
   $(AMRLIB)/bound.f90 \
   $(AMRLIB)/intfil.f90 \
   $(AMRLIB)/amr2.f90 \
+  $(GEOLIB)/fgmax_read.f90 \
+  $(GEOLIB)/fgmax_frompatch.f90 \
+  $(GEOLIB)/fgmax_interpolate.f90 \
+  $(GEOLIB)/fgmax_values.f90 \
+  $(GEOLIB)/fgmax_finalize.f90 \
   $(AMRLIB)/quick_sort1.f \
   $(AMRLIB)/estdt.f \
   $(AMRLIB)/check4nans.f \
