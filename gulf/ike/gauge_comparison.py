@@ -124,12 +124,46 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
     import time
     import sys
     start = time.clock()
-    for (i,gauge_no) in enumerate(gauge_list):
-        gauge = gaugetools.GaugeSolution(gauge_no, location=gauge_info_file.gauges[i][1:3])
-        gauge.read(output_path=base_path, file_name='fort.gauge')
-        gauges[gauge_no] = gauge
-        if verbose:
-            print "Read in GeoClaw gauge %s" % gauge_no
+
+    # Read in all gauges
+    try:
+        file_path = os.path.join(base_path,'fort.gauge')
+        if not os.path.exists(file_path):
+            print '*** Warning: cannot find gauge data file %s'%file_path
+            pass
+        else:
+            print "Reading gauge data from %s" % file_path
+            raw_data = np.loadtxt(file_path)
+
+            gauge_read_string = ""
+            raw_numbers = np.array(raw_data[:,0], dtype=int)    # Convert type for equality comparison
+            for n in gauge_list:
+                gauge = gaugetools.GaugeSolution(n, 
+                                                 location=locations[n])
+                gauge_indices = np.nonzero(n == raw_numbers)[0]
+
+                gauge.level = [int(value) for value in raw_data[gauge_indices,1]]
+                gauge.t = raw_data[gauge_indices,2]
+                gauge.q = raw_data[gauge_indices,3:].transpose()
+                gauge.number = n
+                gauge_read_string = " ".join((gauge_read_string,str(n)))
+
+                gauges[n] = gauge
+
+            if verbose:
+                print "Read in GeoClaw gauge [%s]" % gauge_read_string[1:]
+        
+    except Exception as e:
+        print '*** Error reading gauges in ClawPlotData.getgauge'
+        print '*** outdir = ', base_path
+        raise e
+
+    # for (i,gauge_no) in enumerate(gauge_list):
+    #     gauge = gaugetools.GaugeSolution(gauge_no, location=gauge_info_file.gauges[i][1:3])
+    #     gauge.read(output_path=base_path, file_name='fort.gauge')
+    #     gauges[gauge_no] = gauge
+
+
     elapsed = (time.clock() - start)
     print "Single gauge reading elapsed time = %s" % elapsed
     
@@ -195,18 +229,19 @@ def plot_comparison(gauge_path, adcirc_path, geoclaw_path, single_plot=True, for
         if single_plot:
             axes = fig.add_subplot(2,len(kennedy_gauges)/2,index)
         else:
-            fig = plt.figure(figsize=(16,10),dpi=80)
-            fig.suptitle('Surface from Sea Level')
+            fig = plt.figure(figsize=(8,4))
+            # 16 / 10 = 4 / 2
+            # fig.suptitle('Surface from Sea Level')
             axes = fig.add_subplot(111)
 
         # Plot actual gauge data
         axes.plot(kennedy_gauge['t'] - seconds2days(date2seconds(landfall[0])),
-                  kennedy_gauge['mean_water'] + kennedy_gauge['depth'], 'k', 
+                  kennedy_gauge['mean_water'] + kennedy_gauge['depth'], '-', 
                   label="Gauge Data")
 
         # Plot GeoClaw gauge data
         axes.plot(seconds2days(geoclaw_gauge.t - date2seconds(landfall[1])),
-                  geoclaw_gauge.q[3,:] + surface_offset[0], 'r', 
+                  geoclaw_gauge.q[3,:] + surface_offset[0], '--', 
                   label="GeoClaw")
 
         # Plot ADCIRC gauge data
@@ -216,7 +251,7 @@ def plot_comparison(gauge_path, adcirc_path, geoclaw_path, single_plot=True, for
 
         # Plot new ADCIRC gauge data
         axes.plot(seconds2days(new_adcirc_gauge[:,0] - landfall[2]),
-                  new_adcirc_gauge[:,1] + surface_offset[1], 'g', 
+                  new_adcirc_gauge[:,1] + surface_offset[1], '..', 
                   label="ADCIRC")
                   # label="ADCIRC[2]")
 
