@@ -22,8 +22,8 @@ R_earth = 6378.1 * 1000.0
 deg2meters = lambda theta,lat:R_earth * theta * np.pi / 180.0 * np.cos(lat * np.pi / 180.0)
 meters2deg = lambda d,lat:d / (R_earth * np.pi / 180.0 * np.cos(lat * np.pi / 180.0))
 
-def extract(path,fill_path,extent,no_data_value=999999,plot_fill=False,
-            method='nearest',delta_limit=20.0,TOLERANCE=1e-3):
+def extract(path, fill_path, extent, no_data_value=999999, plot_fill=False,
+            method='nearest', delta_limit=20.0, TOLERANCE=1e-3):
     r"""Extract sub-section of bathymetry from file at path
 
     Function to extract a sub-section given by extent of the bathymetry file at 
@@ -119,16 +119,14 @@ def extract(path,fill_path,extent,no_data_value=999999,plot_fill=False,
        print " Requested Extent = %s" % str(extent)
        raise Exception("Fill bathymetry extent does not contain extent.")
 
-
-
     extent_mask = extent[0] > X_fill
-    extent_mask = np.logical_or(extent_mask,extent[1] < X_fill)
-    extent_mask = np.logical_or(extent_mask,extent[2] > Y_fill)
-    extent_mask = np.logical_or(extent_mask,extent[3] < Y_fill)
+    extent_mask = np.logical_or(extent_mask, extent[1] < X_fill)
+    extent_mask = np.logical_or(extent_mask, extent[2] > Y_fill)
+    extent_mask = np.logical_or(extent_mask, extent[3] < Y_fill)
 
     X_fill_mask = np.ma.masked_where(extent_mask,X_fill)
     Y_fill_mask = np.ma.masked_where(extent_mask,Y_fill)
-    Z_fill_mask = np.ma.masked_where(extent_mask,Z_fill,no_data_value)
+    Z_fill_mask = np.ma.masked_where(extent_mask,Z_fill)
 
     fill_points = np.column_stack((X_fill_mask.compressed(),
                                    Y_fill_mask.compressed()))

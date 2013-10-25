@@ -282,9 +282,9 @@ def setrun(claw_pkg='geoclaw'):
     amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [2,2,3,4,16]
-    amrdata.refinement_ratios_y = [2,2,3,4,16]
-    amrdata.refinement_ratios_t = [2,2,3,4,16]
+    amrdata.refinement_ratios_x = [2,2,2,6,16]
+    amrdata.refinement_ratios_y = [2,2,2,6,16]
+    amrdata.refinement_ratios_t = [2,2,2,6,16]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -474,7 +474,7 @@ def setgeo(rundata):
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
                               '../bathy/NOAA_Galveston_Houston.tt3'])
     topo_data.topofiles.append([3, 1, 6, rundata.clawdata.t0, rundata.clawdata.tfinal,
-                              '../bathy/Galveston_DEM_1072/galveston_tx.asc'])
+                              '../bathy/galveston_tx.asc'])
     # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
     #                           '../bathy/galveston_channel.tt3'])
     # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 

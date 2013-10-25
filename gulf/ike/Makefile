@@ -177,5 +177,8 @@ SOURCES = \
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
 
+topo: ../bathy/gulf_caribbean.tt3 ../bathy/NOAA_Galveston_Houston.tt3 ../bathy/galveston_tx.asc
+	../bathy/get_bathy.py
+
 ### DO NOT remove this line - make depends on it ###
 

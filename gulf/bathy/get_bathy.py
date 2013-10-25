@@ -52,7 +52,8 @@ if __name__ == "__main__":
         base_url = sys.argv[1]
 
     urls = [os.path.join(base_url, 'gulf_caribbean.tt3'),
-            os.path.join(base_url, 'NOAA_Galveston_Houston.tt3')]
+            os.path.join(base_url, 'NOAA_Galveston_Houston.tt3'),
+            os.path.join(base_url, 'galveston_tx.asc')]
 
     for url in urls:
         get_bathy(url)
