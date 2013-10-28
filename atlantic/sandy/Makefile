@@ -20,7 +20,7 @@ SETPLOT_FILE = setplot.py      # File containing function to set plots
 PLOTDIR = _plots               # Directory for plots
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
-FFLAGS ?= -W -Wall -fbounds-check -pedantic-errors -Wunderflow -ffpe-trap=zero,overflow -g
+FFLAGS ?= 
 
 # ---------------------------------
 # List of sources for this program:
@@ -45,7 +45,8 @@ MODULES = \
  $(GEOLIB)/surge/constant_storm_module.f90 \
  $(GEOLIB)/surge/stommel_storm_module.f90 \
  $(GEOLIB)/surge/storm_module.f90 \
- $(GEOLIB)/surge/friction_module.f90
+ $(GEOLIB)/surge/friction_module.f90 \
+ $(GEOLIB)/fgmax_module.f90
 
 SOURCES = \
   $(GEOLIB)/surge/src2.f90 \
@@ -55,7 +56,7 @@ SOURCES = \
   $(GEOLIB)/surge/flag2refine2.f90 \
   $(GEOLIB)/surge/b4step2.f90 \
   $(GEOLIB)/surge/tick.f \
-  $(GEOLIB)/surge/valout.f \
+  $(GEOLIB)/valout.f \
   $(GEOLIB)/qinit.f90 \
   $(GEOLIB)/bc2amr.f \
   $(GEOLIB)/movetopo.f \
@@ -85,6 +86,11 @@ SOURCES = \
   $(AMRLIB)/bound.f90 \
   $(AMRLIB)/intfil.f90 \
   $(AMRLIB)/amr2.f90 \
+  $(GEOLIB)/fgmax_read.f90 \
+  $(GEOLIB)/fgmax_frompatch.f90 \
+  $(GEOLIB)/fgmax_interpolate.f90 \
+  $(GEOLIB)/fgmax_values.f90 \
+  $(GEOLIB)/fgmax_finalize.f90 \
   $(AMRLIB)/quick_sort1.f \
   $(AMRLIB)/estdt.f \
   $(AMRLIB)/check4nans.f \

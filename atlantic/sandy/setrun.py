@@ -88,7 +88,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_eqn = 3
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
-    clawdata.num_aux = 9
+    clawdata.num_aux = 3 + 1 + 3
 
     # Index of aux array corresponding to capacity function, if there is one:
     clawdata.capa_index = 2
@@ -150,8 +150,8 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.output_format == 'ascii'      # 'ascii' or 'netcdf' 
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
-    clawdata.output_aux_components = 'none'  # could be list
-    clawdata.output_aux_onlyonce = True    # output aux arrays only at t0
+    clawdata.output_aux_components = 'all'
+    clawdata.output_aux_onlyonce = False    # output aux arrays only at t0
 
 
 

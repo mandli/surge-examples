@@ -48,7 +48,7 @@ def setplot(plotdata):
     track = surge.plot.track_data(os.path.join(plotdata.outdir,'fort.track'))
 
     # Calculate landfall time, off by a day, maybe leap year issue?
-    landfall_dt = datetime.datetime(2011,8,27,7,30) - datetime.datetime(2011,1,1,0)
+    landfall_dt = datetime.datetime(2012,10,29,8,0) - datetime.datetime(2012,1,1,0)
     landfall = (landfall_dt.days) * 24.0 * 60**2 + landfall_dt.seconds
 
     # Set afteraxes function
@@ -58,8 +58,10 @@ def setplot(plotdata):
     full_xlimits = [clawdata.lower[0],clawdata.upper[0]]
     full_ylimits = [clawdata.lower[1],clawdata.upper[1]]
     full_shrink = 0.8
-    newyork_xlimits = [-74.5,-71.0]
-    newyork_ylimits = [40.0,41.5]
+    # newyork_xlimits = [-74.5,-71.0]
+    # newyork_ylimits = [40.0,41.5]
+    newyork_xlimits = [-74.2,-73.8]
+    newyork_ylimits = [40.55,40.85]
     newyork_shrink = 0.5
 
     # Color limits
