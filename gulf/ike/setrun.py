@@ -144,11 +144,9 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.output_t0 = True
         
 
-    clawdata.output_format == 'ascii'      # 'ascii' or 'netcdf' 
-
+    clawdata.output_format = 'binary'      # 'ascii' or 'netcdf' 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
-    # Output the bathymetry, the friction, and the computed storm fields
-    clawdata.output_aux_components = [0,3,4,5,6]
+    clawdata.output_aux_components = 'all'
     clawdata.output_aux_onlyonce = False    # output aux arrays only at t0
 
 
