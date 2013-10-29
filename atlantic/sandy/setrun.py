@@ -68,7 +68,13 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_dim = num_dim
 
     # Lower and upper edge of computational domain:
-    clawdata.lower[0] = -85.0      # west longitude
+    # clawdata.lower[0] = -85.0      # west longitude
+    # clawdata.upper[0] = -55.0      # east longitude
+
+    # clawdata.lower[1] = 13.0       # south latitude
+    # clawdata.upper[1] = 45.0      # north latitude
+
+    clawdata.lower[0] = -100.0      # west longitude
     clawdata.upper[0] = -55.0      # east longitude
 
     clawdata.lower[1] = 13.0       # south latitude
@@ -280,12 +286,12 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 5
+    amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [2,2,3,4,8,2]
-    amrdata.refinement_ratios_y = [2,2,3,4,8,2]
-    amrdata.refinement_ratios_t = [2,2,3,4,8,2]
+    amrdata.refinement_ratios_x = [2,2,2,6,16]
+    amrdata.refinement_ratios_y = [2,2,2,6,16]
+    amrdata.refinement_ratios_t = [2,2,2,6,16]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -400,9 +406,12 @@ def setgeo(rundata):
     # geodata.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
     #                                    rundata.clawdata.tfinal, 
     #                                    '../bathy/atlantic_2min.tt3'])
+    # topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
+    #                                    rundata.clawdata.tfinal, 
+    #                                    '../bathy/atlantic_2min.tt3'])
     topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
-                                       '../bathy/atlantic_2min.tt3'])
+                                       '../bathy/full_2min.tt3'])
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
                                        '../bathy/newyork_3s.tt3'])
