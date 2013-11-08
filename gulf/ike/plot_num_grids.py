@@ -103,6 +103,8 @@ if __name__ == "__main__":
     axes.set_ylabel('Number of Grids')
     axes.set_title("Number of Grids per Level in Time")
     axes.legend(proxy_artists, ["Level %s" % (str(level+1)) for level in xrange(num_levels)], loc=2)
+    axes.set_ylim(bottom=0.0)
+    axes.set_xlim([-3,1])
     fig.savefig("num_grids.png")
 
     # Number of cells
@@ -116,8 +118,9 @@ if __name__ == "__main__":
     axes.set_ylabel('Number of Cells')
     axes.set_title("Number of Cells per Level in Time")
     axes.legend(proxy_artists, ["Level %s" % (str(level+1)) for level in xrange(num_levels)], loc=2)
+    axes.set_ylim(bottom=0.0) 
+    axes.set_xlim([-3,1]) 
     fig.savefig("num_cells.png")
-
 
     plt.show()
 
