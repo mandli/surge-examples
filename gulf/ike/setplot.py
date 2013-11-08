@@ -7,7 +7,7 @@ function setplot is called to set the plot parameters.
     
 """
 
-article = True
+article = False
 
 import os
 
@@ -223,7 +223,10 @@ def setplot(plotdata):
     gulf_ylimits = [clawdata.lower[1],clawdata.upper[1]]
     gulf_shrink = 0.9
     def gulf_after_axes(cd):
-        plt.subplots_adjust(left=0.08, bottom=0.04, right=0.97, top=0.96)
+        if article:
+            plt.subplots_adjust(left=0.08, bottom=0.04, right=0.97, top=0.96)
+        else:
+            plt.subplots_adjust(left=0.05, bottom=0.07, right=1.00, top=0.93)
         surge_afteraxes(cd)
     #
     #  Surface
@@ -312,8 +315,8 @@ def setplot(plotdata):
     def latex_after_axes(cd):
         if article:
             plt.subplots_adjust(left=0.07, bottom=0.14, right=1.0, top=0.86)
-        else:
-            plt.subplots_adjust(right=1.0)
+        # else:
+            # plt.subplots_adjust(right=1.0)
         surge_afteraxes(cd)
 
     #
@@ -323,9 +326,9 @@ def setplot(plotdata):
                                          figno=fig_num_counter.get_counter())
     plotfigure.show = True
     if article:
-        plotfigure.kwargs = {'figsize':(8,2.7), 'facecolor':'none'}
+        plotfigure.kwargs = {'figsize':(8,2.7)}#, 'facecolor':'none'}
     else:
-        plotfigure.kwargs = {'figsize':(9,2.7), 'facecolor':'none'}
+        plotfigure.kwargs = {'figsize':(9,2.7)}#, 'facecolor':'none'}
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
@@ -365,9 +368,9 @@ def setplot(plotdata):
                                          figno=fig_num_counter.get_counter())
     plotfigure.show = True
     if article:
-        plotfigure.kwargs = {'figsize':(8,2.7), 'facecolor':'none'}
+        plotfigure.kwargs = {'figsize':(8,2.7)}#, 'facecolor':'none'}
     else:
-        plotfigure.kwargs = {'figsize':(9,2.7), 'facecolor':'none'}
+        plotfigure.kwargs = {'figsize':(9,2.7)}#, 'facecolor':'none'}
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
