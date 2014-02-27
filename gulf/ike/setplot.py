@@ -158,7 +158,7 @@ def setplot(plotdata):
     clawdata = clawutil.ClawInputData(2)
     clawdata.read(os.path.join(plotdata.outdir,'claw.data'))
     amrdata = amrclaw.AmrclawInputData(clawdata)
-    amrdata.read(os.path.join(plotdata.outdir,'amrclaw.data'))
+    amrdata.read(os.path.join(plotdata.outdir,'amr.data'))
     physics = geodata.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
     surge_data = surge.data.SurgeData()
