@@ -5,42 +5,35 @@
 import sys
 import os
 import urllib
-import subprocess
+import tarfile
 
-def get_bathy(url, destination=os.getcwd(), force=False):
+
+def get_remote_file(url, destination=os.getcwd(), force=False, verbose=False):
     r"""Get bathymetry file located at `url`
 
     Will check downloaded file's suffix to see if the file needs to be extracted
     """
 
-    file_name = os.path.basename(url)
-    output_path = os.path.join(destination, file_name)
-    if not os.path.exists(output_path) or force:
-        print "Downloading %s to %s..." % (url, output_path)
-        urllib.urlretrieve(url, output_path)
-        print "Finished downloading."
-    else:
-        print "Skipping %s, file already exists." % file_name
+    try:
+        file_name = os.path.basename(url)
+        output_path = os.path.join(destination, file_name)
+        if not os.path.exists(output_path) or force:
+            if verbose:
+                print "Downloading %s to %s..." % (url, output_path)
+            urllib.urlretrieve(url, output_path)
+            if verbose:
+                print "Finished downloading."
+        else:
+            if verbose:
+                print "Skipping %s, file already exists." % file_name
 
-    tar = False
-    gunzip = False
-    split_file_name = file_name.split('.')
-    if split_file_name[-1] == 'gz':
-        gunzip = True
-        if split_file_name[-2] == 'tar':
-            tar = True
-    if split_file_name[-1] == 'tgz':
-        gunzip = True
-        tar = True
-
-    if gunzip or tar:
-        print "Extracting %s" % file_name
-        if gunzip and tar:
-            subprocess.Popen('tar xvzf %s' % output_path, shell=True)
-        elif gunzip:
-            subprocess.Popen('gunzip %s' % output_path, shell=True)
-        elif tar:
-            subprocess.Popen('tar xvf %s' % output_path, shell=True)
+        if tarfile.is_tarfile(output_path):
+            with tarfile.open(output_path, mode="r:*") as tar_file:
+                tar_file.extractall(path=destination)
+    except IOError as e:
+        if verbose:
+            print "Unsuccesfull at downloading and expanding '%s'." % url
+        raise e
 
 
 if __name__ == "__main__":
@@ -56,4 +49,4 @@ if __name__ == "__main__":
             os.path.join(base_url, 'galveston_tx.asc')]
 
     for url in urls:
-        get_bathy(url)
+        get_remote_file(url, verbose=True)
