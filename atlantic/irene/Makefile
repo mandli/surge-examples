@@ -37,7 +37,6 @@ MODULES = \
  $(AMRLIB)/gauges_module.f90 \
  $(GEOLIB)/geoclaw_module.f90 \
  $(GEOLIB)/topo_module.f90 \
- $(GEOLIB)/dtopo_module.f90 \
  $(GEOLIB)/qinit_module.f90 \
  $(GEOLIB)/refinement_module.f90 \
  $(GEOLIB)/fixedgrids_module.f90 \
@@ -45,22 +44,23 @@ MODULES = \
  $(GEOLIB)/surge/constant_storm_module.f90 \
  $(GEOLIB)/surge/stommel_storm_module.f90 \
  $(GEOLIB)/surge/storm_module.f90 \
- $(GEOLIB)/surge/friction_module.f90
+ $(GEOLIB)/surge/friction_module.f90 \
+ $(GEOLIB)/fgmax_module.f90
 
 SOURCES = \
   $(GEOLIB)/surge/src2.f90 \
   $(GEOLIB)/surge/src1d.f90 \
   $(GEOLIB)/surge/setaux.f90 \
   $(GEOLIB)/surge/setprob.f90 \
+  $(GEOLIB)/topo_update.f90 \
   $(GEOLIB)/surge/flag2refine2.f90 \
   $(GEOLIB)/surge/b4step2.f90 \
   $(GEOLIB)/surge/tick.f \
   $(GEOLIB)/valout.f \
   $(GEOLIB)/qinit.f90 \
   $(GEOLIB)/bc2amr.f \
-  $(GEOLIB)/movetopo.f \
   $(GEOLIB)/allowflag.f90 \
-  $(GEOLIB)/cellgridintegrate.f \
+  $(GEOLIB)/cellgridintegrate2.f \
   $(GEOLIB)/topointegral.f \
   $(GEOLIB)/bilinearintegral.f \
   $(GEOLIB)/stepgrid.f \
@@ -85,6 +85,11 @@ SOURCES = \
   $(AMRLIB)/bound.f90 \
   $(AMRLIB)/intfil.f90 \
   $(AMRLIB)/amr2.f90 \
+  $(GEOLIB)/fgmax_read.f90 \
+  $(GEOLIB)/fgmax_frompatch.f90 \
+  $(GEOLIB)/fgmax_interpolate0.f90 \
+  $(GEOLIB)/fgmax_values.f90 \
+  $(GEOLIB)/fgmax_finalize.f90 \
   $(AMRLIB)/quick_sort1.f \
   $(AMRLIB)/estdt.f \
   $(AMRLIB)/check4nans.f \
@@ -170,6 +175,9 @@ SOURCES = \
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
+
+topo: ../bathy/atlantic_2min.tt3 ../bathy/newyork_3s.tt3
+	../bathy/get_bathy.py
 
 ### DO NOT remove this line - make depends on it ###
 
