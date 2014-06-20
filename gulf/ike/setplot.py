@@ -46,7 +46,8 @@ import clawpack.clawutil.data as clawutil
 import clawpack.amrclaw.data as amrclaw
 import clawpack.geoclaw.data as geodata
 
-import clawpack.geoclaw.surge as surge
+import clawpack.geoclaw.surge.plot as surge
+import clawpack.geoclaw.surge.data
 
 try:
     from setplotfg import setplotfg
@@ -152,7 +153,7 @@ def setplot(plotdata):
     plotdata.clearfigures()  # clear any old figures,axes,items data
     plotdata.format = 'binary'
 
-    fig_num_counter = surge.plot.figure_counter()
+    fig_num_counter = surge.figure_counter()
 
     # Load data from output
     clawdata = clawutil.ClawInputData(2)
@@ -161,20 +162,20 @@ def setplot(plotdata):
     amrdata.read(os.path.join(plotdata.outdir,'amr.data'))
     physics = geodata.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
-    surge_data = surge.data.SurgeData()
+    surge_data = clawpack.geoclaw.surge.data.SurgeData()
     surge_data.read(os.path.join(plotdata.outdir,'surge.data'))
-    friction_data = surge.data.FrictionData()
+    friction_data = clawpack.geoclaw.surge.data.FrictionData()
     friction_data.read(os.path.join(plotdata.outdir,'friction.data'))
 
     # Load storm track
-    track = surge.plot.track_data(os.path.join(plotdata.outdir,'fort.track'))
+    track = surge.track_data(os.path.join(plotdata.outdir,'fort.track'))
 
     # Calculate landfall time, off by a day, maybe leap year issue?
     landfall_dt = datetime.datetime(2008,9,13,7) - datetime.datetime(2008,1,1,0)
     landfall = (landfall_dt.days - 1.0) * 24.0 * 60**2 + landfall_dt.seconds
 
     # Set afteraxes function
-    surge_afteraxes = lambda cd: surge.plot.surge_afteraxes(cd, 
+    surge_afteraxes = lambda cd: surge.surge_afteraxes(cd, 
                                         track, landfall, plot_direction=False)
 
     # Color limits
@@ -201,7 +202,7 @@ def setplot(plotdata):
 
     # def pcolor_afteraxes(current_data):
     #     surge_afteraxes(current_data)
-    #     surge.plot.gauge_locations(current_data,gaugenos=[6])
+    #     surge.gauge_locations(current_data,gaugenos=[6])
     
     def contour_afteraxes(current_data):
         surge_afteraxes(current_data)
@@ -243,11 +244,11 @@ def setplot(plotdata):
     plotaxes.ylimits = gulf_ylimits
     plotaxes.afteraxes = gulf_after_axes
 
-    surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
+    surge.add_surface_elevation(plotaxes, plot_type='contourf', 
                                                contours=surface_contours,
                                                shrink=gulf_shrink)
-    surge.plot.add_land(plotaxes,topo_min=-10.0,topo_max=5.0)
-    # surge.plot.add_bathy_contours(plotaxes)
+    surge.add_land(plotaxes,topo_min=-10.0,topo_max=5.0)
+    # surge.add_bathy_contours(plotaxes)
     if article:
         plotaxes.plotitem_dict['surface'].add_colorbar = False
     else:
@@ -270,7 +271,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = gulf_after_axes
 
     # Speed
-    surge.plot.add_speed(plotaxes, plot_type='contourf', 
+    surge.add_speed(plotaxes, plot_type='contourf', 
                                    contours=speed_contours, 
                                    shrink=gulf_shrink)
     if article:
@@ -279,8 +280,8 @@ def setplot(plotdata):
         add_custom_colorbar_ticks_to_axes(plotaxes, 'speed', speed_ticks, speed_labels)
 
     # Land
-    surge.plot.add_land(plotaxes)
-    surge.plot.add_bathy_contours(plotaxes)    
+    surge.add_land(plotaxes)
+    surge.add_bathy_contours(plotaxes)    
 
     #
     # Friction field
@@ -301,7 +302,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = friction_after_axes
     plotaxes.scaled = True
 
-    surge.plot.add_friction(plotaxes,bounds=friction_bounds,shrink=0.9)
+    surge.add_friction(plotaxes,bounds=friction_bounds,shrink=0.9)
     plotaxes.plotitem_dict['friction'].amr_patchedges_show = [0,0,0,0,0,0,0]
     plotaxes.plotitem_dict['friction'].colorbar_label = "$n$"
 
@@ -338,7 +339,7 @@ def setplot(plotdata):
     plotaxes.ylimits = latex_ylimits
     plotaxes.afteraxes = latex_after_axes
     
-    surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
+    surge.add_surface_elevation(plotaxes, plot_type='contourf', 
                                                contours=surface_contours,
                                                shrink=latex_shrink)
 
@@ -349,8 +350,8 @@ def setplot(plotdata):
         add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', [-5,-2.5,0,2.5,5.0], 
                                     ["-5.0","-2.5"," 0"," 2.5"," 5.0"])
     # plotaxes.plotitem_dict['surface'].contour_cmap = plt.get_cmap('OrRd')
-    # surge.plot.add_surface_elevation(plotaxes,plot_type='contour')
-    surge.plot.add_land(plotaxes)
+    # surge.add_surface_elevation(plotaxes,plot_type='contour')
+    surge.add_land(plotaxes)
     # plotaxes.plotitem_dict['surface'].amr_patchedges_show = [1,1,1,0,0,0,0]
     plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0,0,0,0,0,0,0]
     # plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,0,0,0,0]
@@ -380,7 +381,7 @@ def setplot(plotdata):
     plotaxes.ylimits = latex_ylimits
     plotaxes.afteraxes = latex_after_axes
     
-    surge.plot.add_speed(plotaxes, plot_type='contourf', 
+    surge.add_speed(plotaxes, plot_type='contourf', 
                                    contours=speed_contours, 
                                    shrink=latex_shrink)
 
@@ -388,8 +389,8 @@ def setplot(plotdata):
         plotaxes.plotitem_dict['speed'].add_colorbar = False
     else:
         add_custom_colorbar_ticks_to_axes(plotaxes, 'speed', speed_ticks, speed_labels)
-    # surge.plot.add_surface_elevation(plotaxes,plot_type='contour')
-    surge.plot.add_land(plotaxes)
+    # surge.add_surface_elevation(plotaxes,plot_type='contour')
+    surge.add_land(plotaxes)
     # plotaxes.plotitem_dict['speed'].amr_patchedges_show = [1,1,0,0,0,0,0]
     # plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,0,0,0,0]
     plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0,0,0,0,0,0,0]
@@ -409,7 +410,7 @@ def setplot(plotdata):
         else:
             plt.subplots_adjust(left=0.12, bottom=0.06, right=0.97, top=0.97)
         surge_afteraxes(cd)
-        # surge.plot.gauge_locations(cd)
+        # surge.gauge_locations(cd)
     
     #
     # Surface Elevations
@@ -428,7 +429,7 @@ def setplot(plotdata):
     plotaxes.ylimits = houston_ylimits
     plotaxes.afteraxes = houston_after_axes
     
-    surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
+    surge.add_surface_elevation(plotaxes, plot_type='contourf', 
                                                contours=surface_contours,
                                                shrink=houston_shrink)
     
@@ -436,10 +437,10 @@ def setplot(plotdata):
         plotaxes.plotitem_dict['surface'].add_colorbar = False
     else:
         add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks, surface_labels)
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
     plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0,0,0,0,0,0,0]
     plotaxes.plotitem_dict['land'].amr_patchedges_show = [0,0,0,0,0,0,0]
-    # surge.plot.add_bathy_contours(plotaxes)
+    # surge.add_bathy_contours(plotaxes)
 
     # Plot using jet and 0.0 to 5.0 to match figgen generated ADCIRC results
     # plotaxes.plotitem_dict['surface'].pcolor_cmin = 0.0
@@ -461,7 +462,7 @@ def setplot(plotdata):
     plotaxes.ylimits = houston_ylimits
     plotaxes.afteraxes = houston_after_axes
     
-    surge.plot.add_speed(plotaxes, plot_type='contourf', 
+    surge.add_speed(plotaxes, plot_type='contourf', 
                                    contours=speed_contours,
                                    shrink=houston_shrink)
     
@@ -469,8 +470,8 @@ def setplot(plotdata):
         plotaxes.plotitem_dict['speed'].add_colorbar = False
     else:
         add_custom_colorbar_ticks_to_axes(plotaxes, 'speed', speed_ticks, speed_labels)
-    surge.plot.add_land(plotaxes)
-    # surge.plot.add_bathy_contours(plotaxes)
+    surge.add_land(plotaxes)
+    # surge.add_bathy_contours(plotaxes)
     # plotaxes.plotitem_dict['speed'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
     # plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,1,1,1,1,1,1,1]
     plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0,0,0,0,0,0,0]
@@ -492,8 +493,8 @@ def setplot(plotdata):
     plotaxes.afteraxes = gulf_after_axes
     plotaxes.scaled = True
     
-    surge.plot.add_pressure(plotaxes, bounds=pressure_limits, shrink=gulf_shrink)
-    surge.plot.add_land(plotaxes)
+    surge.add_pressure(plotaxes, bounds=pressure_limits, shrink=gulf_shrink)
+    surge.add_land(plotaxes)
     
     # Wind field
     plotfigure = plotdata.new_plotfigure(name='Wind Speed', 
@@ -507,9 +508,9 @@ def setplot(plotdata):
     plotaxes.afteraxes = gulf_after_axes
     plotaxes.scaled = True
     
-    surge.plot.add_wind(plotaxes, bounds=wind_limits, plot_type='pcolor',
+    surge.add_wind(plotaxes, bounds=wind_limits, plot_type='pcolor',
                                   shrink=gulf_shrink)
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     # ========================================================================
     #  Figures for gauges
@@ -554,7 +555,7 @@ def setplot(plotdata):
 
             plt.hold(False)
 
-        # surge.plot.gauge_afteraxes(cd)
+        # surge.gauge_afteraxes(cd)
 
 
     # Set up for axes in this figure:
@@ -580,7 +581,7 @@ def setplot(plotdata):
     def gauge_after_axes(cd):
         plt.subplots_adjust(left=0.12, bottom=0.06, right=0.97, top=0.97)
         surge_afteraxes(cd)
-        surge.plot.gauge_locations(cd, gaugenos=[1, 2, 3, 4])
+        surge.gauge_locations(cd, gaugenos=[1, 2, 3, 4])
         plt.title("Gauge Locations")
 
     plotfigure = plotdata.new_plotfigure(name='Gauge Locations',  
@@ -595,12 +596,12 @@ def setplot(plotdata):
     plotaxes.ylimits = gauge_ylimits
     plotaxes.afteraxes = gauge_after_axes
     
-    surge.plot.add_surface_elevation(plotaxes, plot_type='contourf', 
+    surge.add_surface_elevation(plotaxes, plot_type='contourf', 
                                                contours=surface_contours,
                                                shrink=gauge_location_shrink)
-    # surge.plot.add_surface_elevation(plotaxes, plot_type="contourf")
+    # surge.add_surface_elevation(plotaxes, plot_type="contourf")
     add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks, surface_labels)
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
     # plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0,0,0,0,0,0,0]
     # plotaxes.plotitem_dict['surface'].add_colorbar = False
     # plotaxes.plotitem_dict['surface'].pcolor_cmap = plt.get_cmap('jet')
@@ -630,7 +631,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = gulf_after_axes
 
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.plot.water_u
+    plotitem.plot_var = surge.water_u
     plotitem.pcolor_cmap = colormaps.make_colormap({1.0:'r',0.5:'w',0.0:'b'})
     plotitem.pcolor_cmin = -speed_limits[1]
     plotitem.pcolor_cmax = speed_limits[1]
@@ -639,7 +640,7 @@ def setplot(plotdata):
     plotitem.amr_celledges_show = [0,0,0]
     plotitem.amr_patchedges_show = [1,1,1]
 
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     # Y-Component
     plotaxes = plotfigure.new_plotaxes()
@@ -651,7 +652,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = gulf_after_axes
 
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.plot.water_v
+    plotitem.plot_var = surge.water_v
     plotitem.pcolor_cmap = colormaps.make_colormap({1.0:'r',0.5:'w',0.0:'b'})
     plotitem.pcolor_cmin = -speed_limits[1]
     plotitem.pcolor_cmax = speed_limits[1]
@@ -660,7 +661,7 @@ def setplot(plotdata):
     plotitem.amr_celledges_show = [0,0,0]
     plotitem.amr_patchedges_show = [1,1,1]
     
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     # 
     # Depth
@@ -701,7 +702,7 @@ def setplot(plotdata):
     plotaxes.scaled = True
     
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.plot.pressure_field + 1
+    plotitem.plot_var = surge.pressure_field + 1
     plotitem.pcolor_cmap = plt.get_cmap('PuBu')
     plotitem.pcolor_cmin = 0.0
     plotitem.pcolor_cmax = 1e-3
@@ -711,7 +712,7 @@ def setplot(plotdata):
     plotitem.amr_celledges_show = [0,0,0]
     plotitem.amr_patchedges_show = [1,1,1,1,1,0,0]
     
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     plotfigure = plotdata.new_plotfigure(name='Friction/Coriolis Source', 
                                          figno=fig_num_counter.get_counter())
@@ -725,7 +726,7 @@ def setplot(plotdata):
     plotaxes.scaled = True
     
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.plot.pressure_field + 2
+    plotitem.plot_var = surge.pressure_field + 2
     plotitem.pcolor_cmap = plt.get_cmap('PuBu')
     plotitem.pcolor_cmin = 0.0
     plotitem.pcolor_cmax = 1e-3
@@ -735,7 +736,7 @@ def setplot(plotdata):
     plotitem.amr_celledges_show = [0,0,0]
     plotitem.amr_patchedges_show = [1,1,1,1,1,0,0]
     
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     #-----------------------------------------
 
