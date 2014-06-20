@@ -19,7 +19,7 @@ import clawpack.clawutil.data
 import clawpack.amrclaw.data
 import clawpack.geoclaw.data
 
-import clawpack.geoclaw.surge as surge
+import clawpack.geoclaw.surge.plot as surge
 
 try:
     from setplotfg import setplotfg
@@ -32,7 +32,7 @@ def setplot(plotdata):
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
 
-    fig_num_counter = surge.plot.figure_counter()
+    fig_num_counter = surge.figure_counter()
 
     # Load data from output
     clawdata = clawpack.clawutil.data.ClawInputData(2)
@@ -45,14 +45,14 @@ def setplot(plotdata):
     friction_data.read(os.path.join(plotdata.outdir,'friction.data'))
 
     # Load storm track
-    track = surge.plot.track_data(os.path.join(plotdata.outdir,'fort.track'))
+    track = surge.track_data(os.path.join(plotdata.outdir,'fort.track'))
 
     # Calculate landfall time, off by a day, maybe leap year issue?
     landfall_dt = datetime.datetime(2012,10,29,8,0) - datetime.datetime(2012,1,1,0)
     landfall = (landfall_dt.days) * 24.0 * 60**2 + landfall_dt.seconds
 
     # Set afteraxes function
-    surge_afteraxes = lambda cd: surge.plot.surge_afteraxes(cd, 
+    surge_afteraxes = lambda cd: surge.surge_afteraxes(cd, 
                                         track, landfall, plot_direction=False)
     # Limits for plots
     region_data = {'full':([clawdata.lower[0],clawdata.upper[0]],
@@ -80,7 +80,7 @@ def setplot(plotdata):
 
     def pcolor_afteraxes(current_data):
         surge_afteraxes(current_data)
-        surge.plot.gauge_locations(current_data)
+        surge.gauge_locations(current_data)
     
     def contour_afteraxes(current_data):
         surge_afteraxes(current_data)
@@ -107,8 +107,8 @@ def setplot(plotdata):
         plotaxes.ylimits = values[1]
         plotaxes.afteraxes = pcolor_afteraxes
     
-        surge.plot.add_surface_elevation(plotaxes,bounds=surface_limits,shrink=values[2])
-        surge.plot.add_land(plotaxes)
+        surge.add_surface_elevation(plotaxes,bounds=surface_limits,shrink=values[2])
+        surge.add_land(plotaxes)
 
 
         # ========================================================================
@@ -127,10 +127,10 @@ def setplot(plotdata):
         plotaxes.afteraxes = pcolor_afteraxes
 
         # Speed
-        surge.plot.add_speed(plotaxes,bounds=speed_limits,shrink=values[2])
+        surge.add_speed(plotaxes,bounds=speed_limits,shrink=values[2])
 
         # Land
-        surge.plot.add_land(plotaxes)
+        surge.add_land(plotaxes)
 
 
     # ========================================================================
@@ -148,7 +148,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
 
-    surge.plot.add_friction(plotaxes,bounds=friction_bounds)
+    surge.add_friction(plotaxes,bounds=friction_bounds)
 
     # Pressure field
     plotfigure = plotdata.new_plotfigure(name='Pressure',  
@@ -162,9 +162,9 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     
-    surge.plot.add_pressure(plotaxes,bounds=pressure_limits)
+    surge.add_pressure(plotaxes,bounds=pressure_limits)
     # add_pressure(plotaxes)
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
     
     # Wind field
     plotfigure = plotdata.new_plotfigure(name='Wind Speed', 
@@ -178,10 +178,10 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     
-    surge.plot.add_wind(plotaxes,bounds=wind_limits,plot_type='imshow')
+    surge.add_wind(plotaxes,bounds=wind_limits,plot_type='imshow')
     # add_wind(plotaxes,bounds=wind_limits,plot_type='contour')
     # add_wind(plotaxes,bounds=wind_limits,plot_type='quiver')
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     # ==========================================================================
     #  Depth
@@ -225,7 +225,7 @@ def setplot(plotdata):
         pass
     plotaxes.ylimits = surface_limits
     plotaxes.title = 'Surface'
-    plotaxes.afteraxes = surge.plot.gauge_afteraxes
+    plotaxes.afteraxes = surge.gauge_afteraxes
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
     plotitem.plot_var = 3
     plotitem.plotstyle = 'b-'
@@ -239,7 +239,7 @@ def setplot(plotdata):
     #     pass
     # plotaxes.ylimits = surface_limits
     # plotaxes.title = 'Momenta'
-    # plotaxes.afteraxes = surge.plot.gauge_afteraxes
+    # plotaxes.afteraxes = surge.gauge_afteraxes
 
     # plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
     # plotitem.plot_var = 1
