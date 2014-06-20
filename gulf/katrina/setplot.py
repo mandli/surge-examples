@@ -18,7 +18,8 @@ import clawpack.amrclaw.data
 import clawpack.geoclaw.data
 import clawpack.geoclaw.surge.data
 
-import clawpack.geoclaw.surge as surge
+import clawpack.geoclaw.surge.plot as surge
+import clawpack.geoclaw.surge.data
 
 try:
     from setplotfg import setplotfg
@@ -36,20 +37,20 @@ def setplot(plotdata):
     # Load data from output
     physics = clawpack.geoclaw.data.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
-    surge_data = surge.data.SurgeData()
+    surge_data = clawpack.geoclaw.surge.data.SurgeData()
     surge_data.read(os.path.join(plotdata.outdir,'surge.data'))
     friction_data = clawpack.geoclaw.surge.data.FrictionData()
     friction_data.read(os.path.join(plotdata.outdir,'friction.data'))
 
     # Load storm track
-    track = surge.plot.track_data(os.path.join(plotdata.outdir,'fort.track'))
+    track = surge.track_data(os.path.join(plotdata.outdir,'fort.track'))
 
     # Calculate landfall time, off by a day, maybe leap year issue?
     landfall_dt = datetime.datetime(2005,8,29,6) - datetime.datetime(2005,1,1,0)
     landfall = (landfall_dt.days - 1.0) * 24.0 * 60**2 + landfall_dt.seconds
 
     # Set afteraxes function
-    surge_afteraxes = lambda cd: surge.plot.surge_afteraxes(cd, 
+    surge_afteraxes = lambda cd: surge.surge_afteraxes(cd, 
                                         track, landfall, plot_direction=False)
 
     # Limits for plots
@@ -77,7 +78,7 @@ def setplot(plotdata):
 
     def pcolor_afteraxes(current_data):
         surge_afteraxes(current_data)
-        surge.plot.gauge_locations(current_data,gaugenos=[6])
+        surge.gauge_locations(current_data,gaugenos=[6])
     
     def contour_afteraxes(current_data):
         surge_afteraxes(current_data)
@@ -103,9 +104,9 @@ def setplot(plotdata):
     plotaxes.ylimits = ylimits
     plotaxes.afteraxes = surge_afteraxes
 
-    surge.plot.add_surface_elevation(plotaxes,bounds=surface_limits,shrink=full_shrink)
-    surge.plot.add_land(plotaxes,topo_min=-10.0,topo_max=5.0)
-    surge.plot.add_bathy_contours(plotaxes)
+    surge.add_surface_elevation(plotaxes,bounds=surface_limits,shrink=full_shrink)
+    surge.add_land(plotaxes,topo_min=-10.0,topo_max=5.0)
+    surge.add_bathy_contours(plotaxes)
 
 
     # ========================================================================
@@ -124,11 +125,11 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
 
     # Speed
-    surge.plot.add_speed(plotaxes,bounds=speed_limits,shrink=full_shrink)
+    surge.add_speed(plotaxes,bounds=speed_limits,shrink=full_shrink)
 
     # Land
-    surge.plot.add_land(plotaxes)
-    surge.plot.add_bathy_contours(plotaxes)    
+    surge.add_land(plotaxes)
+    surge.add_bathy_contours(plotaxes)    
 
     # ========================================================================
     # Hurricane forcing - Entire gulf
@@ -145,7 +146,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
 
-    surge.plot.add_friction(plotaxes,bounds=friction_bounds)
+    surge.add_friction(plotaxes,bounds=friction_bounds)
 
     # Pressure field
     plotfigure = plotdata.new_plotfigure(name='Pressure',  
@@ -159,9 +160,9 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     
-    surge.plot.add_pressure(plotaxes,bounds=pressure_limits)
+    surge.add_pressure(plotaxes,bounds=pressure_limits)
     # add_pressure(plotaxes)
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
     
     # Wind field
     plotfigure = plotdata.new_plotfigure(name='Wind Speed', 
@@ -175,10 +176,10 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     
-    surge.plot.add_wind(plotaxes,bounds=wind_limits,plot_type='imshow')
+    surge.add_wind(plotaxes,bounds=wind_limits,plot_type='imshow')
     # add_wind(plotaxes,bounds=wind_limits,plot_type='contour')
     # add_wind(plotaxes,bounds=wind_limits,plot_type='quiver')
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
     
     # Surge field
     plotfigure = plotdata.new_plotfigure(name='Surge Field', 
@@ -194,7 +195,7 @@ def setplot(plotdata):
     plotaxes.scaled = True
     
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.plot.pressure_field + 1
+    plotitem.plot_var = surge.pressure_field + 1
     plotitem.pcolor_cmap = plt.get_cmap('PuBu')
     plotitem.pcolor_cmin = 0.0
     plotitem.pcolor_cmax = 1e-3
@@ -204,7 +205,7 @@ def setplot(plotdata):
     plotitem.amr_celledges_show = [0,0,0]
     plotitem.amr_patchedges_show = [1,1,1,1,1,0,0]
     
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     plotfigure = plotdata.new_plotfigure(name='Friction/Coriolis Source', 
                                          figno=fig_num_counter.get_counter())
@@ -218,7 +219,7 @@ def setplot(plotdata):
     plotaxes.scaled = True
     
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.plot.pressure_field + 2
+    plotitem.plot_var = surge.pressure_field + 2
     plotitem.pcolor_cmap = plt.get_cmap('PuBu')
     plotitem.pcolor_cmin = 0.0
     plotitem.pcolor_cmax = 1e-3
@@ -228,7 +229,7 @@ def setplot(plotdata):
     plotitem.amr_celledges_show = [0,0,0]
     plotitem.amr_patchedges_show = [1,1,1,1,1,0,0]
     
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     # ========================================================================
     #  Figures for gauges
@@ -247,7 +248,7 @@ def setplot(plotdata):
     # plotaxes.ylimits = [0,150.0]
     plotaxes.ylimits = 'auto'
     plotaxes.title = 'Surface'
-    plotaxes.afteraxes = surge.plot.gauge_afteraxes
+    plotaxes.afteraxes = surge.gauge_afteraxes
 
     # Plot surface as blue curve:
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
@@ -271,7 +272,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
 
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.plot.water_u
+    plotitem.plot_var = surge.water_u
     plotitem.pcolor_cmap = colormaps.make_colormap({1.0:'r',0.5:'w',0.0:'b'})
     plotitem.pcolor_cmin = -speed_limits[1]
     plotitem.pcolor_cmax = speed_limits[1]
@@ -279,7 +280,7 @@ def setplot(plotdata):
     plotitem.amr_celledges_show = [0,0,0]
     plotitem.amr_patchedges_show = [1,1,1]
 
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     # Y-Component
     plotaxes = plotfigure.new_plotaxes()
@@ -291,7 +292,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
 
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.plot.water_v
+    plotitem.plot_var = surge.water_v
     plotitem.pcolor_cmap = colormaps.make_colormap({1.0:'r',0.5:'w',0.0:'b'})
     plotitem.pcolor_cmin = -speed_limits[1]
     plotitem.pcolor_cmax = speed_limits[1]
@@ -299,7 +300,7 @@ def setplot(plotdata):
     plotitem.amr_celledges_show = [0,0,0]
     plotitem.amr_patchedges_show = [1,1,1]
     
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
     # ==========================================================================
     #  Depth
