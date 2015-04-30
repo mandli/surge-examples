@@ -30,6 +30,7 @@ def setplot(plotdata):
     
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
+    plotdata.format = 'binary'
 
     fig_num_counter = surge.figure_counter()
 
