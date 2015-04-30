@@ -445,7 +445,7 @@ def set_storm(rundata):
     data.B = 1.5
     data.Pc = 950.0 * 1e2 # Have to convert this to Pa instead of millibars
 
-    surge.data.write_idealized_holland_storm_data(data.storm_file, data)
+    # surge.data.write_idealized_holland_storm_data(data.storm_file, data)
 
     return rundata
 

@@ -12,8 +12,6 @@ import datetime
 
 import numpy as np
 
-import clawpack.geoclaw.surge.data as surge
-
 # October 29, 2012 at 8:00 pm EDT (October 30, 2012 0:00 am UTC)
 sandy_landfall = datetime.datetime(2012,10,29,8,0) - datetime.datetime(2012,1,1,0)
 
