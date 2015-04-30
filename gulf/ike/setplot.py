@@ -47,7 +47,6 @@ import clawpack.amrclaw.data as amrclaw
 import clawpack.geoclaw.data as geodata
 
 import clawpack.geoclaw.surge.plot as surge
-import clawpack.geoclaw.surge.data
 
 try:
     from setplotfg import setplotfg
@@ -132,18 +131,21 @@ gauge_landfall.append(datetime.datetime(2008,9,13 - 1,7)
 gauge_landfall.append(days2seconds(4.25))
 
 # Read in Kennedy et al Gauges
-kennedy_gauge_path = './gauge_data'
-kennedy_gauges = read_tide_gauge_data(kennedy_gauge_path)
-keys = kennedy_gauges.keys()
-for gauge_label in keys:
-    if kennedy_gauges[gauge_label]['gauge_no'] not in [1, 2, 3, 4]:
-        kennedy_gauges.pop(gauge_label)
-gauge_list = [gauge['gauge_no'] for gauge in kennedy_gauges.itervalues()]
+try:
+    kennedy_gauge_path = './gauge_data'
+    kennedy_gauges = read_tide_gauge_data(kennedy_gauge_path)
+    keys = kennedy_gauges.keys()
+    for gauge_label in keys:
+        if kennedy_gauges[gauge_label]['gauge_no'] not in [1, 2, 3, 4]:
+            kennedy_gauges.pop(gauge_label)
+    gauge_list = [gauge['gauge_no'] for gauge in kennedy_gauges.itervalues()]
 
-# Read in ADCIRC gauges
-adcirc_path = "./gauge_data"
-ADCIRC_gauges = read_adcirc_gauge_data(base_path=os.path.join(adcirc_path,'new_data'))
-
+    # Read in ADCIRC gauges
+    adcirc_path = "./gauge_data"
+    ADCIRC_gauges = read_adcirc_gauge_data(base_path=os.path.join(adcirc_path,'new_data'))
+except:
+    print "Could not load external gauge files, ignoring."
+    pass
 
 
 def setplot(plotdata):
@@ -162,9 +164,9 @@ def setplot(plotdata):
     amrdata.read(os.path.join(plotdata.outdir,'amr.data'))
     physics = geodata.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
-    surge_data = clawpack.geoclaw.surge.data.SurgeData()
+    surge_data = geodata.SurgeData()
     surge_data.read(os.path.join(plotdata.outdir,'surge.data'))
-    friction_data = clawpack.geoclaw.surge.data.FrictionData()
+    friction_data = geodata.FrictionData()
     friction_data.read(os.path.join(plotdata.outdir,'friction.data'))
 
     # Load storm track

@@ -277,12 +277,20 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
+    # amrdata.amr_levels_max = 7
     amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [2,2,2,6,16]
-    amrdata.refinement_ratios_y = [2,2,2,6,16]
-    amrdata.refinement_ratios_t = [2,2,2,6,16]
+    amrdata.refinement_ratios_x = [2,2,3,4,16]
+    amrdata.refinement_ratios_y = [2,2,3,4,16]
+    amrdata.refinement_ratios_t = [2,2,3,4,16]
+    # amrdata.refinement_ratios_x = [2,2,2,6,16]
+    # amrdata.refinement_ratios_y = [2,2,2,6,16]
+    # amrdata.refinement_ratios_t = [2,2,2,6,16]
+    # amrdata.refinement_ratios_x = [2,2,2,6,4,4]
+    # amrdata.refinement_ratios_y = [2,2,2,6,4,4]
+    # amrdata.refinement_ratios_t = [2,2,2,6,4,4]
+
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -333,7 +341,7 @@ def setrun(claw_pkg='geoclaw'):
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
     # Latex shelf
     # regions.append([1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
-    #                                         -97.5, -88.5, 27.5, 30.5])
+                                            # -97.5, -88.5, 27.5, 30.5])
 
     # Galveston region
 
@@ -467,27 +475,24 @@ def setgeo(rundata):
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for the
     # smaller domains
-    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                              '../bathy/gulf_caribbean.tt3'])
-    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
-                              '../bathy/NOAA_Galveston_Houston.tt3'])
-    topo_data.topofiles.append([3, 1, 6, rundata.clawdata.t0, rundata.clawdata.tfinal,
-                              '../bathy/galveston_tx.asc'])
-    # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-    #                           '../bathy/galveston_channel.tt3'])
-    # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-    #                           '../bathy/houston_harbor.tt3'])
-    # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-    #                           '../bathy/houston_channel_3.tt3'])
-    # geodata.topofiles.append([3, 1, 7, 0., 1.e10, \
-    #                           '../bathy/houston_channel_2.tt3'])
-    # geodata.topofiles.append([3, 1, 7, 0., 1.e10, \
-    #                           '../bathy/galveston.tt3'])
-    # geodata.topofiles.append([3, 1, 7, 0., 1.e10, \
-    #                           '../bathy/lower_galveston_bay.tt3'])
-    # geodata.topofiles.append([3, 1, 7, 0., 1.e10, \
-    #                           '../bathy/upper_galveston_bay.tt3'])
+    if os.environ.has_key("DATA_PATH"):
+        topo_path = os.path.join(os.environ["DATA_PATH"], "topography", "gulf")
+    else:
+        topo_path = os.getcwd()
 
+    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, 
+                                         rundata.clawdata.tfinal, 
+                                         os.path.join(topo_path, 
+                                         'gulf_caribbean.tt3')])
+    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, 
+                                         rundata.clawdata.tfinal, 
+                                         os.path.join(topo_path, 
+                                         'NOAA_Galveston_Houston.tt3')])
+    topo_data.topofiles.append([3, 1, 6, rundata.clawdata.t0, 
+                                         rundata.clawdata.tfinal, 
+                                         os.path.join(topo_path, 
+                                         'galveston_tx.asc')])
+    
     # == setdtopo.data values ==
     dtopo_data = rundata.dtopo_data
     dtopo_data.dtopofiles = []
@@ -571,10 +576,5 @@ if __name__ == '__main__':
         rundata = setrun(sys.argv[1])
     else:
         rundata = setrun()
-
-    rundata.add_data(surge.SurgeData(),'stormdata')
-    set_storm(rundata)
-    rundata.add_data(surge.FrictionData(),'frictiondata')
-    set_friction(rundata)
 
     rundata.write()
