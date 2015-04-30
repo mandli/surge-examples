@@ -175,6 +175,8 @@ SOURCES = \
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
 
+.PHONY: topo all
+
 topo:
 	../bathy/get_bathy.py ../bathy/
 
