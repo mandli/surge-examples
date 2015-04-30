@@ -41,22 +41,40 @@ def set_cell_ticks():
     plt.yticks(locs,labels)
     # plt.yticks(new_ticks, [str(tick) for tick in new_ticks])
 
+def plot_num_grids(axes=None, path="./_output"):
+    r"""Plot number of grids used over time."""
+    
+    if axes is None:
+        fig = plt.figure()
+        axes = fig.add_subplot(1, 1, 1)
+
+
+def plot_num_cells(axes=None, path="./_output"):
+    r"""Plot number of cells used over time."""
+    
+    if axes is None:
+        fig = plt.figure()
+        axes = fig.add_subplot(1, 1, 1)
+
+    return axes
+    
+
 if __name__ == "__main__":
 
     output_path = "./_output"    
     if len(sys.argv) > 1:
         output_path = sys.argv[1]
 
-    num_levels = 7
-    # ADCIRC_num_nodes = 3331560
+    MAX_LEVELS = 10
     landfall = datetime.datetime(2008,9,13 - 1,7) - datetime.datetime(2008,1,1,0)
     landfall = days2seconds(landfall.days) + landfall.seconds
 
     file_list = glob.glob(os.path.join(output_path,"fort.q*"))
 
     time = numpy.empty(len(file_list), dtype=float)
-    num_grids = numpy.zeros((time.shape[0], num_levels), dtype=int)
-    num_cells = numpy.zeros((time.shape[0], num_levels), dtype=int)
+    num_grids = numpy.zeros((time.shape[0], MAX_LEVELS), dtype=int)
+    num_cells = numpy.zeros((time.shape[0], MAX_LEVELS), dtype=int)
+    num_levels = 0
 
     for (n,path) in enumerate(file_list):
         # Read t file
@@ -75,6 +93,7 @@ if __name__ == "__main__":
             if "grid_number" in line:
                 # print "grid number:", int(line.split()[0])
                 level = int(q_file.readline().split()[0])
+                num_levels = max(level, num_levels)
                 num_grids[n,level - 1] += 1 
                 mx = int(q_file.readline().split()[0])
                 my = int(q_file.readline().split()[0])
@@ -84,11 +103,12 @@ if __name__ == "__main__":
 
         # File checking
         if numpy.sum(num_grids[n,:]) != t_file_num_grids:
-            raise Exception("Number of grids in fort.t* file and fort.q* file do not match.")
+            raise ValueError("Number of grids in fort.t* file and fort.q*"
+                             " file do not match.")
 
     # Plot cascading time histories per level
     colors = [ (value / 256.0, value / 256.0, value / 256.0) 
-                                    for value in [247, 217, 189, 150, 115, 82, 37] ]
+                                for value in [247, 217, 189, 150, 115, 82, 37] ]
     proxy_artists = [plt.Rectangle((0, 0), 1, 1, fc=colors[level], 
             label="Level %s" % (str(level+1))) for level in xrange(num_levels)]
 

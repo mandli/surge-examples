@@ -11,8 +11,7 @@ import os
 
 import datetime
 
-import clawpack.clawutil.clawdata as data
-import clawpack.geoclaw.surge as surge
+import clawpack.clawutil.data as data
 
 #                           days   s/hour    hours/day            
 days2seconds = lambda days: days * 60.0**2 * 24.0
@@ -356,7 +355,7 @@ def setgeo(rundata):
     """
 
     try:
-        geodata = rundata.geo_data
+        geo_data = rundata.geo_data
     except:
         print "*** Error, this rundata has no geodata attribute"
         raise AttributeError("Missing geodata attribute")
@@ -400,13 +399,13 @@ def setgeo(rundata):
     # geodata.basin_depth = -100.0
     topo_data.shelf_depth = -500.0
     beach_height = 300.0
-    topo_data.beach_slope = -(beach_height + geodata.shelf_depth) / (rundata.clawdata.upper[0] - geodata.x2)
+    topo_data.beach_slope = -(beach_height + topo_data.shelf_depth) / (rundata.clawdata.upper[0] - topo_data.x2)
 
     # == setqinit.data values ==
-    rundata.qinitdata.qinit_type = 0
+    rundata.qinit_data.qinit_type = 0
 
     # == setfixedgrids.data values ==
-    geodata.fixedgrids = []
+    rundata.fixed_grid_data.fixedgrids = []
     # for fixed grids append lines of the form
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,ioutarrivaltimes,ioutsurfacemax]
     
@@ -446,7 +445,7 @@ def set_storm(rundata):
     data.B = 1.5
     data.Pc = 950.0 * 1e2 # Have to convert this to Pa instead of millibars
 
-    surge.data.write_idealized_holland_storm_data(data.storm_file, data)
+    # surge.data.write_idealized_holland_storm_data(data.storm_file, data)
 
     return rundata
 
@@ -468,11 +467,6 @@ if __name__ == '__main__':
         rundata = setrun(sys.argv[1])
     else:
         rundata = setrun()
-
-    rundata.add_data(surge.data.SurgeData(),'stormdata')
-    set_storm(rundata)
-    rundata.add_data(surge.data.FrictionData(),'frictiondata')
-    set_friction(rundata)
 
     rundata.write()
 

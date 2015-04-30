@@ -13,10 +13,11 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
-import clawpack.geoclaw.surge as surge
 import clawpack.visclaw.colormaps as colormaps
 import clawpack.visclaw.geoplot as geoplot
-import clawpack.clawutil.clawdata as clawdata
+import clawpack.clawutil.data as clawdata
+import clawpack.geoclaw.data
+import clawpack.geoclaw.surge.plot as surge
 
 try:
     from setplotfg import setplotfg
@@ -30,24 +31,26 @@ def setplot(plotdata):
     plotdata.clearfigures()  # clear any old figures,axes,items data
 
     # Load data from output
-    amrdata = clawdata.AmrclawInputData(2)
-    amrdata.read(os.path.join(plotdata.outdir,'amrclaw.data'))
-    physics = clawdata.GeoclawInputData(2)
+    amrdata = clawpack.clawutil.data.ClawInputData(2)
+    amrdata.read('claw.data')
+    physics = clawpack.geoclaw.data.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
-    surge_data = surge.data.SurgeData()
+    topo_data = clawpack.geoclaw.data.TopographyData()
+    topo_data.read(os.path.join(plotdata.outdir, 'topo.data'))
+    surge_data = clawpack.geoclaw.data.SurgeData()
     surge_data.read(os.path.join(plotdata.outdir,'surge.data'))
-    friction_data = surge.data.FrictionData()
+    friction_data = clawpack.geoclaw.data.FrictionData()
     friction_data.read(os.path.join(plotdata.outdir,'friction.data'))
 
     # Load storm track
-    track = surge.plot.track_data(os.path.join(plotdata.outdir,'fort.track'))
+    track = surge.track_data(os.path.join(plotdata.outdir,'fort.track'))
 
     # Calculate landfall time, off by a day, maybe leap year issue?
     landfall_dt = datetime.datetime(2008, 8, 1, 12) - datetime.datetime(2008,1,1,0)
     landfall = landfall_dt.days * 24.0 * 60**2 + landfall_dt.seconds
 
     # Set afteraxes function
-    surge_afteraxes = lambda cd: surge.plot.surge_afteraxes(cd, 
+    surge_afteraxes = lambda cd: surge.surge_afteraxes(cd, 
                                         track, landfall, plot_direction=False)
 
     # Limits for plots
@@ -77,7 +80,7 @@ def setplot(plotdata):
     # ==========================================================================
     def pcolor_afteraxes(current_data):
         surge_afteraxes(current_data)
-        surge.plot.gauge_locations(current_data)
+        surge.gauge_locations(current_data)
         
     def contour_afteraxes(current_data):
         surge_afteraxes(current_data)
@@ -110,8 +113,8 @@ def setplot(plotdata):
     plotaxes.ylimits = ylimits
     plotaxes.afteraxes = pcolor_afteraxes
     
-    surge.plot.add_surface_elevation(plotaxes,bounds=surface_limits)
-    surge.plot.add_land(plotaxes)
+    surge.add_surface_elevation(plotaxes,bounds=surface_limits)
+    surge.add_land(plotaxes)
 
 
     # ========================================================================
@@ -129,10 +132,10 @@ def setplot(plotdata):
     plotaxes.afteraxes = pcolor_afteraxes
 
     # Speed
-    surge.plot.add_speed(plotaxes,bounds=speed_limits)
+    surge.add_speed(plotaxes,bounds=speed_limits)
 
     # Land
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
 
     # ========================================================================
@@ -149,9 +152,9 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     
-    surge.plot.add_pressure(plotaxes,bounds=pressure_limits)
+    surge.add_pressure(plotaxes,bounds=pressure_limits)
     # add_pressure(plotaxes)
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
     
     # Wind field
     plotfigure = plotdata.new_plotfigure(name='Wind Speed',figno=4)
@@ -164,10 +167,10 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     
-    surge.plot.add_wind(plotaxes,bounds=wind_limits,plot_type='imshow')
+    surge.add_wind(plotaxes,bounds=wind_limits,plot_type='imshow')
     # add_wind(plotaxes,bounds=wind_limits,plot_type='contour')
     # add_wind(plotaxes,bounds=wind_limits,plot_type='quiver')
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
     
     # Wind field components
     plotfigure = plotdata.new_plotfigure(name='Wind Components',figno=5)
@@ -183,7 +186,7 @@ def setplot(plotdata):
     plotaxes.scaled = True
 
     plotitem = plotaxes.new_plotitem(plot_type='2d_imshow')
-    plotitem.plot_var = surge.plot.wind_x
+    plotitem.plot_var = surge.wind_x
     plotitem.imshow_cmap = colormaps.make_colormap({1.0:'r',0.5:'w',0.0:'b'})
     plotitem.imshow_cmin = -wind_limits[1]
     plotitem.imshow_cmax = wind_limits[1]
@@ -200,7 +203,7 @@ def setplot(plotdata):
     plotaxes.scaled = True
 
     plotitem = plotaxes.new_plotitem(plot_type='2d_imshow')
-    plotitem.plot_var = surge.plot.wind_y
+    plotitem.plot_var = surge.wind_y
     plotitem.imshow_cmap = colormaps.make_colormap({1.0:'r',0.5:'w',0.0:'b'})
     plotitem.imshow_cmin = -wind_limits[1]
     plotitem.imshow_cmax = wind_limits[1]
@@ -222,7 +225,7 @@ def setplot(plotdata):
     # plotaxes.ylimits = [0,150.0]
     plotaxes.ylimits = surface_limits
     plotaxes.title = 'Surface'
-    plotaxes.afteraxes = surge.plot.gauge_afteraxes
+    plotaxes.afteraxes = surge.gauge_afteraxes
 
     # Plot surface as blue curve:
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
@@ -245,11 +248,11 @@ def setplot(plotdata):
     plotitem = plotaxes.new_plotitem(plot_type="2d_pcolor")
     plotitem.plot_var = geoplot.topo
     # plotitem.pcolor_cmap = geoplot.seafloor_colormap
-    plotitem.pcolor_cmin = physics.basin_depth
+    plotitem.pcolor_cmin = topo_data.basin_depth
     plotitem.pcolor_cmax = 300.0
     plotitem.add_colorbar = True
 
-    surge.plot.add_land(plotaxes)
+    surge.add_land(plotaxes)
 
 
     #-----------------------------------------

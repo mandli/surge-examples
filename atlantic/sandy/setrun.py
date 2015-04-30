@@ -12,8 +12,6 @@ import datetime
 
 import numpy as np
 
-import clawpack.geoclaw.surge.data as surge
-
 # October 29, 2012 at 8:00 pm EDT (October 30, 2012 0:00 am UTC)
 sandy_landfall = datetime.datetime(2012,10,29,8,0) - datetime.datetime(2012,1,1,0)
 
@@ -74,10 +72,10 @@ def setrun(claw_pkg='geoclaw'):
     # clawdata.lower[1] = 13.0       # south latitude
     # clawdata.upper[1] = 45.0      # north latitude
 
-    clawdata.lower[0] = -100.0      # west longitude
+    clawdata.lower[0] = -83.0      # west longitude
     clawdata.upper[0] = -55.0      # east longitude
 
-    clawdata.lower[1] = 13.0       # south latitude
+    clawdata.lower[1] = 15.0       # south latitude
     clawdata.upper[1] = 45.0      # north latitude
 
 
@@ -153,7 +151,7 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.output_t0 = True
         
 
-    clawdata.output_format = 'ascii'      # 'ascii' or 'netcdf' 
+    clawdata.output_format = 'binary'      # 'ascii' or 'netcdf' 
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'all'
@@ -411,7 +409,7 @@ def setgeo(rundata):
     #                                    '../bathy/atlantic_2min.tt3'])
     topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
-                                       '../bathy/full_2min.tt3'])
+                                       '../bathy/atlantic_2min.tt3'])
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
                                        '../bathy/newyork_3s.tt3'])
@@ -488,10 +486,5 @@ if __name__ == '__main__':
         rundata = setrun(sys.argv[1])
     else:
         rundata = setrun()
-
-    rundata.add_data(surge.SurgeData(),'stormdata')
-    set_storm(rundata)
-    rundata.add_data(surge.FrictionData(),'frictiondata')
-    set_friction(rundata)
 
     rundata.write()

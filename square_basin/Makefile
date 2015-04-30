@@ -1,3 +1,4 @@
+
 # Makefile for Clawpack code in this directory.
 # This version only sets the local files and frequently changed
 # options, and then includes the standard makefile pointed to by CLAWMAKE.
@@ -19,7 +20,7 @@ SETPLOT_FILE = setplot.py      # File containing function to set plots
 PLOTDIR = _plots               # Directory for plots
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
-FFLAGS ?= -W -Wall -fbounds-check -pedantic-errors -Wunderflow -ffpe-trap=zero,overflow -g
+FFLAGS ?=
 
 # ---------------------------------
 # List of sources for this program:
@@ -33,10 +34,9 @@ MODULES = \
  $(GEOLIB)/utility_module.f90 \
  $(AMRLIB)/amr_module.f90 \
  $(AMRLIB)/regions_module.f90 \
- $(AMRLIB)/gauges_module.f90 \
  $(GEOLIB)/geoclaw_module.f90 \
+ $(GEOLIB)/gauges_module.f90 \
  $(GEOLIB)/topo_module.f90 \
- $(GEOLIB)/dtopo_module.f90 \
  $(GEOLIB)/qinit_module.f90 \
  $(GEOLIB)/refinement_module.f90 \
  $(GEOLIB)/fixedgrids_module.f90 \
@@ -44,22 +44,23 @@ MODULES = \
  $(GEOLIB)/surge/constant_storm_module.f90 \
  $(GEOLIB)/surge/stommel_storm_module.f90 \
  $(GEOLIB)/surge/storm_module.f90 \
- $(GEOLIB)/surge/friction_module.f90
+ $(GEOLIB)/friction_module.f90 \
+ $(GEOLIB)/fgmax_module.f90
 
 SOURCES = \
-  $(GEOLIB)/surge/src2.f90 \
-  $(GEOLIB)/surge/src1d.f90 \
-  $(GEOLIB)/surge/setaux.f90 \
-  $(GEOLIB)/surge/setprob.f90 \
-  $(GEOLIB)/surge/flag2refine2.f90 \
-  $(GEOLIB)/surge/b4step2.f90 \
-  $(GEOLIB)/surge/tick.f \
-  $(GEOLIB)/surge/valout.f \
+  $(GEOLIB)/src2.f90 \
+  $(GEOLIB)/src1d.f90 \
+  $(GEOLIB)/setaux.f90 \
+  $(GEOLIB)/setprob.f90 \
+  $(GEOLIB)/topo_update.f90 \
+  $(GEOLIB)/flag2refine2.f90 \
+  $(GEOLIB)/b4step2.f90 \
+  $(GEOLIB)/tick.f \
+  $(GEOLIB)/valout.f \
   $(GEOLIB)/qinit.f90 \
   $(GEOLIB)/bc2amr.f \
-  $(GEOLIB)/movetopo.f \
   $(GEOLIB)/allowflag.f90 \
-  $(GEOLIB)/cellgridintegrate.f \
+  $(GEOLIB)/cellgridintegrate2.f \
   $(GEOLIB)/topointegral.f \
   $(GEOLIB)/bilinearintegral.f \
   $(GEOLIB)/stepgrid.f \
@@ -70,7 +71,6 @@ SOURCES = \
   $(GEOLIB)/flux2fw.f \
   $(GEOLIB)/qad.f \
   $(GEOLIB)/update.f \
-  $(GEOLIB)/dumpgauge.f \
   $(GEOLIB)/upbnd.f  \
   $(GEOLIB)/setgrd.f \
   $(GEOLIB)/gfixup.f \
@@ -84,6 +84,11 @@ SOURCES = \
   $(AMRLIB)/bound.f90 \
   $(AMRLIB)/intfil.f90 \
   $(AMRLIB)/amr2.f90 \
+  $(GEOLIB)/fgmax_read.f90 \
+  $(GEOLIB)/fgmax_frompatch.f90 \
+  $(GEOLIB)/fgmax_interpolate.f90 \
+  $(GEOLIB)/fgmax_values.f90 \
+  $(GEOLIB)/fgmax_finalize.f90 \
   $(AMRLIB)/quick_sort1.f \
   $(AMRLIB)/estdt.f \
   $(AMRLIB)/check4nans.f \
@@ -169,6 +174,11 @@ SOURCES = \
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
+
+.PHONY: all
+
+-all:
+	$(MAKE) .plots
 
 ### DO NOT remove this line - make depends on it ###
 
