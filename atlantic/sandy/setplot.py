@@ -39,9 +39,9 @@ def setplot(plotdata):
     clawdata.read('claw.data')
     physics = clawpack.geoclaw.data.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
-    surge_data = surge.data.SurgeData()
+    surge_data = clawpack.geoclaw.data.SurgeData()
     surge_data.read(os.path.join(plotdata.outdir,'surge.data'))
-    friction_data = clawpack.geoclaw.surge.data.FrictionData()
+    friction_data = clawpack.geoclaw.data.FrictionData()
     friction_data.read(os.path.join(plotdata.outdir,'friction.data'))
 
     # Load storm track
