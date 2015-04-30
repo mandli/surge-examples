@@ -12,8 +12,6 @@ import datetime
 
 import numpy as np
 
-import clawpack.geoclaw.surge.data as surge
-
 # Landfall of hurricane 1110 UTC (6:10 a.m. CDT) on Monday, August 29, 2005
 katrina_landfall = datetime.datetime(2005,8,29,6) - datetime.datetime(2005,1,1,0)
 
@@ -141,7 +139,7 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.output_t0 = True
         
 
-    clawdata.output_format = 'ascii'      # 'ascii' or 'netcdf' 
+    clawdata.output_format = 'binary'      # 'ascii' or 'netcdf' 
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'all' # could be list
@@ -476,11 +474,6 @@ if __name__ == '__main__':
         rundata = setrun(sys.argv[1])
     else:
         rundata = setrun()
-
-    rundata.add_data(surge.SurgeData(),'stormdata')
-    set_storm(rundata)
-    rundata.add_data(surge.FrictionData(),'frictiondata')
-    set_friction(rundata)
 
     rundata.write()
 
