@@ -425,6 +425,12 @@ def setgeo(rundata):
     # for fixed grids append lines of the form
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]
+
+    # Set storm
+    set_storm(rundata)
+
+    # Set variable friction
+    set_friction(rundata)
     
     return rundata
     # end of function setgeo
@@ -433,7 +439,7 @@ def setgeo(rundata):
 
 def set_storm(rundata):
 
-    data = rundata.stormdata
+    data = rundata.surge_data
 
     # Physics parameters
     data.rho_air = 1.15
@@ -464,7 +470,7 @@ def set_storm(rundata):
 
 def set_friction(rundata):
 
-    data = rundata.frictiondata
+    data = rundata.friction_data
 
     # Variable friction
     data.variable_friction = True

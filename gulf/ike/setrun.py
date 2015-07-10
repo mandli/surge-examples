@@ -12,7 +12,7 @@ import datetime
 
 import numpy as np
 
-import clawpack.geoclaw.surge.data as surge
+# import clawpack.geoclaw.surge.data as surge
 
 # Need to adjust the date a bit due to weirdness with leap year (I think)
 ike_landfall = datetime.datetime(2008,9,13 - 1,7) - datetime.datetime(2008,1,1,0)
@@ -511,6 +511,9 @@ def setgeo(rundata):
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]
 
+    set_storm(rundata)
+    set_friction(rundata)
+
     return rundata
     # end of function setgeo
     # ----------------------
@@ -518,7 +521,7 @@ def setgeo(rundata):
 
 def set_storm(rundata):
 
-    data = rundata.stormdata
+    data = rundata.surge_data
 
     # Physics parameters
     data.rho_air = 1.15
@@ -549,7 +552,7 @@ def set_storm(rundata):
 
 def set_friction(rundata):
 
-    data = rundata.frictiondata
+    data = rundata.friction_data
 
     # Variable friction
     data.variable_friction = True
