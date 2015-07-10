@@ -465,6 +465,8 @@ def set_storm(rundata):
     # Storm type 2 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'sandy.storm'))
 
+    data.landfall_time_output = True
+
     return data
 
 
