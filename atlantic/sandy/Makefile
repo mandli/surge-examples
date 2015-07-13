@@ -9,15 +9,24 @@ CLAWMAKE = $(CLAW)/clawutil/src/Makefile.common
 # at the unix prompt.
 
 
+# Pressure term control
+NEW_PRESSURE ?= F
+
 # Adjust these variables if desired:
 # ----------------------------------
 
 CLAW_PKG = geoclaw                  # Clawpack package to use
 EXE = xgeoclaw                 # Executable to create
 SETRUN_FILE = setrun.py        # File containing function to make data
-OUTDIR = _output               # Directory for output
 SETPLOT_FILE = setplot.py      # File containing function to set plots
-PLOTDIR = _plots               # Directory for plots
+
+ifeq ($(NEW_PRESSURE), T)
+	OUTDIR = _output_new
+	PLOTDIR = _plots_new
+else
+	OUTDIR = _output_old
+	PLOTDIR = _plots_old
+endif
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
 FFLAGS ?= -W -Wall -fbounds-check -pedantic-errors -Wunderflow -ffpe-trap=zero,overflow -g
@@ -25,10 +34,17 @@ FFLAGS ?= -W -Wall -fbounds-check -pedantic-errors -Wunderflow -ffpe-trap=zero,o
 # ---------------------------------
 # List of sources for this program:
 # ---------------------------------
-
+ifeq ($(NEW_PRESSURE),T)
+	pressure_src_path = $(GEOCLAW)/examples/storm-surge/pressure_test
+	pressure_rp_path = $(GEOCLAW)/examples/storm-surge/pressure_test
+else
+	pressure_src_path = $(GEOLIB)
+	pressure_rp_path = $(RIEMANN)
+endif
 AMRLIB = $(CLAW)/amrclaw/src/2d
 GEOLIB = $(CLAW)/geoclaw/src/2d/shallow
 RIEMANN = $(CLAW)/riemann/src
+
 
 MODULES = \
  $(GEOLIB)/utility_module.f90 \
@@ -48,8 +64,8 @@ MODULES = \
  $(GEOLIB)/fgmax_module.f90
 
 SOURCES = \
-  $(GEOLIB)/src2.f90 \
-  $(GEOLIB)/src1d.f90 \
+  $(pressure_src_path)/src2.f90 \
+  $(pressure_src_path)/src1d.f90 \
   $(GEOLIB)/setaux.f90 \
   $(GEOLIB)/setprob.f90 \
   $(GEOLIB)/topo_update.f90 \
@@ -64,9 +80,9 @@ SOURCES = \
   $(GEOLIB)/topointegral.f \
   $(GEOLIB)/bilinearintegral.f \
   $(GEOLIB)/stepgrid.f \
-  $(RIEMANN)/rpn2_geoclaw.f \
+  $(pressure_rp_path)/rpn2_geoclaw.f \
   $(RIEMANN)/rpt2_geoclaw.f \
-  $(RIEMANN)/geoclaw_riemann_utils.f \
+  $(pressure_rp_path)/geoclaw_riemann_utils.f \
   $(GEOLIB)/step2.f \
   $(GEOLIB)/flux2fw.f \
   $(GEOLIB)/qad.f \
@@ -83,7 +99,7 @@ SOURCES = \
   $(AMRLIB)/trimbd.f90 \
   $(AMRLIB)/bound.f90 \
   $(AMRLIB)/intfil.f90 \
-  $(AMRLIB)/amr2.f90 \
+  $(GEOLIB)/amr2.f90 \
   $(GEOLIB)/fgmax_read.f90 \
   $(GEOLIB)/fgmax_frompatch.f90 \
   $(GEOLIB)/fgmax_interpolate.f90 \
