@@ -5,7 +5,7 @@
 import sys
 import os
 
-import clawpack.geoclaw.util as util
+import clawpack.clawutil.data as data
 
 if __name__ == "__main__":
 
@@ -21,4 +21,4 @@ if __name__ == "__main__":
             "https://dl.dropboxusercontent.com/u/8449354/bathy/NewOrleans_3s.tt3.tar.bz2"]
 
     for url in urls:
-        util.get_remote_file(url, output_dir=output_dir)
+        data.get_remote_file(url, output_dir=output_dir)
