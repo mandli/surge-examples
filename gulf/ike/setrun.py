@@ -275,19 +275,19 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    # amrdata.amr_levels_max = 7
-    amrdata.amr_levels_max = 6
+    amrdata.amr_levels_max = 7
+    # amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [2,2,3,4,16]
-    amrdata.refinement_ratios_y = [2,2,3,4,16]
-    amrdata.refinement_ratios_t = [2,2,3,4,16]
+    # amrdata.refinement_ratios_x = [2,2,3,4,16]
+    # amrdata.refinement_ratios_y = [2,2,3,4,16]
+    # amrdata.refinement_ratios_t = [2,2,3,4,16]
     # amrdata.refinement_ratios_x = [2,2,2,6,16]
     # amrdata.refinement_ratios_y = [2,2,2,6,16]
     # amrdata.refinement_ratios_t = [2,2,2,6,16]
-    # amrdata.refinement_ratios_x = [2,2,2,6,4,4]
-    # amrdata.refinement_ratios_y = [2,2,2,6,4,4]
-    # amrdata.refinement_ratios_t = [2,2,2,6,4,4]
+    amrdata.refinement_ratios_x = [2,2,2,6,4,4]
+    amrdata.refinement_ratios_y = [2,2,2,6,4,4]
+    amrdata.refinement_ratios_t = [2,2,2,6,4,4]
 
 
 
@@ -344,12 +344,12 @@ def setrun(claw_pkg='geoclaw'):
     # Galveston region
 
     # Galveston Sub-Domains
-    # regions.append([1, 4, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-    #                                         -95.8666, -93.4, 28.63333, 30.2])
-    # regions.append([1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
-    #                                         -95.3723, -94.5939, 29.2467, 29.9837])
-    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal,
-    #                                             -95.25, -94.3, 28.85, 29.8])
+    regions.append([1, 4, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+                                            -95.8666, -93.4, 28.63333, 30.2])
+    regions.append([1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
+                                            -95.3723, -94.5939, 29.2467, 29.9837])
+    regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal,
+                                                -95.25, -94.3, 28.85, 29.8])
 
     # Galveston Channel Entrance (galveston_channel)
     # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
@@ -538,8 +538,9 @@ def set_storm(rundata):
     # Storm parameters
     data.storm_type = 1 # Type of storm
     data.landfall = days2seconds(ike_landfall.days) + ike_landfall.seconds
+    data.display_landfall_time = True
 
-    # Storm type 2 - Idealized storm track
+    # Storm type 1 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'ike.storm'))
 
     return rundata
