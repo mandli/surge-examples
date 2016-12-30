@@ -20,8 +20,6 @@ category_color = {5: 'red',
 mumbai = (72.8562, 19.0176)
 
 
-
-
 def create_storm_file(storm):
 
     # Read in and create reference storm data
@@ -65,7 +63,7 @@ def create_storm_file(storm):
             storm_file.write("  %s" % str(int(storm['max_winds'][n])).rjust(3))
             storm_file.write("  %s" % str(int(storm['central_pressure'][n])).rjust(4))
             storm_file.write(" " * 47)
-            storm_file.write("%s" % str(ref_storm['RRP'][n]).rjust(3))
+            storm_file.write("%s" % str(1e3).rjust(3))
             storm_file.write("  %s" % str(storm['radius_max_winds'][n]).rjust(3))
             storm_file.write('\n')
 
