@@ -42,6 +42,11 @@ def create_storm_file(storm):
 
     # Write new synthetic storm
     with open('mumbai.storm', 'w') as storm_file:
+
+#12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+#AL, 09, 2008090412,   , BEST,   0,  230N,  564W, 120,  938, HU,  64, NEQ,   40,   30,   25,   30, 1009,  180,  15, 145,   0,   L,   0,    ,   0,   0,        IKE, D, 12, NEQ, 360, 270, 120, 300
+#8x      i4  i2i2i2      a4    i3   i4  a i4  a  i3  i4,47x,i3,2x,i3)"
+# "        DDDDDDDDDD      XXXX  XXX  DDDDS  DDDDS DDD" % 
         # "(8x      i4  i2i2i26x    a4  2x,i3,1x,i4,a1,2x,i4,a1,2x,i3,2x,i4,47x,i3,2x,i3)"
         # "(8x      i4  i2i2i26x    a4  2xi3 xi4  a i4   a i3 2x,i4,47x,i3,2x,i3)"
         # "(        YYYYMMDDHH      BEST  FOR lat_D long_D max  cpre                                               rrp  rad"
@@ -51,20 +56,22 @@ def create_storm_file(storm):
                                  str(storm['time'][n].month).zfill(2),
                                  str(storm['time'][n].day).zfill(2),
                                  str(storm['time'][n].hour).zfill(2))
-            storm_file.write("        %s" % date)
+            storm_file.write("%s" % date)
             if storm['track'][1][n] < 0:
                 lat_dir = "S"
             else:
                 lat_dir = "N"
-            lon_dir = "W"
-            storm_file.write("      XXXX  XXX  %s%s  %s%s" 
+            if storm['track'][0][n] < 0:
+                lon_dir = "E"
+            else:
+                lon_dir = "W"
+            # YYYYMMDDHH LLLLD LLLLD WWW PPPP RRR
+            storm_file.write(" %s%s %s%s" 
                                     % (str(int(storm['track'][1][n] * 10)).rjust(4), lat_dir,
-                                       str(int(storm['track'][1][n] * 10)).rjust(4), lon_dir))
-            storm_file.write("  %s" % str(int(storm['max_winds'][n])).rjust(3))
-            storm_file.write("  %s" % str(int(storm['central_pressure'][n])).rjust(4))
-            storm_file.write(" " * 47)
-            storm_file.write("%s" % str(1e3).rjust(3))
-            storm_file.write("  %s" % str(storm['radius_max_winds'][n]).rjust(3))
+                                       str(int(storm['track'][0][n] * 10)).rjust(4), lon_dir))
+            storm_file.write(" %s" % str(int(storm['max_winds'][n])).rjust(3))
+            storm_file.write(" %s" % str(int(storm['radius_max_winds'][n] * 10)).rjust(3))
+            storm_file.write(" %s" % str(int(storm['central_pressure'][n])).rjust(4))
             storm_file.write('\n')
 
 
@@ -84,6 +91,9 @@ def plot_tracks(storms, plot_cat=True):
     # Plot storm tracks and intensity
     for storm in storms:
         longitude, latitude = mapping(storm['track'][0], storm['track'][1])
+        # print(storm['track'])
+        # print(longitude, latitude)
+        # import pdb; pdb.set_trace()
         for i in xrange(len(longitude)):
             if plot_cat:
                 color = category_color[storm['category'][i]]
@@ -169,16 +179,19 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         path = sys.argv[1]
 
-    storms = extract_data(path, mask_dist=0.5, mask_category=3)
+    storms = extract_data(path, mask_dist=0.2, mask_category=4)
 
-    # plot_tracks(storms[10])
+    # for (n, storm) in enumerate(storms):
+    #     fig = plot_tracks([storm])
+    fig = plot_tracks(storms[2])
+
     # plot_tracks(storms[20])
     # plot_tracks(storms[30])
     # plot_tracks(storms[40])
     # plot_tracks(storms[50])
     # plot_tracks(storms[60])
-    fig = plot_tracks(storms[70], plot_cat=False)
+    # fig = plot_tracks(storms[70], plot_cat=True)
     fig.savefig('track.pdf')
-    # plt.show()
+    plt.show()
 
-    create_storm_file(storms[70])
+    create_storm_file(storms[2])

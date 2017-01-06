@@ -13,7 +13,7 @@ import datetime
 import numpy as np
 
 # Landfall for storm choosen
-landfall = datetime.datetime(2013, 4, 2, 20) - datetime.datetime(2013,1,1,0)
+landfall = datetime.datetime(1997, 11, 15, 3) - datetime.datetime(1997, 1, 1, 0)
 
 #                           days   s/hour    hours/day            
 days2seconds = lambda days: days * 60.0**2 * 24.0
@@ -98,7 +98,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
     # Initial time:
     # -------------
-    clawdata.t0 = days2seconds(landfall.days) + landfall.seconds
+    clawdata.t0 = days2seconds(landfall.days - 3) + landfall.seconds
 
     # Restart from checkpoint file of a previous run?
     # Note: If restarting, you must also change the Makefile to set:
@@ -123,7 +123,7 @@ def setrun(claw_pkg='geoclaw'):
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(landfall.days + 12.0) + landfall.seconds
+        clawdata.tfinal = days2seconds(landfall.days + 1.0) + landfall.seconds
         recurrence = 24
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
                                             * recurrence / (60**2 * 24))
@@ -275,7 +275,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 1
+    amrdata.amr_levels_max = 4
     # amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
