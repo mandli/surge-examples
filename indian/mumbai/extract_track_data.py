@@ -20,7 +20,7 @@ category_color = {5: 'red',
 mumbai = (72.8562, 19.0176)
 
 
-def create_storm_file(storm):
+def create_storm_file(storm, output_path="mumbai.storm"):
 
     # Read in and create reference storm data
     with open("../../gulf/ike/ike.storm", 'r') as ref_storm_file:
@@ -41,7 +41,7 @@ def create_storm_file(storm):
                  'RRP': numpy.array(RRP)}
 
     # Write new synthetic storm
-    with open('mumbai.storm', 'w') as storm_file:
+    with open(output_path, 'w') as storm_file:
 
 #12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
 #AL, 09, 2008090412,   , BEST,   0,  230N,  564W, 120,  938, HU,  64, NEQ,   40,   30,   25,   30, 1009,  180,  15, 145,   0,   L,   0,    ,   0,   0,        IKE, D, 12, NEQ, 360, 270, 120, 300
@@ -180,18 +180,11 @@ if __name__ == '__main__':
         path = sys.argv[1]
 
     storms = extract_data(path, mask_dist=0.2, mask_category=4)
-
-    # for (n, storm) in enumerate(storms):
-    #     fig = plot_tracks([storm])
+    
     fig = plot_tracks(storms[2])
+    fig.savefig('track_1.pdf')
+    fig = plot_tracks(storms[-2])
+    fig.savefig('track_2.pdf')
 
-    # plot_tracks(storms[20])
-    # plot_tracks(storms[30])
-    # plot_tracks(storms[40])
-    # plot_tracks(storms[50])
-    # plot_tracks(storms[60])
-    # fig = plot_tracks(storms[70], plot_cat=True)
-    fig.savefig('track.pdf')
-    plt.show()
-
-    create_storm_file(storms[2])
+    create_storm_file(storms[2], output_path="mumbai_1.storm")
+    create_storm_file(storms[-2], output_path="mumbai_2.storm")

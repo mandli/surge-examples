@@ -12,8 +12,16 @@ import datetime
 
 import numpy as np
 
+storm_num = 1
+
 # Landfall for storm choosen
-landfall = datetime.datetime(1997, 11, 15, 3) - datetime.datetime(1997, 1, 1, 0)
+if storm_num == 1:
+    # Storm  1
+    landfall = datetime.datetime(1997, 11, 15, 3) - datetime.datetime(1997, 1, 1, 0)
+elif storm_num == 2:
+    # Storm 2 - 2008 12 08 18 to 2008 12 20 02
+    landfall = datetime.datetime(2008, 12, 17, 1) - datetime.datetime(2008, 1, 1, 0)
+
 
 #                           days   s/hour    hours/day            
 days2seconds = lambda days: days * 60.0**2 * 24.0
@@ -99,6 +107,7 @@ def setrun(claw_pkg='geoclaw'):
     # Initial time:
     # -------------
     clawdata.t0 = days2seconds(landfall.days - 3) + landfall.seconds
+    # clawdata.t0 = days2seconds(landfall.days - 12) + landfall.seconds
 
     # Restart from checkpoint file of a previous run?
     # Note: If restarting, you must also change the Makefile to set:
@@ -124,6 +133,7 @@ def setrun(claw_pkg='geoclaw'):
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
         clawdata.tfinal = days2seconds(landfall.days + 1.0) + landfall.seconds
+        # clawdata.tfinal = days2seconds(landfall.days) + landfall.seconds
         recurrence = 24
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
                                             * recurrence / (60**2 * 24))
@@ -275,9 +285,8 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 4
-    # amrdata.amr_levels_max = 6
-
+    amrdata.amr_levels_max = 5
+    
     # List of refinement ratios at each level (length at least mxnest-1)
     # amrdata.refinement_ratios_x = [2,2,3,4,16]
     # amrdata.refinement_ratios_y = [2,2,3,4,16]
@@ -337,15 +346,19 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    # Latex shelf
-    # regions.append([1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
-                                            # -97.5, -88.5, 27.5, 30.5])
+    # Mumbai Region
+    regions.append([2, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
+                                            70, 75, 17, 22])
+    # Mumbai
+    regions.append([4, 5, days2seconds(landfall.days - 1.0) + landfall.seconds, 
+                          rundata.clawdata.tfinal,
+                          72.6, 73, 18.80, 19.15])
 
     # == setgauges.data values ==
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    # rundata.gaugedata.gauges.append([121, -94.70895, 29.2812, rundata.clawdata.t0, rundata.clawdata.tfinal])  
-    # rundata.gaugedata.gauges.append([122, -94.38840, 29.4964, rundata.clawdata.t0, rundata.clawdata.tfinal])    
-    # rundata.gaugedata.gauges.append([123, -94.12530, 29.5846, rundata.clawdata.t0, rundata.clawdata.tfinal]) 
+    rundata.gaugedata.gauges.append([1, 72.811790, 18.936508, rundata.clawdata.t0, rundata.clawdata.tfinal])  
+    rundata.gaugedata.gauges.append([2, 72.972316, 18.997762, rundata.clawdata.t0, rundata.clawdata.tfinal])    
+    rundata.gaugedata.gauges.append([3, 72.819311, 18.818044, rundata.clawdata.t0, rundata.clawdata.tfinal]) 
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -469,7 +482,10 @@ def set_storm(rundata):
     data.display_landfall_time = True
 
     # Storm type 1 - Idealized storm track
-    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(), 'mumbai.storm'))
+    if storm_num == 1:
+        data.storm_file = os.path.expandvars(os.path.join(os.getcwd(), 'mumbai_1.storm'))
+    elif storm_num == 2:
+        data.storm_file = os.path.expandvars(os.path.join(os.getcwd(), 'mumbai_2.storm'))
 
     return rundata
 
