@@ -27,8 +27,8 @@ axes = fig.add_subplot(1, 1, 1)
 topo_extent = (numpy.min(indian_ocean_topo.Z), numpy.max(indian_ocean_topo.Z))
 
 # axes.pcolor(indian_ocean_topo.X, indian_ocean_topo.Y, indian_ocean_topo.Z)
-indian_ocean_topo.plot(axes=axes)
-mumbai_topo.plot(axes=axes, add_colorbar=False)
+indian_ocean_topo.plot(axes=axes, add_colorbar=True, limits=[-300, topo_extent[1]])
+# mumbai_topo.plot(axes=axes, add_colorbar=True)
 
 # mumbai_topo.plot(axes=axes, limits=topo_extent, plot_box=True)
 

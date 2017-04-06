@@ -185,6 +185,7 @@ def setplot(plotdata):
         # surge.add_surface_elevation(plotaxes, plot_type='contourf', 
         #                                        contours=surface_contours)
         surge.add_land(plotaxes,topo_min=-10.0,topo_max=5.0)
+        surge.add_bathy_contours(plotaxes)    
 
         if article:
             plotaxes.plotitem_dict['surface'].add_colorbar = False
@@ -218,7 +219,6 @@ def setplot(plotdata):
 
         # Land
         surge.add_land(plotaxes,topo_min=-10.0,topo_max=5.0)
-        surge.add_bathy_contours(plotaxes)    
 
         plotaxes.plotitem_dict['speed'].amr_patchedges_show = region_data[2]
         plotaxes.plotitem_dict['land'].amr_patchedges_show = region_data[2]

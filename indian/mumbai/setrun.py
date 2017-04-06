@@ -350,7 +350,7 @@ def setrun(claw_pkg='geoclaw'):
     regions.append([2, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
                                             70, 75, 17, 22])
     # Mumbai
-    regions.append([4, 5, days2seconds(landfall.days - 1.0) + landfall.seconds, 
+    regions.append([4, 7, days2seconds(landfall.days - 1.0) + landfall.seconds, 
                           rundata.clawdata.tfinal,
                           72.6, 73, 18.80, 19.15])
 
@@ -396,7 +396,7 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geo_data.sea_level = 0.28  # Due to seasonal swelling of gulf
+    geo_data.sea_level = 2.0  # Due to seasonal swelling of gulf
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
