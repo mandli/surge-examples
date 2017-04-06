@@ -7,9 +7,12 @@ that will be read in by the Fortran code.
 
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
-
 import datetime
+
+import numpy as np
 
 import clawpack.clawutil.data as data
 
@@ -116,7 +119,7 @@ def setrun(claw_pkg='geoclaw'):
     # Note that the time integration stops after the final output time.
     # The solution at initial time t0 is always written in addition.
 
-    clawdata.output_style = 1
+    clawdata.output_style = 2
 
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
@@ -127,24 +130,24 @@ def setrun(claw_pkg='geoclaw'):
                                             * recurrence / (60**2 * 24))
 
         clawdata.output_t0 = True  # output at initial (or restart) time?
-        
 
     elif clawdata.output_style == 2:
         # Specify a list of output times.
-        clawdata.output_times = [0.5, 1.0]
+        clawdata.output_t0 = True  # output at initial (or restart) time?
+        clawdata.output_times = [days2seconds(tracy_landfall.days) + tracy_landfall.seconds + delta_t for delta_t in range(-1*60**2, 100, 500)]
 
     elif clawdata.output_style == 3:
         # Output every iout timesteps with a total of ntot time steps:
         clawdata.output_step_interval = 1
         clawdata.total_steps = 1
         clawdata.output_t0 = True
-        
 
-    clawdata.output_format = 'ascii'      # 'ascii' or 'netcdf' 
+
+    clawdata.output_format = 'binary'      # 'ascii' or 'netcdf' 
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
-    clawdata.output_aux_components = 'None' # could be list
-    clawdata.output_aux_onlyonce = True    # output aux arrays only at t0
+    clawdata.output_aux_components = 'all' # could be list
+    clawdata.output_aux_onlyonce = False    # output aux arrays only at t0
 
 
     # ---------------------------------------------------
@@ -154,7 +157,7 @@ def setrun(claw_pkg='geoclaw'):
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
     #   (E.g. verbosity == 2 means print only on levels 1 and 2.)
-    clawdata.verbosity = 2
+    clawdata.verbosity = 1
 
 
 
@@ -181,7 +184,7 @@ def setrun(claw_pkg='geoclaw'):
     # clawdata.cfl_max = 0.5
 
     # Maximum number of time steps to allow between output times:
-    clawdata.steps_max = 5000
+    clawdata.steps_max = 2**16
 
 
 
@@ -332,7 +335,7 @@ def setrun(claw_pkg='geoclaw'):
         x = clawdata.lower[0] + 4.55 # This is right where the shelf turns into beach, 100 meter of water
         y = clawdata.lower[1] + 5.0 / (N_gauges + 1) * (i+1)       # Start 25 km inside domain
         gauges.append([i, x, y, 0.0, 1e10])
-        print "Gauge %s: (%s,%s)" % (i,x,y)
+        print("Gauge %s: (%s,%s)" % (i,x,y))
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -357,7 +360,7 @@ def setgeo(rundata):
     try:
         geo_data = rundata.geo_data
     except:
-        print "*** Error, this rundata has no geodata attribute"
+        print("*** Error, this rundata has no geodata attribute")
         raise AttributeError("Missing geodata attribute")
        
     # == Physics ==
@@ -387,19 +390,21 @@ def setgeo(rundata):
     topo_data = rundata.topo_data
     topo_data.test_topography = 2
     topo_data.topofiles = []
+
     # Based on approximately 100 km = 1 degree of long
     # geodata.x0 = rundata.clawdata.lower[0] + 3.5
     # geodata.x1 = rundata.clawdata.lower[0] + 4.5
     # geodata.x2 = rundata.clawdata.lower[0] + 4.8
     topo_data.x0 = rundata.clawdata.lower[0] + 3.5
-    topo_data.x1 = rundata.clawdata.lower[0] + 3.6
-    topo_data.x2 = rundata.clawdata.lower[0] + 3.8
+    topo_data.x1 = rundata.clawdata.lower[0] + 4.5
+    topo_data.x2 = rundata.clawdata.lower[0] + 4.8
 
     topo_data.basin_depth = -3000.0
     # geodata.basin_depth = -100.0
-    topo_data.shelf_depth = -500.0
-    beach_height = 300.0
-    topo_data.beach_slope = -(beach_height + topo_data.shelf_depth) / (rundata.clawdata.upper[0] - topo_data.x2)
+    topo_data.shelf_depth = -200.0
+    # beach_height = 300.0
+    # topo_data.beach_slope = -(beach_height + topo_data.shelf_depth) / (rundata.clawdata.upper[0] - topo_data.x2)
+    topo_data.beach_slope = 0.05
 
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0
@@ -409,13 +414,10 @@ def setgeo(rundata):
     # for fixed grids append lines of the form
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,ioutarrivaltimes,ioutsurfacemax]
     
-    return rundata
-    # end of function setgeo
-    # ----------------------
-
-def set_storm(rundata):
-
-    data = rundata.stormdata
+    # ================
+    #  Set Surge Data
+    # ================
+    data = rundata.surge_data
 
    # Physics parameters
     data.rho_air = 1.15             # Density of air (rho is not implemented above)
@@ -434,6 +436,7 @@ def set_storm(rundata):
     data.storm_type = 1 # Type of storm
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'tracy.storm'))
     data.landfall = days2seconds(tracy_landfall.days) + tracy_landfall.seconds
+    data.display_landfall_time = True
 
     # Storm parameters, not written out but used to write the tracy.data file
     data.ramp_up_t = days2seconds(RAMP_UP_TIME)
@@ -447,17 +450,24 @@ def set_storm(rundata):
 
     # surge.data.write_idealized_holland_storm_data(data.storm_file, data)
 
-    return rundata
-
-
-def set_friction(rundata):
-
-    data = rundata.frictiondata
+    # =======================
+    #  Set Variable Friction
+    # =======================
+    data = rundata.friction_data
 
     # Variable friction
-    data.variable_friction = False
+    data.variable_friction = True
 
-    return data
+    # Region based friction
+    # Entire domain
+    data.friction_regions.append([rundata.clawdata.lower, 
+                                  rundata.clawdata.upper,
+                                  [np.infty,0.0,-np.infty],
+                                  [0.030, 0.022]])
+
+    return rundata
+    # end of function setgeo
+    # ----------------------
 
 
 if __name__ == '__main__':
