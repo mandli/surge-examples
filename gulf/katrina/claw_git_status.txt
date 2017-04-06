@@ -1,7 +1,7 @@
 Clawpack Git Status 
 Diffs can be found in /Users/mandli/src/clawpack/apps/surge-examples/gulf/katrina/claw_git_diffs.txt
 
-Thu, 06 Apr 2017 09:50:45 CDT
+Thu, 06 Apr 2017 10:25:16 CDT
 $CLAW = /Users/mandli/src/clawpack
 $FC = gfortran
 

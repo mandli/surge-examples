@@ -55,8 +55,11 @@ def setplot(plotdata):
     # Limits for plots
     regions = [{"name": "Full Domain",
                 "limits":[[-99.0, -75.0], [15.0, 32.0]]},
-               {"name": "New Orleans",
-                "limits": [[-91.0, -88.5], [28.5, 30.5]]}]
+               {"name": "New Orleans - Zoom",
+                "limits": [[-91.0, -88.5], [28.5, 30.5]]},
+               {"name": "New Orleans - Region",
+                "limits": [[-91, -87], [28.5, 32.0]]}]
+
     full_xlimits = regions[0]['limits'][0]
     full_ylimits = regions[0]['limits'][1]
 

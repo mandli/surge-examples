@@ -275,6 +275,8 @@ def setrun(claw_pkg='geoclaw'):
     amrdata.amr_levels_max = 4
 
     # List of refinement ratios at each level (length at least mxnest-1)
+    # Resolution in degrees 0.25, 0.125, 0.0625, 0.015625, 0.00390625
+    # Resolution in ~meters 27.5e3, 13.75e3, 6.875e3, 1.71875e3, 429.6875
     amrdata.refinement_ratios_x = [2, 2, 4, 4, 4, 4]
     amrdata.refinement_ratios_y = [2, 2, 4, 4, 4, 4]
     amrdata.refinement_ratios_t = [2, 2, 4, 4, 4, 4]
@@ -466,10 +468,10 @@ def set_friction(rundata):
                                   [np.infty, 0.0, -np.infty],
                                   [0.030, 0.022]])
 
-    # La-Tex Shelf
-    data.friction_regions.append([(-98, 25.25), (-90, 30),
-                                  [np.infty, -10.0, -200.0, -np.infty],
-                                  [0.030, 0.012, 0.022]])
+    # # La-Tex Shelf
+    # data.friction_regions.append([(-98, 25.25), (-90, 30),
+    #                               [np.infty, -10.0, -200.0, -np.infty],
+    #                               [0.030, 0.012, 0.022]])
 
     return data
 
