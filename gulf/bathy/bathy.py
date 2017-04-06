@@ -106,7 +106,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         path = sys.argv[1]
     else:
-        path = './gulf_coarse_bathy.tt3'
+        path = './gulf_carribean.tt3'
     plot(path)
 
     plt.show()
