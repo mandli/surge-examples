@@ -569,10 +569,7 @@ def set_friction(rundata):
 
 
 def get_topo(plot=False):
-    """
-    Retrieve the topo file from the GeoClaw repository.
-
-    """
+    """Retrieve the topo file from the GeoClaw repository."""
 
     # Fetch topography
     base_url = "https://dl.dropboxusercontent.com/u/8449354/bathy/"
