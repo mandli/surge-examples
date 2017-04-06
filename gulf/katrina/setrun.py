@@ -7,22 +7,29 @@ that will be read in by the Fortran code.
 
 """
 
+from __future__ import print_function
+from __future__ import absolute_import
+
 import os
+import sys
 import datetime
 
 import numpy as np
 
-# Landfall of hurricane 1110 UTC (6:10 a.m. CDT) on Monday, August 29, 2005
-katrina_landfall = datetime.datetime(2005,8,29,6) - datetime.datetime(2005,1,1,0)
+import clawpack.clawutil.data as data
+import clawpack.geoclaw.topotools as topotools
+import clawpack.geoclaw.etopotools as etopotools
 
-#                           days   s/hour    hours/day            
+# Landfall of hurricane 1110 UTC (6:10 a.m. CDT) on Monday, August 29, 2005
+katrina_landfall = datetime.datetime(2005, 8, 28, 6)     \
+                 - datetime.datetime(2005, 1, 1, 0)
+
+#                           days   s/hour    hours/day
 days2seconds = lambda days: days * 60.0**2 * 24.0
 seconds2days = lambda seconds: seconds / (60.0**2 * 24.0)
 
-#------------------------------
-def setrun(claw_pkg='geoclaw'):
-#------------------------------
 
+def setrun(claw_pkg='geoclaw'):
     """
     Define the parameters used for running Clawpack.
 
@@ -34,12 +41,10 @@ def setrun(claw_pkg='geoclaw'):
 
     """
 
-    from clawpack.clawutil import data as clawdata
-
     assert claw_pkg.lower() == 'geoclaw',  "Expected claw_pkg = 'geoclaw'"
 
     num_dim = 2
-    rundata = clawdata.ClawRunData(claw_pkg, num_dim)
+    rundata = data.ClawRunData(claw_pkg, num_dim)
 
     #------------------------------------------------------------------
     # Problem-specific parameters to be written to setprob.data:
@@ -68,9 +73,9 @@ def setrun(claw_pkg='geoclaw'):
 
     # Lower and upper edge of computational domain:
     clawdata.lower[0] = -99.0
-    clawdata.upper[0] = -50.0
+    clawdata.upper[0] = -75.0
 
-    clawdata.lower[1] = 8.0
+    clawdata.lower[1] = 15.0
     clawdata.upper[1] = 32.0
 
 
@@ -88,7 +93,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_eqn = 3
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
-    clawdata.num_aux = 4 + 3 + 2
+    clawdata.num_aux = 4 + 3
 
     # Index of aux array corresponding to capacity function, if there is one:
     clawdata.capa_index = 2
@@ -100,10 +105,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
 
     # Katrina 2005082412 20260800.000000000
-    clawdata.t0 = days2seconds(katrina_landfall.days - 4) + katrina_landfall.seconds
-    # clawdata.t0 = days2seconds(date2days('2005082412'))
-    # clawdata.t0 = days2seconds(237.0)
-
+    clawdata.t0 = days2seconds(katrina_landfall.days - 2) + katrina_landfall.seconds
 
     # -------------
     # Output times:
@@ -115,7 +117,7 @@ def setrun(claw_pkg='geoclaw'):
 
     clawdata.output_style = 1
 
-    if clawdata.output_style==1:
+    if clawdata.output_style == 1:
         # Output nout frames at equally spaced times up to tfinal:
         #                 day     s/hour  hours/day
         # Katrina 2005083012
@@ -123,8 +125,8 @@ def setrun(claw_pkg='geoclaw'):
 
         # Output files per day requested
         recurrence = 24
-        clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
-                                            * recurrence / (60**2 * 24))
+        clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) *
+                                        recurrence / (60**2 * 24))
 
         clawdata.output_t0 = True  # output at initial (or restart) time?
         
@@ -138,8 +140,7 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.total_steps = 1
         clawdata.output_t0 = True
         
-
-    clawdata.output_format = 'binary'      # 'ascii' or 'netcdf' 
+    clawdata.output_format = 'binary'      # 'ascii' or 'netcdf'
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'all' # could be list
@@ -179,7 +180,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.cfl_max = 1.0
 
     # Maximum number of time steps to allow between output times:
-    clawdata.steps_max = 5000
+    clawdata.steps_max = 2**16
 
 
 
@@ -256,7 +257,7 @@ def setrun(claw_pkg='geoclaw'):
 
     elif clawdata.checkpt_style == 2:
         # Specify a list of checkpoint times.  
-        clawdata.checkpt_times = [0.1,0.15]
+        clawdata.checkpt_times = [0.1, 0.15]
 
     elif clawdata.checkpt_style == 3:
         # Checkpoint every checkpt_interval timesteps (on Level 1)
@@ -271,21 +272,22 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 1
+    amrdata.amr_levels_max = 4
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [2,2,3,4,4,4]
-    amrdata.refinement_ratios_y = [2,2,3,4,4,4]
-    amrdata.refinement_ratios_t = [2,2,3,4,4,4]
+    # Resolution in degrees 0.25, 0.125, 0.0625, 0.015625, 0.00390625
+    # Resolution in ~meters 27.5e3, 13.75e3, 6.875e3, 1.71875e3, 429.6875
+    amrdata.refinement_ratios_x = [2, 2, 4, 4, 4, 4]
+    amrdata.refinement_ratios_y = [2, 2, 4, 4, 4, 4]
+    amrdata.refinement_ratios_t = [2, 2, 4, 4, 4, 4]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length maux, each element of which is one of:
     #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
 
-    amrdata.aux_type = ['center','capacity','yleft','center','center','center',
-                         'center', 'center', 'center']
-
+    amrdata.aux_type = ['center', 'capacity', 'yleft', 'center', 'center',
+                        'center', 'center', 'center', 'center']
 
     # Flag using refinement routine flag2refine rather than richardson error
     amrdata.flag_richardson = False    # use Richardson?
@@ -303,10 +305,9 @@ def setrun(claw_pkg='geoclaw'):
     amrdata.clustering_cutoff = 0.700000
 
     # print info about each regridding up to this level:
-    amrdata.verbosity_regrid = 0  
+    amrdata.verbosity_regrid = 0
 
-
-    #  ----- For developers ----- 
+    #  ----- For developers -----
     # Toggle debugging print statements:
     amrdata.dprint = False      # print domain flags
     amrdata.eprint = False      # print err est flags
@@ -318,9 +319,9 @@ def setrun(claw_pkg='geoclaw'):
     amrdata.sprint = False      # space/memory output
     amrdata.tprint = False      # time step reporting each level
     amrdata.uprint = False      # update/upbnd reporting
-    
+
     # More AMR parameters can be set -- see the defaults in pyclaw/data.py
-    
+
     # == setregions.data values ==
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
@@ -329,22 +330,29 @@ def setrun(claw_pkg='geoclaw'):
     # == setgauges.data values ==
     gauges = rundata.gaugedata.gauges
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    gauges.append([1, -89.5, 29.6,  rundata.clawdata.t0, rundata.clawdata.tfinal])
+    gauges.append([1, -88.270704,  29.671603,  rundata.clawdata.t0, rundata.clawdata.tfinal])
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
     #------------------------------------------------------------------
 
     rundata = setgeo(rundata)   # Defined below
+    
+    # Set storm
+    set_storm(rundata)
+
+    # Set variable friction
+    set_friction(rundata)
+
+    # Fetch topography if needed
+    get_topo(plot=False)
 
     return rundata
     # end of function setrun
     # ----------------------
 
 
-#-------------------
 def setgeo(rundata):
-#-------------------
     """
     Set GeoClaw specific runtime parameters.
     For documentation see ....
@@ -353,7 +361,7 @@ def setgeo(rundata):
     try:
         geo_data = rundata.geo_data
     except:
-        print "*** Error, this rundata has no geodata attribute"
+        print("*** Error, this rundata has no geodata attribute")
         raise AttributeError("Missing geodata attribute")
        
     # == Physics ==
@@ -368,7 +376,7 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geo_data.sea_level = 0.28  # Due to seasonal swelling of gulf
+    geo_data.sea_level = 0.0
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
@@ -386,12 +394,16 @@ def setgeo(rundata):
     topo_data = rundata.topo_data
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
+    topo_path = os.path.join(os.environ["CLAW"], "geoclaw", "scratch")
     topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                              '../bathy/gulf_caribbean.tt3'])
+                              os.path.join(topo_path, 'gulf_caribbean.tt3')])
     # geodata.topofiles.append([3, 1, 3, 0., 1.e10, \
     #                           './bathy/gulf_coarse_bathy.tt3'])
-    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
-                              '../bathy/NewOrleans_3s.tt3'])
+    # topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    #                           os.path.join(topo_path, 'NewOrleans_3s.tt3')])
+    topo_data.topofiles.append([4, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
+                              os.path.join(topo_path, 'NewOrleans_3s.nc')])
+
 
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0
@@ -406,16 +418,11 @@ def setgeo(rundata):
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]
     # geodata.fixedgrids.append([1e3,3.24e4,10,-90,-80,-30,-15,100,100,0,1])
-    
-    # Set storm
-    set_storm(rundata)
-
-    # Set variable friction
-    set_friction(rundata)
 
     return rundata
     # end of function setgeo
     # ----------------------
+
 
 def set_storm(rundata):
 
@@ -427,24 +434,22 @@ def set_storm(rundata):
 
     # Source term controls - These are currently not respected
     data.wind_forcing = True
-    data.drag_law = 2
     data.pressure_forcing = True
-    
-    # Source term algorithm parameters
-    # data.wind_tolerance = 1e-4
-    # data.pressure_tolerance = 1e-4 # Pressure source term tolerance
+    data.drag_law = 2
 
-    # AMR parameters
-    data.wind_refine = [20.0,40.0,60.0] # m/s
-    data.R_refine = [60.0e3,40e3,20e3]  # m
-    
-    # Storm parameters
-    data.storm_type = 1 # Type of storm
-    data.landfall = days2seconds(katrina_landfall.days) + katrina_landfall.seconds
+    # AMR parameters - m/s for wind refinement and (m) for radius
+    data.wind_refine = [20.0, 40.0, 60.0]
+    data.R_refine = [60.0e3, 40e3, 20e3]
+
+    # Storm parameters - Storm Type 1 is Holland parameterized
+    data.storm_type = 1
+    data.landfall = days2seconds(katrina_landfall.days)         \
+                    + katrina_landfall.seconds
     data.display_landfall_time = True
 
     # Storm type 1 - Idealized storm track
-    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'katrina.storm'))
+    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
+                                         'katrina.storm'))
 
     return data
 
@@ -458,29 +463,51 @@ def set_friction(rundata):
 
     # Region based friction
     # Entire domain
-    data.friction_regions.append([rundata.clawdata.lower, 
+    data.friction_regions.append([rundata.clawdata.lower,
                                   rundata.clawdata.upper,
-                                  [np.infty,0.0,-np.infty],
+                                  [np.infty, 0.0, -np.infty],
                                   [0.030, 0.022]])
 
-    # La-Tex Shelf
-    data.friction_regions.append([(-98, 25.25), (-90, 30),
-                                  [np.infty,-10.0,-200.0,-np.infty],
-                                  [0.030, 0.012, 0.022]])
-
-    
-    # 0.012 for LaTex shelf?
-    # 0.022 everywhere else?
+    # # La-Tex Shelf
+    # data.friction_regions.append([(-98, 25.25), (-90, 30),
+    #                               [np.infty, -10.0, -200.0, -np.infty],
+    #                               [0.030, 0.012, 0.022]])
 
     return data
 
+
+def get_topo(plot=False):
+    """
+    Retrieve the topo file from the GeoClaw repository.
+    """
+
+    # Fetch topography
+    base_url = "https://dl.dropboxusercontent.com/u/8449354/bathy/"
+    urls = [os.path.join(base_url, "gulf_caribbean.tt3.tar.bz2"),
+            os.path.join(base_url, "NewOrleans_3s.nc.tar.bz2")]
+    for url in urls:
+        data.get_remote_file(url, verbose=True)
+
+    # Plot if requested
+    if plot:
+        import matplotlib.pyplot as plt
+        scratch_dir = os.path.join(os.environ.get("CLAW", os.getcwd()),
+                                   'geoclaw', 'scratch')
+        for topo_name in ['gulf_caribbean.tt3', 'NewOrleans_3s.tt3']:
+            topo_path = os.path.join(scratch_dir, topo_name)
+            topo = topotools.Topography(topo_path, topo_type=3)
+            topo.plot()
+            fname = os.path.splitext(topo_name)[0] + '.png'
+            plt.savefig(fname)
+
+
 if __name__ == '__main__':
     # Set up run-time parameters and write all data files.
-    import sys
+
+    rundata = data.ClawRunData("geoclaw", 2)
     if len(sys.argv) == 2:
         rundata = setrun(sys.argv[1])
     else:
         rundata = setrun()
 
     rundata.write()
-

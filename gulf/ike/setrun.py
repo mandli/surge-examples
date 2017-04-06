@@ -568,6 +568,30 @@ def set_friction(rundata):
     return rundata
 
 
+def get_topo(plot=False):
+    """Retrieve the topo file from the GeoClaw repository."""
+
+    # Fetch topography
+    base_url = "https://dl.dropboxusercontent.com/u/8449354/bathy/"
+    urls = [os.path.join(base_url, "gulf_caribbean.tt3.tar.bz2"),
+            os.path.join(base_url, "NOAA_Galveston_Houston.tt3.tar.bz2"),
+            os.path.join(base_url, "galveston_tx.asc.tar.bz2")]
+    for url in urls:
+        data.get_remote_file(url, verbose=True)
+
+    # Plot if requested
+    if plot:
+        import matplotlib.pyplot as plt
+        scratch_dir = os.path.join(os.environ.get("CLAW", os.getcwd()),
+                                   'geoclaw', 'scratch')
+        for topo_name in ['gulf_caribbean.tt3', 'NOAA_Galveston_Houston.tt3',
+                          'galveston_tx.asc']:
+            topo_path = os.path.join(scratch_dir, topo_name)
+            topo = topotools.Topography(topo_path, topo_type=3)
+            topo.plot()
+            fname = os.path.splitext(topo_name)[0] + '.png'
+            plt.savefig(fname)
+
 if __name__ == '__main__':
     # Set up run-time parameters and write all data files.
     import sys

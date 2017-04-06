@@ -53,16 +53,20 @@ def setplot(plotdata):
                                         track, landfall, plot_direction=False)
 
     # Limits for plots
-    full_xlimits = [-99.0,-50.0]
-    full_ylimits = [8.0,32.0]
-    full_shrink = 0.5
+    regions = [{"name": "Full Domain",
+                "limits":[[-99.0, -75.0], [15.0, 32.0]]},
+               {"name": "New Orleans - Zoom",
+                "limits": [[-91.0, -88.5], [28.5, 30.5]]},
+               {"name": "New Orleans - Region",
+                "limits": [[-91, -87], [28.5, 32.0]]}]
+
+    full_xlimits = regions[0]['limits'][0]
+    full_ylimits = regions[0]['limits'][1]
 
     # Color limits
     surface_range = 5.0
     speed_range = 3.0
 
-    xlimits = full_xlimits
-    ylimits = full_ylimits
     eta = physics.sea_level
     if not isinstance(eta,list):
         eta = [eta]
@@ -88,47 +92,53 @@ def setplot(plotdata):
     # ==========================================================================
     # ==========================================================================
 
-    # ========================================================================
-    #  Surface Elevations - Entire Gulf
-    # ========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Surface - Entire Domain', 
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = True
+    # Loop over region specifications ploting both surface and speeds
+    for region in regions:
+        name = region['name']
+        xlimits = region['limits'][0]
+        ylimits = region['limits'][1]
+        # ======================================================================
+        #  Surface Elevations
+        # ======================================================================
+        plotfigure = plotdata.new_plotfigure(name='Surface - %s' % name,
+                                            figno=fig_num_counter.get_counter())
+        plotfigure.show = True
 
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.title = 'Surface'
-    plotaxes.scaled = True
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = ylimits
-    plotaxes.afteraxes = surge_afteraxes
+        # Set up for axes in this figure:
+        plotaxes = plotfigure.new_plotaxes()
+        plotaxes.title = 'Surface'
+        plotaxes.scaled = True
+        plotaxes.xlimits = xlimits
+        plotaxes.ylimits = ylimits
+        plotaxes.afteraxes = surge_afteraxes
 
-    surge.add_surface_elevation(plotaxes,bounds=surface_limits,shrink=full_shrink)
-    surge.add_land(plotaxes,topo_min=-10.0,topo_max=5.0)
-    surge.add_bathy_contours(plotaxes)
+        surge.add_surface_elevation(plotaxes, bounds=surface_limits)
+        surge.add_land(plotaxes, topo_min=-10.0, topo_max=5.0)
+        surge.add_bathy_contours(plotaxes)
+        plotaxes.plotitem_dict['bathy_contours'].amr_contour_show = [0, 0, 0, 1]
 
+        # ======================================================================
+        #  Water Speed
+        # ======================================================================
+        plotfigure = plotdata.new_plotfigure(name='Currents - %s' % name,  
+                                             figno=fig_num_counter.get_counter())
+        plotfigure.show = True
 
-    # ========================================================================
-    #  Water Speed - Entire Gulf
-    # ========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Currents - Entire Domain',  
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = True
+        # Set up for axes in this figure:
+        plotaxes = plotfigure.new_plotaxes()
+        plotaxes.title = 'Currents'
+        plotaxes.scaled = True
+        plotaxes.xlimits = xlimits
+        plotaxes.ylimits = ylimits
+        plotaxes.afteraxes = surge_afteraxes
 
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.title = 'Currents'
-    plotaxes.scaled = True
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = ylimits
-    plotaxes.afteraxes = surge_afteraxes
+        # Speed
+        surge.add_speed(plotaxes, bounds=speed_limits)
 
-    # Speed
-    surge.add_speed(plotaxes,bounds=speed_limits,shrink=full_shrink)
-
-    # Land
-    surge.add_land(plotaxes)
-    surge.add_bathy_contours(plotaxes)    
+        # Land
+        surge.add_land(plotaxes)
+        surge.add_bathy_contours(plotaxes)
+        plotaxes.plotitem_dict['bathy_contours'].amr_contour_show = [0, 0, 0, 1]
 
     # ========================================================================
     # Hurricane forcing - Entire gulf
@@ -201,78 +211,6 @@ def setplot(plotdata):
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
     plotitem.plot_var = 3
     plotitem.plotstyle = 'b-'
-
-    # ========================================================================
-    #  Water Velocity Components - Entire Gulf
-    # ========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Velocity Components - Entire Domain',  
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = False
-
-    # X-Component
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.axescmd = "subplot(121)"
-    plotaxes.title = 'Velocity, X-Component'
-    plotaxes.scaled = True
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = ylimits
-    plotaxes.afteraxes = surge_afteraxes
-
-    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.water_u
-    plotitem.pcolor_cmap = colormaps.make_colormap({1.0:'r',0.5:'w',0.0:'b'})
-    plotitem.pcolor_cmin = -speed_limits[1]
-    plotitem.pcolor_cmax = speed_limits[1]
-    plotitem.add_colorbar = True
-    plotitem.amr_celledges_show = [0,0,0]
-    plotitem.amr_patchedges_show = [1,1,1]
-
-    surge.add_land(plotaxes)
-
-    # Y-Component
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.axescmd = "subplot(122)"
-    plotaxes.title = 'Velocity, Y-Component'
-    plotaxes.scaled = True
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = ylimits
-    plotaxes.afteraxes = surge_afteraxes
-
-    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = surge.water_v
-    plotitem.pcolor_cmap = colormaps.make_colormap({1.0:'r',0.5:'w',0.0:'b'})
-    plotitem.pcolor_cmin = -speed_limits[1]
-    plotitem.pcolor_cmax = speed_limits[1]
-    plotitem.add_colorbar = True
-    plotitem.amr_celledges_show = [0,0,0]
-    plotitem.amr_patchedges_show = [1,1,1]
-    
-    surge.add_land(plotaxes)
-
-    # ==========================================================================
-    #  Depth
-    # ==========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Depth - Entire Domain', 
-                                         figno=fig_num_counter.get_counter())
-    plotfigure.show = False
-
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.title = 'depth'
-    plotaxes.scaled = True
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = ylimits
-    plotaxes.afteraxes = surge_afteraxes
-
-    plotitem = plotaxes.new_plotitem(plot_type='2d_imshow')
-    plotitem.plot_var = 0
-    plotitem.imshow_cmap = colormaps.make_colormap({1.0:'r',0.5:'w',0.0:'b'})
-    plotitem.imshow_cmin = 0
-    plotitem.imshow_cmax = 100
-    plotitem.add_colorbar = True
-    plotitem.amr_celledges_show = [0,0,0]
-    plotitem.amr_patchedges_show = [1,1,1,1,1,1,1,1,1]
-
 
     #-----------------------------------------
     
