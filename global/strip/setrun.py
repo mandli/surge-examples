@@ -70,7 +70,10 @@ def setrun(claw_pkg='geoclaw'):
 
     # Number of grid cells:
     degree_factor = 1
-    clawdata.num_cells = int(clawdata.upper - clawdata.lower) * degree_factor
+    clawdata.num_cells[0] = int(clawdata.upper[0] - clawdata.lower[0]) *      \
+                                degree_factor
+    clawdata.num_cells[1] = int(clawdata.upper[1] - clawdata.lower[1]) *      \
+                                degree_factor
 
     # ---------------
     # Size of system:
@@ -339,6 +342,9 @@ def setgeo(rundata):
     geo_data.gravity = 9.81
     geo_data.coordinate_system = 2
     geo_data.earth_radius = 6367.5e3
+    geo_data.rho = 1025.0
+    geo_data.rho_air = 1.15
+    geo_data.ambient_pressure = 101.3e3
 
     # == Forcing Options
     geo_data.coriolis_forcing = True
@@ -366,16 +372,19 @@ def setgeo(rundata):
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
-    if "DATA_PATH" in os.environ:
-        topo_path = os.path.join(os.environ["DATA_PATH"], "topography",
-                                 "global")
-    else:
-        topo_path = os.path.join(os.getcwd(), '../bathy/')
+    # if "DATA_PATH" in os.environ:
+    #     topo_path = os.path.join(os.environ["DATA_PATH"], "topography",
+    #                              "global")
+    # else:
+    #     topo_path = os.path.join(os.getcwd(), '../bathy/')
 
-    topo_data.topofiles.append([4, 1, 3,
-                                rundata.clawdata.t0,
-                                rundata.clawdata.tfinal,
-                                os.path.join(topo_path, 'coarse_strip.nc')])
+    topo_path = os.path.join(os.getcwd(), 'topo')
+
+    for n in range(1, 9):
+        topo_data.topofiles.append([4, 1, 3,
+                                    rundata.clawdata.t0,
+                                    rundata.clawdata.tfinal,
+                                    os.path.join(topo_path, 'strip_%s.nc' % n)])
 
     # == setfixedgrids.data values ==
     rundata.fixed_grid_data.fixedgrids = []
@@ -391,10 +400,6 @@ def setgeo(rundata):
 def set_storm(rundata):
 
     data = rundata.surge_data
-
-    # Physics parameters
-    data.rho_air = 1.15
-    data.ambient_pressure = 101.3e3
 
     # Source term controls - These are currently not respected
     data.wind_forcing = True
