@@ -7,13 +7,15 @@ that will be read in by the Fortran code.
 
 """
 
+from __future__ import print_function
+
 import os
 import datetime
 
 import numpy as np
 
 # October 29, 2012 at 8:00 pm EDT (October 30, 2012 0:00 am UTC)
-sandy_landfall = datetime.datetime(2012,10,29,8,0) - datetime.datetime(2012,1,1,0)
+sandy_landfall = datetime.datetime(2012,10,30,0,0) - datetime.datetime(2012,1,1,0)
 
 #                           days   s/hour    hours/day            
 days2seconds = lambda days: days * 60.0**2 * 24.0
@@ -72,7 +74,7 @@ def setrun(claw_pkg='geoclaw'):
     # clawdata.lower[1] = 13.0       # south latitude
     # clawdata.upper[1] = 45.0      # north latitude
 
-    clawdata.lower[0] = -83.0      # west longitude
+    clawdata.lower[0] = -88.0      # west longitude
     clawdata.upper[0] = -55.0      # east longitude
 
     clawdata.lower[1] = 15.0       # south latitude
@@ -103,7 +105,7 @@ def setrun(claw_pkg='geoclaw'):
     # Initial time:
     # -------------
 
-    clawdata.t0 = days2seconds(sandy_landfall.days - 3) + sandy_landfall.seconds
+    clawdata.t0 = days2seconds(sandy_landfall.days - 2) + sandy_landfall.seconds
 
 
     # Restart from checkpoint file of a previous run?
@@ -287,9 +289,13 @@ def setrun(claw_pkg='geoclaw'):
     amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [2,2,2,6,16]
-    amrdata.refinement_ratios_y = [2,2,2,6,16]
-    amrdata.refinement_ratios_t = [2,2,2,6,16]
+    # amrdata.refinement_ratios_x = [2, 2, 2, 6, 16]
+    # amrdata.refinement_ratios_y = [2, 2, 2, 6, 16]
+    # amrdata.refinement_ratios_t = [2, 2, 2, 6, 16]
+
+    amrdata.refinement_ratios_x = [2, 2, 2, 6, 8]
+    amrdata.refinement_ratios_y = [2, 2, 2, 6, 8]
+    amrdata.refinement_ratios_t = [2, 2, 2, 6, 8]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -340,11 +346,10 @@ def setrun(claw_pkg='geoclaw'):
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
     regions.append([1,7,clawdata.t0,clawdata.tfinal,-74.2,-73.8,40.55,41.0])
-    
     # == setgauges.data values ==
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    rundata.gaugedata.gauges.append([1,-74.0,40.55,clawdata.t0,clawdata.tfinal])
-    rundata.gaugedata.gauges.append([2,-63.0,43.5,clawdata.t0,clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([1,-74.0,40.55,clawdata.t0,clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([2,-63.0,43.5,clawdata.t0,clawdata.tfinal])
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -367,13 +372,15 @@ def setgeo(rundata):
     try:
         geo_data = rundata.geo_data
     except:
-        print "*** Error, this rundata has no geodata attribute"
+        print("*** Error, this rundata has no geodata attribute")
         raise AttributeError("Missing geodata attribute")
        
     # == Physics ==
     geo_data.gravity = 9.81
     geo_data.coordinate_system = 2
     geo_data.earth_radius = 6367.5e3
+    geo_data.rho_air = 1.15
+    geo_data.ambient_pressure = 101.3e3
 
     # == Forcing Options
     geo_data.coriolis_forcing = True
@@ -391,7 +398,7 @@ def setgeo(rundata):
     # refine_data.wave_tolerance = 0.5
     # refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
     # refine_data.speed_tolerance = [0.5,1.0,1.5,2.0,2.5,3.0]
-    refine_data.speed_tolerance = [1.0,2.0,3.0,4.0]
+    refine_data.speed_tolerance = [1.0, 2.0, 3.0, 4.0]
     refine_data.deep_depth = 1e6
     refine_data.max_level_deep = 5
     refine_data.variable_dt_refinement_ratios = True
@@ -407,9 +414,12 @@ def setgeo(rundata):
     # topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
     #                                    rundata.clawdata.tfinal, 
     #                                    '../bathy/atlantic_2min.tt3'])
+    # topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
+    #                                    rundata.clawdata.tfinal, 
+    #                                    '../bathy/atlantic_2min.tt3'])
     topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
-                                       '../bathy/atlantic_2min.tt3'])
+                                       '../bathy/atlantic_1min.tt3'])
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, 
                                        rundata.clawdata.tfinal, 
                                        '../bathy/newyork_3s.tt3'])
@@ -441,10 +451,6 @@ def set_storm(rundata):
 
     data = rundata.surge_data
 
-    # Physics parameters
-    data.rho_air = 1.15
-    data.ambient_pressure = 101.3e3 # Nominal atmos pressure
-
     # Source term controls - These are currently not respected
     data.wind_forcing = True
     data.drag_law = 1
@@ -465,8 +471,6 @@ def set_storm(rundata):
 
     # Storm type 1 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'sandy.storm'))
-
-    data.landfall_time_output = True
 
     return data
 

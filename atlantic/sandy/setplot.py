@@ -33,8 +33,6 @@ def setplot(plotdata):
     plotdata.clearfigures()  # clear any old figures,axes,items data
     plotdata.format = 'binary'
 
-    fig_num_counter = surge.figure_counter()
-
     # Load data from output
     clawdata = clawpack.clawutil.data.ClawInputData(2)
     clawdata.read('claw.data')
@@ -49,19 +47,13 @@ def setplot(plotdata):
     track = surge.track_data(os.path.join(plotdata.outdir,'fort.track'))
 
     # Calculate landfall time, off by a day, maybe leap year issue?
-    landfall_dt = datetime.datetime(2012,10,29,8,0) - datetime.datetime(2012,1,1,0)
+    landfall_dt = datetime.datetime(2012,10,30,8,0) - datetime.datetime(2012,1,1,0)
     landfall = (landfall_dt.days) * 24.0 * 60**2 + landfall_dt.seconds
 
     # Set afteraxes function
     surge_afteraxes = lambda cd: surge.surge_afteraxes(cd, 
                                         track, landfall, plot_direction=False)
-    # Limits for plots
-    region_data = {'full':([clawdata.lower[0],clawdata.upper[0]],
-                           [clawdata.lower[1],clawdata.upper[1]],
-                           0.8),
-                   'Region':([-74.5,-71.0], [40.0,41.5], 0.5),
-                   'NYC':([-74.2,-73.8], [40.55,40.85], 0.5)
-                  }
+
 
     # Color limits
     surface_range = 1.5
@@ -78,10 +70,11 @@ def setplot(plotdata):
     pressure_limits = [966,1013]
     friction_bounds = [0.01,0.04]
     vorticity_limits = [-1.e-2,1.e-2]
+    land_bounds = [-10, 50]
 
     def pcolor_afteraxes(current_data):
         surge_afteraxes(current_data)
-        surge.gauge_locations(current_data)
+        # surge.gauge_locations(current_data)
     
     def contour_afteraxes(current_data):
         surge_afteraxes(current_data)
@@ -92,59 +85,69 @@ def setplot(plotdata):
     #   Plot specifications
     # ==========================================================================
     # ==========================================================================
-    for (region, values) in region_data.iteritems():
+    # Limits for plots
+    regions = {'full': ([[clawdata.lower[0],clawdata.upper[0]],
+                         [clawdata.lower[1],clawdata.upper[1]]],
+                         0.8, [1] * 10),
+               'Region': ([[-74.5,-71.0], [40.0,41.5]], 
+                          0.5, [0] * 10),
+                   'NYC':([[-74.2,-73.8], [40.55,40.85]], 0.5, [0] * 10)
+                  }
+    
+    for (name, region_data) in regions.items():
         # ========================================================================
         #  Surface Elevations
         # ========================================================================
-        plotfigure = plotdata.new_plotfigure(name='Surface - %s' % region,  
-                                         figno=fig_num_counter.get_counter())
+        plotfigure = plotdata.new_plotfigure(name='Surface - %s' % name)
         plotfigure.show = True
 
         # Set up for axes in this figure:
         plotaxes = plotfigure.new_plotaxes()
         plotaxes.title = 'Surface'
         plotaxes.scaled = True
-        plotaxes.xlimits = values[0]
-        plotaxes.ylimits = values[1]
+        plotaxes.xlimits = region_data[0][0]
+        plotaxes.ylimits = region_data[0][1]
         plotaxes.afteraxes = pcolor_afteraxes
     
-        surge.add_surface_elevation(plotaxes,bounds=surface_limits,shrink=values[2])
-        surge.add_land(plotaxes)
+        surge.add_surface_elevation(plotaxes, bounds=surface_limits, shrink=region_data[1])
+        surge.add_land(plotaxes, bounds=land_bounds)
+        plotaxes.plotitem_dict['land'].amr_patchedges_show = region_data[2]
+        plotaxes.plotitem_dict['surface'].amr_patchedges_show = region_data[2]
 
 
         # ========================================================================
         #  Water Speed
         # ========================================================================
-        plotfigure = plotdata.new_plotfigure(name='Currents - %s' % region,  
-                                         figno=fig_num_counter.get_counter())
+        plotfigure = plotdata.new_plotfigure(name='Currents - %s' % name)
         plotfigure.show = True
 
         # Set up for axes in this figure:
         plotaxes = plotfigure.new_plotaxes()
         plotaxes.title = 'Currents'
         plotaxes.scaled = True
-        plotaxes.xlimits = values[0]
-        plotaxes.ylimits = values[1]
+        plotaxes.xlimits = region_data[0][0]
+        plotaxes.ylimits = region_data[0][1]
         plotaxes.afteraxes = pcolor_afteraxes
 
         # Speed
-        surge.add_speed(plotaxes,bounds=speed_limits,shrink=values[2])
+        surge.add_speed(plotaxes,bounds=speed_limits,shrink=region_data[1])
 
         # Land
-        surge.add_land(plotaxes)
+        surge.add_land(plotaxes, bounds=land_bounds)
+        plotaxes.plotitem_dict['land'].amr_patchedges_show = region_data[2]
+        plotaxes.plotitem_dict['speed'].amr_patchedges_show = region_data[2]
 
 
     # ========================================================================
     # Hurricane forcing - Entire Atlantic
     # ========================================================================
     # Friction field
-    plotfigure = plotdata.new_plotfigure(name='Friction',
-                                         figno=fig_num_counter.get_counter())
+    plotfigure = plotdata.new_plotfigure(name='Friction')
     plotfigure.show = friction_data.variable_friction and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = region_data['full'][0]
-    plotaxes.ylimits = region_data['full'][1]
+    plotaxes.xlimits = regions['full'][0][0]
+    plotaxes.ylimits = regions['full'][0][1]
     plotaxes.title = "Manning's N Coefficients"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
@@ -152,29 +155,28 @@ def setplot(plotdata):
     surge.add_friction(plotaxes,bounds=friction_bounds)
 
     # Pressure field
-    plotfigure = plotdata.new_plotfigure(name='Pressure',  
-                                         figno=fig_num_counter.get_counter())
+    plotfigure = plotdata.new_plotfigure(name='Pressure')
     plotfigure.show = surge_data.pressure_forcing and True
     
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = region_data['full'][0]
-    plotaxes.ylimits = region_data['full'][1]
+    plotaxes.xlimits = regions['full'][0][0]
+    plotaxes.ylimits = regions['full'][0][1]
     plotaxes.title = "Pressure Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     
     surge.add_pressure(plotaxes,bounds=pressure_limits)
     # add_pressure(plotaxes)
-    surge.add_land(plotaxes)
+    surge.add_land(plotaxes, bounds=[-10, 500])
     
     # Wind field
-    plotfigure = plotdata.new_plotfigure(name='Wind Speed', 
-                                         figno=fig_num_counter.get_counter())
+    plotfigure = plotdata.new_plotfigure(name='Wind Speed')
     plotfigure.show = surge_data.wind_forcing and True
     
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = region_data['full'][0]
-    plotaxes.ylimits = region_data['full'][1]
+
+    plotaxes.xlimits = regions['full'][0][0]
+    plotaxes.ylimits = regions['full'][0][1]
     plotaxes.title = "Wind Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
@@ -182,21 +184,20 @@ def setplot(plotdata):
     surge.add_wind(plotaxes,bounds=wind_limits,plot_type='imshow')
     # add_wind(plotaxes,bounds=wind_limits,plot_type='contour')
     # add_wind(plotaxes,bounds=wind_limits,plot_type='quiver')
-    surge.add_land(plotaxes)
+    surge.add_land(plotaxes, bounds=[-10, 500])
 
     # ==========================================================================
     #  Depth
     # ==========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Depth - Entire Domain', 
-                                         figno=fig_num_counter.get_counter())
+    plotfigure = plotdata.new_plotfigure(name='Depth - Entire Domain')
     plotfigure.show = False
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Topography'
     plotaxes.scaled = True
-    plotaxes.xlimits = region_data['full'][0]
-    plotaxes.ylimits = region_data['full'][1]
+    plotaxes.xlimits = regions['full'][0][0]
+    plotaxes.ylimits = regions['full'][0][1]
     plotaxes.afteraxes = surge_afteraxes
 
     plotitem = plotaxes.new_plotitem(plot_type='2d_imshow')
@@ -211,25 +212,25 @@ def setplot(plotdata):
     # ========================================================================
     #  Figures for gauges
     # ========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Surface, Speeds',   
-                                         figno=fig_num_counter.get_counter(),
-                                         type='each_gauge')
-    plotfigure.show = True
-    plotfigure.clf_each_gauge = True
+    # plotfigure = plotdata.new_plotfigure(name='Surface, Speeds',   
+    #                                      figno=fig_counter + 7,
+    #                                      type='each_gauge')
+    # plotfigure.show = True
+    # plotfigure.clf_each_gauge = True
 
-    # Surface and Topography
-    plotaxes = plotfigure.new_plotaxes()
-    # plotaxes.axescmd = 'subplot(121)'
-    try:
-        plotaxes.xlimits = [amrdata.t0,amrdata.tfinal]
-    except:
-        pass
-    plotaxes.ylimits = surface_limits
-    plotaxes.title = 'Surface'
-    plotaxes.afteraxes = surge.gauge_afteraxes
-    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = 3
-    plotitem.plotstyle = 'b-'
+    # # Surface and Topography
+    # plotaxes = plotfigure.new_plotaxes()
+    # # plotaxes.axescmd = 'subplot(121)'
+    # try:
+    #     plotaxes.xlimits = [amrdata.t0,amrdata.tfinal]
+    # except:
+    #     pass
+    # plotaxes.ylimits = surface_limits
+    # plotaxes.title = 'Surface'
+    # plotaxes.afteraxes = surge.gauge_afteraxes
+    # plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+    # plotitem.plot_var = 3
+    # plotitem.plotstyle = 'b-'
 
     # # Speeds
     # plotaxes = plotfigure.new_plotaxes()

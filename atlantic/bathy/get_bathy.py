@@ -5,7 +5,7 @@
 import sys
 import os
 
-import clawpack.geoclaw.util as util
+import clawpack.clawutil.data as data
 
 if __name__ == "__main__":
 
@@ -15,8 +15,8 @@ if __name__ == "__main__":
     else:
         output_dir = os.getcwd()
 
-    urls = ["https://dl.dropboxusercontent.com/u/8449354/bathy/atlantic_2min.tt3.tar.bz2",
-            "https://dl.dropboxusercontent.com/u/8449354/bathy/newyork_3s.tt3.tar.bz2"]
+    urls = ["https://www.dropbox.com/s/jkww7jm78azswk5/atlantic_1min.tt3.tar.bz2?dl=0",
+            "https://www.dropbox.com/s/vafi7k6zqn5cfs1/newyork_3s.tt3.tar.bz2?dl=0"]
 
     for url in urls:
-        util.get_remote_file(url, output_dir=output_dir)
+        data.get_remote_file(url, output_dir=output_dir)
