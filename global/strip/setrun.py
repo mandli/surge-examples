@@ -12,7 +12,8 @@ import datetime
 
 import numpy as np
 
-landfall = datetime.datetime(2015, 1, 1, 0) - datetime.datetime(2015, 1, 1, 0)
+landfall = datetime.datetime(2008, 9, 13, 7) - \
+           datetime.datetime(2008, 1, 1, 0)
 
 
 def days2seconds(days):
@@ -62,11 +63,11 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_dim = num_dim
 
     # Lower and upper edge of computational domain:
-    clawdata.lower[0] = -99.0      # west longitude
-    clawdata.upper[0] = -70.0      # east longitude
+    clawdata.lower[0] = -180.0      # west longitude
+    clawdata.upper[0] = 180.0       # east longitude
 
-    clawdata.lower[1] = 8.0       # south latitude
-    clawdata.upper[1] = 32.0      # north latitude
+    clawdata.lower[1] = -50.0       # south latitude
+    clawdata.upper[1] = 50.0      # north latitude
 
     # Number of grid cells:
     degree_factor = 1
@@ -118,7 +119,7 @@ def setrun(claw_pkg='geoclaw'):
     if clawdata.output_style == 1:
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(landfall.days + 0.75) + landfall.seconds
+        clawdata.tfinal = days2seconds(landfall.days + 1.0) + landfall.seconds
         recurrence = 4
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) *
                                         recurrence / (60**2 * 24))
@@ -354,7 +355,7 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geo_data.sea_level = 0.28  # Due to seasonal swelling of gulf
+    geo_data.sea_level = 0.0
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
