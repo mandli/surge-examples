@@ -317,6 +317,33 @@ def setrun(claw_pkg='geoclaw'):
 
     # == setgauges.data values ==
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
+    city_locations = {"New York": {"location": [-74.042227, 40.567970],
+                                   "gauge_id": 1},
+                      "Tampa Bay": {"location": [-82.789195, 27.547842],
+                                    "gauge_id": 2},
+                      "Houston": {"location": [-94.704520, 29.334877],
+                                  "gauge_id": 3},
+                      "Miami": {"location": [-80.125826, 25.730958],
+                                  "gauge_id": 4},
+                      "New Orleans": {"location": [-88.825468, 30.118699],
+                                  "gauge_id": 5},
+                      "Manila": {"location": [120.517863, 14.278543],
+                                  "gauge_id": 6},
+                      "Hong Kong": {"location": [114.093341, 22.266447],
+                                    "gauge_id": 7},
+                      "Bohai Sea (Beijing)": {"location": [118.787639, 38.604150],
+                                    "gauge_id": 8},
+                      "Bangladesh": {"location": [89.954084, 21.797045],
+                                     "gauge_id": 9},
+                      "Chennai": {"location": [80.307269, 13.108752],
+                                  "gauge_id": 10}}
+
+    for (name, gauge_data) in city_locations.items():
+        rundata.gaugedata.gauges.append([gauge_data["gauge_id"],
+                                         gauge_data['location'][0],
+                                         gauge_data['location'][1],
+                                         rundata.clawdata.t0,
+                                         rundata.clawdata.tfinal])
 
     # ------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -411,16 +438,9 @@ def setgeo(rundata):
     recurrence = 6.0
     tfinal = (storms[0].t[-1] - storms[0].t[0]).total_seconds()
     N = int(tfinal / (recurrence * 60**2))
-    rundata.clawdata.output_times = [t for t in numpy.arange(0.0, N * recurrence * 60**2,
-                                     recurrence * 60**2)]
+    rundata.clawdata.output_times = [t for t in
+                 numpy.arange(0.0, N * recurrence * 60**2, recurrence * 60**2)]
     rundata.clawdata.output_times.append(tfinal)
-
-    # rundata.clawdata.tfinal = (  storms[0].t[-1]
-    #                            - storms[0].t[0]).total_seconds()
-
-    # rundata.clawdata.num_output_times = int((rundata.clawdata.tfinal
-    #                                          - rundata.clawdata.t0) *
-    #                                         recurrence / (60**2 * 24))
 
     storms[0].write(data.storm_file)
 

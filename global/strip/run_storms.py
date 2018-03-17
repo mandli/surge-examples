@@ -6,6 +6,8 @@ from __future__ import print_function
 import os
 import sys
 
+import numpy
+
 # from batch.habanero import HabaneroJob as Job
 # from batch.habanero import HabaneroBatchController as BatchController
 from batch import Job, BatchController
@@ -39,13 +41,29 @@ class StormJob(Job):
         self.prefix = "storm_%s" % self.storm_number
         self.executable = "xgeoclaw"
 
-        # Modify storm data
+        # Modify run data
         import setrun
         self.rundata = setrun.setrun()
 
+        # Modify output times
+        self.rundata.clawdata.output_style = 2
+        recurrence = 6.0
+        tfinal = (storm.t[-1] - storm.t[0]).total_seconds()
+        N = int(tfinal / (recurrence * 60**2))
+        self.rundata.clawdata.output_times = [t for t in
+                 numpy.arange(0.0, N * recurrence * 60**2, recurrence * 60**2)]
+        self.rundata.clawdata.output_times.append(tfinal)
+
+        # Modify storm data
         surge_data = self.rundata.surge_data
-        surge_data.storm_file = 'storm_%s.storm' % (str(i).zfill(5))
+        base_path = os.path.expandvars(os.path.join("$DATA_PATH", "storms",
+                                                    "global", "storms"))
+        surge_data.storm_file = os.path.join(base_path,
+                                             'storm_%s.storm'
+                                             % (str(i).zfill(5)))
         self.storm.time_offset = storm.t[0]
+
+        # TODO: Set gauges based on track
 
     def __str__(self):
         output = super(StormJob, self).__str__()
