@@ -16,7 +16,13 @@ import shutil
 import gzip
 
 import numpy as np
-import pandas
+
+pandas_support = True
+try:
+    import pandas
+except ImportError as e:
+    print("Pandas support not present, will not be used.")
+    pandas_support = False
 
 from clawpack.geoclaw.surge.storm import Storm
 import clawpack.clawutil as clawutil
@@ -327,16 +333,19 @@ def setrun(claw_pkg='geoclaw'):
     # == setgauges.data values ==
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
     # Read in and parse the excel spreadsheet of entry points
-
-    path = os.path.join(os.environ['DATA_PATH'], "crisp_manhattan",
-                        "BuildingFootprintsManhattan.xls")
-    data = pandas.read_excel(path, usecols=[0, 14, 15])
-    for i in range(data.shape[0]):
-        rundata.gaugedata.gauges.append([data['FID'][i],
-                                         data['Longitude'][i],
-                                         data['Latitude'][i],
-                                         clawdata.t0,
-                                         clawdata.tfinal])
+    if pandas_support:
+        path = os.path.join(os.environ['DATA_PATH'], "crisp_manhattan",
+                            "BuildingFootprintsManhattan.xls")
+        data = pandas.read_excel(path, usecols=[0, 14, 15])
+        for i in range(data.shape[0]):
+            rundata.gaugedata.gauges.append([data['FID'][i],
+                                             data['Longitude'][i],
+                                             data['Latitude'][i],
+                                             clawdata.t0,
+                                             clawdata.tfinal])
+    else:
+        print("Gauges not set via excel file.")
+        print("  Install pandas to enable reading of the data file.")
 
     # Output only the surface
     rundata.gaugedata.q_out_fields = [4]
