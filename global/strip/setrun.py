@@ -6,14 +6,18 @@ The values set in the function setrun are then written out to data files
 that will be read in by the Fortran code.
 
 """
+from __future__ import absolute_import
+from __future__ import print_function
 
 import os
 import datetime
+import shutil
+import gzip
 
-import numpy as np
+import numpy
 
-landfall = datetime.datetime(2008, 9, 13, 7) - \
-           datetime.datetime(2008, 1, 1, 0)
+import clawpack.geoclaw.surge.storm
+import clawpack.clawutil as clawutil
 
 
 def days2seconds(days):
@@ -21,13 +25,13 @@ def days2seconds(days):
     return days * 60.0**2 * 24.0
 
 
-def seconds2days(seconds):
-    """"""
-    return seconds / (60.0**2 * 24.0)
+# Scratch directory for storing topo and dtopo files:
+scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
 
 
 # ------------------------------
 def setrun(claw_pkg='geoclaw'):
+
     """
     Define the parameters used for running Clawpack.
 
@@ -66,15 +70,15 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.lower[0] = -180.0      # west longitude
     clawdata.upper[0] = 180.0       # east longitude
 
-    clawdata.lower[1] = -50.0       # south latitude
-    clawdata.upper[1] = 50.0      # north latitude
+    clawdata.lower[1] = -45.0       # south latitude
+    clawdata.upper[1] = 45.0      # north latitude
 
     # Number of grid cells:
     degree_factor = 1
-    clawdata.num_cells[0] = int(clawdata.upper[0] - clawdata.lower[0]) *      \
-                                degree_factor
-    clawdata.num_cells[1] = int(clawdata.upper[1] - clawdata.lower[1]) *      \
-                                degree_factor
+    clawdata.num_cells[0] = int(clawdata.upper[0] - clawdata.lower[0]) \
+        * degree_factor
+    clawdata.num_cells[1] = int(clawdata.upper[1] - clawdata.lower[1]) \
+        * degree_factor
 
     # ---------------
     # Size of system:
@@ -94,11 +98,10 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
     # Initial time:
     # -------------
-    clawdata.t0 = days2seconds(landfall.days - 3) + landfall.seconds
+    clawdata.t0 = 0.0
+    # clawdata.t0 = days2seconds(landfall.days - 1) + landfall.seconds
 
     # Restart from checkpoint file of a previous run?
-    # Note: If restarting, you must also change the Makefile to set:
-    #    RESTART = True
     # If restarting, t0 above should be from original run, and the
     # restart_file 'fort.chkNNNNN' specified below should be in
     # the OUTDIR indicated in Makefile.
@@ -118,8 +121,8 @@ def setrun(claw_pkg='geoclaw'):
 
     if clawdata.output_style == 1:
         # Output nout frames at equally spaced times up to tfinal:
-        # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(landfall.days + 1.0) + landfall.seconds
+        # Note that this is overriden below when we know the storm length
+        clawdata.tfinal = days2seconds(4.0)
         recurrence = 4
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) *
                                         recurrence / (60**2 * 24))
@@ -169,11 +172,9 @@ def setrun(claw_pkg='geoclaw'):
     # retaking step with a smaller dt:
     clawdata.cfl_desired = 0.75
     clawdata.cfl_max = 1.0
-    # clawdata.cfl_desired = 0.25
-    # clawdata.cfl_max = 0.5
 
     # Maximum number of time steps to allow between output times:
-    clawdata.steps_max = 2**16
+    clawdata.steps_max = 5000
 
     # ------------------
     # Method to be used:
@@ -207,9 +208,12 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.use_fwaves = True    # True ==> use f-wave version of algorithms
 
     # Source terms splitting:
-    # 'none'    ==> no source term (src routine never called)
-    # 'godunov' ==> Godunov (1st order) splitting used,
-    # 'strang'  ==> Strang (2nd order) splitting used,  not recommended.
+    #   src_split == 0 or 'none'
+    #      ==> no source term (src routine never called)
+    #   src_split == 1 or 'godunov'
+    #      ==> Godunov (1st order) splitting used,
+    #   src_split == 2 or 'strang'
+    #      ==> Strang (2nd order) splitting used,  not recommended.
     clawdata.source_split = 'godunov'
 
     # --------------------
@@ -310,11 +314,9 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    pass
 
     # == setgauges.data values ==
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    pass
 
     # ------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -333,11 +335,7 @@ def setgeo(rundata):
     For documentation see ....
     """
 
-    try:
-        geo_data = rundata.geo_data
-    except:
-        print "*** Error, this rundata has no geo_data attribute"
-        raise AttributeError("Missing geo_data attribute")
+    geo_data = rundata.geo_data
 
     # == Physics ==
     geo_data.gravity = 9.81
@@ -350,8 +348,6 @@ def setgeo(rundata):
     # == Forcing Options
     geo_data.coriolis_forcing = True
     geo_data.friction_forcing = True
-    # Overriden below
-    geo_data.manning_coefficient = 0.025
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
@@ -371,21 +367,11 @@ def setgeo(rundata):
     topo_data.topofiles = []
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
-    # See regions for control over these regions, need better bathy data for
-    # the smaller domains
-    # if "DATA_PATH" in os.environ:
-    #     topo_path = os.path.join(os.environ["DATA_PATH"], "topography",
-    #                              "global")
-    # else:
-    #     topo_path = os.path.join(os.getcwd(), '../bathy/')
-
-    topo_path = os.path.join(os.getcwd(), 'topo')
-
-    for n in range(1, 9):
-        topo_data.topofiles.append([4, 1, 3,
-                                    rundata.clawdata.t0,
-                                    rundata.clawdata.tfinal,
-                                    os.path.join(topo_path, 'strip_%s.nc' % n)])
+    topo_path = os.path.expandvars(os.path.join(os.getcwd(), "topo"))
+    for i in range(6):
+        topo_file_name = os.path.join(topo_path, "strip%s.nc" % i)
+        topo_data.topofiles.append([4, 1, 3, rundata.clawdata.t0,
+                                    rundata.clawdata.tfinal, topo_file_name])
 
     # == setfixedgrids.data values ==
     rundata.fixed_grid_data.fixedgrids = []
@@ -393,13 +379,9 @@ def setgeo(rundata):
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]
 
-    return rundata
-    # end of function setgeo
-    # ----------------------
-
-
-def set_storm(rundata):
-
+    # ================
+    #  Set Surge Data
+    # ================
     data = rundata.surge_data
 
     # Source term controls - These are currently not respected
@@ -407,24 +389,44 @@ def set_storm(rundata):
     data.drag_law = 1
     data.pressure_forcing = True
 
-    # AMR parameters
+    data.display_landfall_time = True
+
+    # AMR parameters, m/s and m respectively
     data.wind_refine = [20.0, 40.0, 60.0]
     data.R_refine = [60.0e3, 40e3, 20e3]
 
-    # Storm parameters
-    data.storm_type = 1
-    data.landfall = days2seconds(landfall.days) + landfall.seconds
-    data.display_landfall_time = True
+    # Storm parameters - Parameterized storm (Holland 1980)
+    data.storm_specification_type = 'holland80'  # (type 1)
 
-    # Storm type 1 - Idealized storm track
-    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-                                                      'test.storm'))
+    # Load only one storm for this case, refer to the run_storms.py script
+    # to see how all (or some portion) of the entire ensemble can be run
+    path = os.path.expandvars(os.path.join("$DATA_PATH", "storms", "global",
+                                           "Trial1_GB_dkipsl_rcp60cal.mat"))
+    storms = clawpack.geoclaw.surge.storm.load_emmanuel_storms(path)
+    data.storm_file = os.path.abspath(os.path.join(os.getcwd(),
+                                                   'storm_0000.storm'))
+    # Set the simulation time to the beginning and end of the ensemble storm
+    storms[0].time_offset = storms[0].t[0]
+    rundata.clawdata.output_style = 2
+    recurrence = 6.0
+    tfinal = (storms[0].t[-1] - storms[0].t[0]).total_seconds()
+    N = int(tfinal / (recurrence * 60**2))
+    rundata.clawdata.output_times = [t for t in numpy.arange(0.0, N * recurrence * 60**2,
+                                     recurrence * 60**2)]
+    rundata.clawdata.output_times.append(tfinal)
 
-    return rundata
+    # rundata.clawdata.tfinal = (  storms[0].t[-1]
+    #                            - storms[0].t[0]).total_seconds()
 
+    # rundata.clawdata.num_output_times = int((rundata.clawdata.tfinal
+    #                                          - rundata.clawdata.t0) *
+    #                                         recurrence / (60**2 * 24))
 
-def set_friction(rundata):
+    storms[0].write(data.storm_file)
 
+    # =======================
+    #  Set Variable Friction
+    # =======================
     data = rundata.friction_data
 
     # Variable friction
@@ -433,37 +435,12 @@ def set_friction(rundata):
     # Region based friction - Set the entire domain iso-bath based friction
     data.friction_regions.append([rundata.clawdata.lower,
                                   rundata.clawdata.upper,
-                                  [np.infty, 0.0, -np.infty],
+                                  [numpy.infty, 0.0, -numpy.infty],
                                   [0.030, 0.022]])
 
     return rundata
-
-
-def get_topo(plot=False):
-    """Retrieve the topo file from the GeoClaw repository."""
-
-    if "DATA_PATH" in os.environ:
-        topo_path = os.path.join(os.environ["DATA_PATH"], "topography",
-                                 "global")
-    else:
-        topo_path = os.path.join(os.getcwd(), '../bathy/')
-
-    # Fetch topography
-    base_url = "https://dl.dropboxusercontent.com/u/8449354/bathy/"
-    urls = [os.path.join(base_url, "global.nc.tar.bz2")]
-    for url in urls:
-        data.get_remote_file(url, output_dir=topo_path, verbose=True)
-
-    # Plot if requested
-    if plot:
-        import matplotlib.pyplot as plt
-
-        for topo_name in ['global.nc']:
-            topo = topotools.Topography(os.path.join(topo_path, topo_name),
-                                        topo_type=4)
-            topo.plot()
-            fname = os.path.splitext(topo_name)[0] + '.png'
-            plt.savefig(fname)
+    # end of function setgeo
+    # ----------------------
 
 
 if __name__ == '__main__':
@@ -473,7 +450,5 @@ if __name__ == '__main__':
         rundata = setrun(sys.argv[1])
     else:
         rundata = setrun()
-    rundata = set_storm(rundata)
-    rundata = set_friction(rundata)
 
     rundata.write()
