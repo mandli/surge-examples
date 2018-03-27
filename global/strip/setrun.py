@@ -427,22 +427,26 @@ def setgeo(rundata):
 
     # Load only one storm for this case, refer to the run_storms.py script
     # to see how all (or some portion) of the entire ensemble can be run
-    path = os.path.expandvars(os.path.join("$DATA_PATH", "storms", "global",
-                                           "Trial1_GB_dkipsl_rcp60cal.mat"))
-    storms = clawpack.geoclaw.surge.storm.load_emmanuel_storms(path)
     data.storm_file = os.path.abspath(os.path.join(os.getcwd(),
                                                    'storm_0000.storm'))
-    # Set the simulation time to the beginning and end of the ensemble storm
-    storms[0].time_offset = storms[0].t[0]
+    if os.path.exists(data.storm_file):
+        storm = clawpack.geoclaw.surge.storm.Storm(data.storm_file,
+                                                   file_format="geoclaw")
+    else:
+        path = os.path.expandvars(os.path.join("$DATA_PATH", "storms", "global",
+                                               "Trial1_GB_dkipsl_rcp60cal.mat"))
+        storm = clawpack.geoclaw.surge.storm.load_emmanuel_storms(path)[0]
+        storm.time_offset = storm.t[0]
+        storm.write(data.storm_file)
+
+    # Set the simulation time to the beginning and end of the ensemble storms
     rundata.clawdata.output_style = 2
     recurrence = 6.0
-    tfinal = (storms[0].t[-1] - storms[0].t[0]).total_seconds()
+    tfinal = (storm.t[-1] - storm.t[0]).total_seconds()
     N = int(tfinal / (recurrence * 60**2))
     rundata.clawdata.output_times = [t for t in
                  numpy.arange(0.0, N * recurrence * 60**2, recurrence * 60**2)]
     rundata.clawdata.output_times.append(tfinal)
-
-    storms[0].write(data.storm_file)
 
     # =======================
     #  Set Variable Friction

@@ -63,6 +63,9 @@ class StormJob(Job):
                                              % (str(i).zfill(5)))
         self.storm.time_offset = storm.t[0]
 
+        print("Writing out GeoClaw storms...")
+        self.storm.write(self.rundata.surge_data.storm_file)
+
         # TODO: Set gauges based on track
 
     def __str__(self):
@@ -73,7 +76,6 @@ class StormJob(Job):
         return output
 
     def write_data_objects(self):
-        storm.write(self.rundata.surge_data.storm_file)
 
         super(StormJob, self).write_data_objects()
 
@@ -85,15 +87,13 @@ if __name__ == '__main__':
     storms = clawpack.geoclaw.surge.storm.load_emmanuel_storms(path)
     print("Done.")
     num_storms = len(storms)
-    # Temporary override
-    num_storms = 2
 
     if len(sys.argv) > 1:
         # Take this to be the number of storms to run
-        num_storms = 10
+        num_storms = int(sys.argv[1])
 
     # Convert Emmanuel data to GeoClaw format
-    print("Writing out GeoClaw storms...")
+
     jobs = []
     for (i, storm) in enumerate(storms[:num_storms]):
         jobs.append(StormJob(storm, i))
@@ -103,4 +103,4 @@ if __name__ == '__main__':
     controller.wait = False
     controller.plot = False
     print(controller)
-    controller.run()
+    # controller.run()
