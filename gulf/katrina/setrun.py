@@ -14,6 +14,8 @@ import os
 import sys
 import datetime
 
+from gzip import GzipFile
+from six.moves.urllib.request import urlopen
 import numpy as np
 
 import clawpack.clawutil.data as data
@@ -21,8 +23,8 @@ import clawpack.geoclaw.topotools as topotools
 import clawpack.geoclaw.etopotools as etopotools
 
 # Landfall of hurricane 1110 UTC (6:10 a.m. CDT) on Monday, August 29, 2005
-katrina_landfall = datetime.datetime(2005, 8, 28, 6)     \
-                 - datetime.datetime(2005, 1, 1, 0)
+katrina_landfall = datetime.datetime(2005, 8, 29, 11, 10) \
+                    - datetime.datetime(2005, 1, 1, 0, 0)
 
 #                           days   s/hour    hours/day
 days2seconds = lambda days: days * 60.0**2 * 24.0
@@ -105,7 +107,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
 
     # Katrina 2005082412 20260800.000000000
-    clawdata.t0 = days2seconds(katrina_landfall.days - 2) + katrina_landfall.seconds
+    clawdata.t0 = days2seconds(katrina_landfall.days - 3) + katrina_landfall.seconds
 
     # -------------
     # Output times:
@@ -121,10 +123,10 @@ def setrun(claw_pkg='geoclaw'):
         # Output nout frames at equally spaced times up to tfinal:
         #                 day     s/hour  hours/day
         # Katrina 2005083012
-        clawdata.tfinal = days2seconds(katrina_landfall.days + 2) + katrina_landfall.seconds
+        clawdata.tfinal = days2seconds(katrina_landfall.days + 1) + katrina_landfall.seconds
 
         # Output files per day requested
-        recurrence = 24
+        recurrence = 4
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) *
                                         recurrence / (60**2 * 24))
 
@@ -272,7 +274,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 4
+    amrdata.amr_levels_max = 2
 
     # List of refinement ratios at each level (length at least mxnest-1)
     # Resolution in degrees 0.25, 0.125, 0.0625, 0.015625, 0.00390625
@@ -322,15 +324,32 @@ def setrun(claw_pkg='geoclaw'):
 
     # More AMR parameters can be set -- see the defaults in pyclaw/data.py
 
+    # == setgauges.data values ==
+    gauges = rundata.gaugedata.gauges
+    # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
+
+    # Grand Isle, LA (Station ID: 8761724)
+    gauges.append([1, -89.96, 29.26, rundata.clawdata.t0, rundata.clawdata.tfinal])
+
+    # Pilots Station East, SW Pass, LA (Station ID: 8760922)
+    gauges.append([2, -89.41, 28.93, rundata.clawdata.t0, rundata.clawdata.tfinal])
+
+    # Dauphin Island, AL (Station ID: 8735180)
+    gauges.append([3, -88.08, 30.25, rundata.clawdata.t0, rundata.clawdata.tfinal])
+
     # == setregions.data values ==
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
 
-    # == setgauges.data values ==
-    gauges = rundata.gaugedata.gauges
-    # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    gauges.append([1, -88.270704,  29.671603,  rundata.clawdata.t0, rundata.clawdata.tfinal])
+    dx = 0.1
+    dy = 0.1
+
+    for gauge in gauges:
+        regions.append([amrdata.amr_levels_max, amrdata.amr_levels_max,
+                        rundata.clawdata.t0, rundata.clawdata.tfinal,
+                        gauge[1] - dx, gauge[1] + dx,
+                        gauge[2] - dy, gauge[2] + dy])
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -343,9 +362,6 @@ def setrun(claw_pkg='geoclaw'):
 
     # Set variable friction
     set_friction(rundata)
-
-    # Fetch topography if needed
-    get_topo(plot=False)
 
     return rundata
     # end of function setrun
@@ -368,6 +384,9 @@ def setgeo(rundata):
     geo_data.gravity = 9.81
     geo_data.coordinate_system = 2
     geo_data.earth_radius = 6367.5e3
+    geo_data.rho = 1025.0
+    geo_data.rho_air = 1.15
+    geo_data.ambient_pressure = 101.3e3
 
     # == Forcing Options
     geo_data.coriolis_forcing = True
@@ -376,7 +395,7 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geo_data.sea_level = 0.0
+    geo_data.sea_level = 0.125  # Due to seasonal swelling of gulf
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
@@ -394,16 +413,14 @@ def setgeo(rundata):
     topo_data = rundata.topo_data
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
-    topo_path = os.path.join(os.environ["CLAW"], "geoclaw", "scratch")
-    topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, rundata.clawdata.tfinal, 
-                              os.path.join(topo_path, 'gulf_caribbean.tt3')])
-    # geodata.topofiles.append([3, 1, 3, 0., 1.e10, \
-    #                           './bathy/gulf_coarse_bathy.tt3'])
-    # topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
-    #                           os.path.join(topo_path, 'NewOrleans_3s.tt3')])
-    topo_data.topofiles.append([4, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
-                              os.path.join(topo_path, 'NewOrleans_3s.nc')])
 
+    # Fetch topography if needed
+    topo_files = get_topo()
+
+    for topo_file in topo_files:
+        topo_data.topofiles.append([4, 1, 5,
+                                    rundata.clawdata.t0, rundata.clawdata.tfinal,
+                                    topo_file])
 
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0
@@ -428,10 +445,6 @@ def set_storm(rundata):
 
     data = rundata.surge_data
 
-    # Physics parameters
-    data.rho_air = 1.15
-    data.ambient_pressure = 101.3e3 # Nominal atmos pressure
-
     # Source term controls - These are currently not respected
     data.wind_forcing = True
     data.pressure_forcing = True
@@ -447,9 +460,11 @@ def set_storm(rundata):
                     + katrina_landfall.seconds
     data.display_landfall_time = True
 
+    # Fetch storm track if needed
+    storm_file = get_storm_track()
+
     # Storm type 1 - Idealized storm track
-    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-                                         'katrina.storm'))
+    data.storm_file = storm_file
 
     return data
 
@@ -476,29 +491,81 @@ def set_friction(rundata):
     return data
 
 
-def get_topo(plot=False):
+def get_topo():
     """
-    Retrieve the topo file from the GeoClaw repository.
+    Retrieve the topo files from NOAA.
     """
+    base_url = 'https://gis.ngdc.noaa.gov/mapviewer-support/wcs-proxy/wcs.groovy'
 
-    # Fetch topography
-    base_url = "https://dl.dropboxusercontent.com/u/8449354/bathy/"
-    urls = [os.path.join(base_url, "gulf_caribbean.tt3.tar.bz2"),
-            os.path.join(base_url, "NewOrleans_3s.nc.tar.bz2")]
-    for url in urls:
-        data.get_remote_file(url, verbose=True)
+    claw_dir = os.environ['CLAW']
+    scratch_dir = os.path.join(claw_dir, 'geoclaw', 'scratch')
 
-    # Plot if requested
-    if plot:
-        import matplotlib.pyplot as plt
-        scratch_dir = os.path.join(os.environ.get("CLAW", os.getcwd()),
-                                   'geoclaw', 'scratch')
-        for topo_name in ['gulf_caribbean.tt3', 'NewOrleans_3s.tt3']:
-            topo_path = os.path.join(scratch_dir, topo_name)
-            topo = topotools.Topography(topo_path, topo_type=3)
-            topo.plot()
-            fname = os.path.splitext(topo_name)[0] + '.png'
-            plt.savefig(fname)
+    # Specify topo parameters as tuples of the form
+    #   (res_mins, lat_min, lat_max, lon_min, lon_max)
+    topo_params = [(10, 5, 35, -100, -70),     # Gulf
+                   (1, 28, 31, -92.5, -87.5)]  # New Orleans
+
+    topo_files = []
+
+    for (res_mins, lat_min, lat_max, lon_min, lon_max) in topo_params:
+        # Construct output file name
+        lat_lon = '{}{}_{}{}_{}{}_{}{}'.format(abs(lat_min),
+                                               'N' if lat_min >= 0 else 'S',
+                                               abs(lat_max),
+                                               'N' if lat_max >= 0 else 'S',
+                                               abs(lon_min),
+                                               'E' if lon_min >= 0 else 'W',
+                                               abs(lon_max),
+                                               'E' if lon_max >= 0 else 'W')
+        topo_fname = 'etopo1_{}m_{}.nc'.format(res_mins, lat_lon)
+        topo_files.append(os.path.join(scratch_dir, topo_fname))
+
+        # Fetch topography
+        #   Note: We manually create the query string because using 'urlencode'
+        #   causes an internal server error.
+        res_hrs = res_mins / 60.0
+        url_params = {
+            'filename': 'etopo1.nc',
+            'request': 'getcoverage',
+            'version': '1.0.0',
+            'service': 'wcs',
+            'coverage': 'etopo1',
+            'CRS': 'EPSG:4326',
+            'format': 'netcdf',
+            'resx': '{:.18f}'.format(res_hrs),
+            'resy': '{:.18f}'.format(res_hrs),
+            'bbox': '{:.14f},{:.14f},{:.14f},{:.14f}'.format(lon_min, lat_min,
+                                                             lon_max, lat_max)
+        }
+        query_str = '&'.join('{}={}'.format(k, v) for k, v in url_params.items())
+        full_url = '{}?{}'.format(base_url, query_str)
+        data.get_remote_file(full_url, file_name=topo_fname, verbose=True)
+
+    return topo_files
+
+
+def get_storm_track(verbose=True):
+    """
+    Retrieve the storm track file from NOAA.
+    """
+    url = 'http://ftp.nhc.noaa.gov/atcf/archive/2005/bal122005.dat.gz'
+
+    claw_dir = os.environ['CLAW']
+    scratch_dir = os.path.join(claw_dir, 'geoclaw', 'scratch')
+    output_path = os.path.join(scratch_dir, 'bal122005.dat')
+
+    # Download and decompress storm track file if it does not already exist
+    if not os.path.exists(output_path):
+        if verbose:
+            print('Downloading storm track file')
+        with urlopen(url) as response:
+            with GzipFile(fileobj=response) as fin:
+                with open(output_path, 'wb') as fout:
+                    fout.write(fin.read())
+    elif verbose:
+        print('Using previously downloaded storm track file')
+
+    return output_path
 
 
 if __name__ == '__main__':
