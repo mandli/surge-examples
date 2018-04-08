@@ -59,10 +59,8 @@ def setplot(plotdata):
     regions = [{"name": "Full Domain",
                 "limits": [[clawdata.lower[0], clawdata.upper[0]],
                            [clawdata.lower[1], clawdata.upper[1]]]},
-               {"name": "New Orleans - Zoom",
-                "limits": [[-91.0, -88.5], [28.5, 30.5]]},
-               {"name": "New Orleans - Region",
-                "limits": [[-91, -87], [28.5, 32.0]]}]
+               {"name": "New Orleans",
+                "limits": [[-92.5, -87.5], [27.5, 31.5]]}]
 
     full_xlimits = regions[0]['limits'][0]
     full_ylimits = regions[0]['limits'][1]
@@ -103,8 +101,9 @@ def setplot(plotdata):
         plotaxes.ylimits = ylimits
         plotaxes.afteraxes = surge_afteraxes
 
+        surge.add_bathy_contours(plotaxes)
         surge.add_surface_elevation(plotaxes, bounds=surface_limits)
-        surge.add_land(plotaxes)
+        plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
 
         # ======================================================================
         #  Water Speed
@@ -120,8 +119,10 @@ def setplot(plotdata):
         plotaxes.ylimits = ylimits
         plotaxes.afteraxes = surge_afteraxes
 
+        surge.add_bathy_contours(plotaxes)
         surge.add_speed(plotaxes, bounds=speed_limits)
-        surge.add_land(plotaxes)
+        plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0] * 10
+
 
     # ========================================================================
     # Hurricane forcing - Entire gulf
@@ -150,9 +151,10 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     
-    surge.add_pressure(plotaxes,bounds=pressure_limits)
-    # add_pressure(plotaxes)
-    surge.add_land(plotaxes)
+    surge.add_bathy_contours(plotaxes)
+    surge.add_pressure(plotaxes, bounds=pressure_limits)
+    plotaxes.plotitem_dict['pressure'].amr_patchedges_show = [0] * 10
+
     
     # Wind field
     plotfigure = plotdata.new_plotfigure(name='Wind Speed')
@@ -165,8 +167,10 @@ def setplot(plotdata):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     
-    surge.add_wind(plotaxes,bounds=wind_limits,plot_type='imshow')
-    surge.add_land(plotaxes)
+    surge.add_bathy_contours(plotaxes)
+    surge.add_wind(plotaxes, bounds=wind_limits, plot_type='imshow')
+    plotaxes.plotitem_dict['wind'].amr_patchedges_show = [0] * 10
+
 
     # ========================================================================
     #  Figures for gauges
@@ -240,12 +244,14 @@ def setplot(plotdata):
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Gauge Locations'
     plotaxes.scaled = True
-    plotaxes.xlimits = [-90.5, -87.5]
+    plotaxes.xlimits = [-91.5, -87.5]
     plotaxes.ylimits = [28.0, 31.0]
     plotaxes.afteraxes = gauge_location_afteraxes
 
+    surge.add_bathy_contours(plotaxes)
     surge.add_surface_elevation(plotaxes, bounds=surface_limits)
-    surge.add_land(plotaxes)
+    plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
+
 
     #-----------------------------------------
     
