@@ -126,7 +126,7 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.tfinal = days2seconds(katrina_landfall.days + 1) + katrina_landfall.seconds
 
         # Output files per day requested
-        recurrence = 4
+        recurrence = 48
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) *
                                         recurrence / (60**2 * 24))
 

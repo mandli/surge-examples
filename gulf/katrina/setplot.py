@@ -113,6 +113,7 @@ def setplot(plotdata):
         plotaxes.afteraxes = surge_afteraxes
 
         surge.add_bathy_contours(plotaxes)
+        plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
         surge.add_surface_elevation(plotaxes, bounds=surface_limits)
         plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
 
@@ -131,8 +132,26 @@ def setplot(plotdata):
         plotaxes.afteraxes = surge_afteraxes
 
         surge.add_bathy_contours(plotaxes)
+        plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
         surge.add_speed(plotaxes, bounds=speed_limits)
         plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0] * 10
+
+        # ======================================================================
+        #  Wind Field
+        # ======================================================================
+        plotfigure = plotdata.new_plotfigure(name='Wind Speed - %s' % name)
+        plotfigure.show = surge_data.wind_forcing and True
+
+        plotaxes = plotfigure.new_plotaxes()
+        plotaxes.title = "Wind Field"
+        plotaxes.scaled = True
+        plotaxes.xlimits = xlimits
+        plotaxes.ylimits = ylimits
+        plotaxes.afteraxes = surge_afteraxes
+
+        surge.add_bathy_contours(plotaxes)
+        plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
+        surge.add_wind(plotaxes, bounds=wind_limits, plot_type='imshow')
 
 
     # ========================================================================
@@ -163,23 +182,9 @@ def setplot(plotdata):
     plotaxes.scaled = True
     
     surge.add_bathy_contours(plotaxes)
+    plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
     surge.add_pressure(plotaxes, bounds=pressure_limits)
     plotaxes.plotitem_dict['pressure'].amr_patchedges_show = [0] * 10
-
-    
-    # Wind field
-    plotfigure = plotdata.new_plotfigure(name='Wind Speed')
-    plotfigure.show = surge_data.wind_forcing and True
-    
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = full_xlimits
-    plotaxes.ylimits = full_ylimits
-    plotaxes.title = "Wind Field"
-    plotaxes.afteraxes = surge_afteraxes
-    plotaxes.scaled = True
-    
-    surge.add_bathy_contours(plotaxes)
-    surge.add_wind(plotaxes, bounds=wind_limits, plot_type='imshow')
 
 
     # ========================================================================
@@ -259,6 +264,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = gauge_location_afteraxes
 
     surge.add_bathy_contours(plotaxes)
+    plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
     surge.add_surface_elevation(plotaxes, bounds=surface_limits)
     plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
 
