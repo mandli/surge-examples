@@ -274,7 +274,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 2
+    amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
     # Resolution in degrees 0.25, 0.125, 0.0625, 0.015625, 0.00390625
@@ -421,6 +421,9 @@ def setgeo(rundata):
         topo_data.topofiles.append([4, 1, 5,
                                     rundata.clawdata.t0, rundata.clawdata.tfinal,
                                     topo_file])
+    topo_data.topofiles.append([3, 1, 5,
+                                rundata.clawdata.t0, rundata.clawdata.tfinal,
+                                os.path.join(os.environ['CLAW'], 'geoclaw', 'scratch', 'NewOrleans_3s.tt3')])
 
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0

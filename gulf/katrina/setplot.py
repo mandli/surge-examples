@@ -56,11 +56,22 @@ def setplot(plotdata):
                                         track, landfall, plot_direction=False)
 
     # Limits for plots
+    dx = 0.5
+    dy = 0.5
     regions = [{"name": "Full Domain",
                 "limits": [[clawdata.lower[0], clawdata.upper[0]],
                            [clawdata.lower[1], clawdata.upper[1]]]},
                {"name": "New Orleans",
-                "limits": [[-92.5, -87.5], [27.5, 31.5]]}]
+                "limits": [[-92.5, -87.5], [27.5, 31.5]]},
+               {"name": "Grand Isle",
+                "limits": [[-89.41 - dx, -89.41 + dx],
+                           [29.26 - dx, 29.26 + dx]]},
+               {"name": "Pilots Station East",
+                "limits": [[-89.41 - dx, -89.41 + dx],
+                           [28.93 - dy, 28.93 + dy]]},
+               {"name": "Dauphin Island",
+                "limits": [[-88.08 - dx, -88.08 + dx],
+                           [30.25 - dy, 30.25 + dy]]}]
 
     full_xlimits = regions[0]['limits'][0]
     full_ylimits = regions[0]['limits'][1]
@@ -169,7 +180,6 @@ def setplot(plotdata):
     
     surge.add_bathy_contours(plotaxes)
     surge.add_wind(plotaxes, bounds=wind_limits, plot_type='imshow')
-    plotaxes.plotitem_dict['wind'].amr_patchedges_show = [0] * 10
 
 
     # ========================================================================
