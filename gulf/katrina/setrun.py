@@ -342,6 +342,8 @@ def setrun(claw_pkg='geoclaw'):
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
 
+    rundata.gaugedata.aux_out_fields = 'all'
+
     dx = 0.1
     dy = 0.1
 

@@ -73,9 +73,6 @@ def setplot(plotdata):
                 "limits": [[-88.08 - dx, -88.08 + dx],
                            [30.25 - dy, 30.25 + dy]]}]
 
-    full_xlimits = regions[0]['limits'][0]
-    full_ylimits = regions[0]['limits'][1]
-
     # Color limits
     surface_limits = [physics.sea_level - 5.0, physics.sea_level + 5.0]
     surface_ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
@@ -86,6 +83,12 @@ def setplot(plotdata):
     wind_limits = [0,40]
     pressure_limits = [966,1013]
     friction_bounds = [0.01,0.04]
+
+    # Contours
+    # TODO Figure out how to plot contours at highest amr level available
+    #amr_levels_max = 2
+    #amr_contours = [0] * (amr_levels_max - 1) + [1] + [0] * (10 - amr_levels_max)
+    amr_contours = [1] + [0] * 9
 
     # ==========================================================================
     # ==========================================================================
@@ -113,14 +116,14 @@ def setplot(plotdata):
         plotaxes.afteraxes = surge_afteraxes
 
         surge.add_bathy_contours(plotaxes)
-        plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
+        plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
         surge.add_surface_elevation(plotaxes, bounds=surface_limits)
         plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
 
         # ======================================================================
         #  Water Speed
         # ======================================================================
-        plotfigure = plotdata.new_plotfigure(name='Currents - %s'% name)
+        plotfigure = plotdata.new_plotfigure(name='Currents - %s' % name)
         plotfigure.show = True
 
         # Set up for axes in this figure:
@@ -132,7 +135,7 @@ def setplot(plotdata):
         plotaxes.afteraxes = surge_afteraxes
 
         surge.add_bathy_contours(plotaxes)
-        plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
+        plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
         surge.add_speed(plotaxes, bounds=speed_limits)
         plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0] * 10
 
@@ -150,41 +153,41 @@ def setplot(plotdata):
         plotaxes.afteraxes = surge_afteraxes
 
         surge.add_bathy_contours(plotaxes)
-        plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
+        plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
         surge.add_wind(plotaxes, bounds=wind_limits, plot_type='imshow')
 
 
-    # ========================================================================
-    # Hurricane forcing - Entire gulf
-    # ========================================================================
-    # Friction field
-    plotfigure = plotdata.new_plotfigure(name='Friction')
-    plotfigure.show = friction_data.variable_friction and False
+        # ========================================================================
+        # Hurricane forcing
+        # ========================================================================
+        # Friction field
+        plotfigure = plotdata.new_plotfigure(name='Friction - %s' % name)
+        plotfigure.show = friction_data.variable_friction and True
 
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = full_xlimits
-    plotaxes.ylimits = full_ylimits
-    plotaxes.title = "Manning's N Coefficients"
-    plotaxes.afteraxes = surge_afteraxes
-    plotaxes.scaled = True
+        plotaxes = plotfigure.new_plotaxes()
+        plotaxes.title = "Manning's N Coefficients"
+        plotaxes.scaled = True
+        plotaxes.xlimits = xlimits
+        plotaxes.ylimits = ylimits
+        plotaxes.afteraxes = surge_afteraxes
 
-    surge.add_friction(plotaxes,bounds=friction_bounds)
+        surge.add_friction(plotaxes, bounds=friction_bounds)
 
-    # Pressure field
-    plotfigure = plotdata.new_plotfigure(name='Pressure')
-    plotfigure.show = surge_data.pressure_forcing and True
+        # Pressure field
+        plotfigure = plotdata.new_plotfigure(name='Pressure - %s' % name)
+        plotfigure.show = surge_data.pressure_forcing and True
+
+        plotaxes = plotfigure.new_plotaxes()
+        plotaxes.title = "Pressure Field"
+        plotaxes.scaled = True
+        plotaxes.xlimits = xlimits
+        plotaxes.ylimits = ylimits
+        plotaxes.afteraxes = surge_afteraxes
     
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = full_xlimits
-    plotaxes.ylimits = full_ylimits
-    plotaxes.title = "Pressure Field"
-    plotaxes.afteraxes = surge_afteraxes
-    plotaxes.scaled = True
-    
-    surge.add_bathy_contours(plotaxes)
-    plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
-    surge.add_pressure(plotaxes, bounds=pressure_limits)
-    plotaxes.plotitem_dict['pressure'].amr_patchedges_show = [0] * 10
+        surge.add_bathy_contours(plotaxes)
+        plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
+        surge.add_pressure(plotaxes, bounds=pressure_limits)
+        plotaxes.plotitem_dict['pressure'].amr_patchedges_show = [0] * 10
 
 
     # ========================================================================
@@ -264,7 +267,7 @@ def setplot(plotdata):
     plotaxes.afteraxes = gauge_location_afteraxes
 
     surge.add_bathy_contours(plotaxes)
-    plotaxes.plotitem_dict['bathy'].amr_contour_show = [1] + [0] * 9
+    plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
     surge.add_surface_elevation(plotaxes, bounds=surface_limits)
     plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
 
