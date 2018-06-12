@@ -7,19 +7,23 @@ that will be read in by the Fortran code.
 
 """
 
+from __future__ import absolute_import
 from __future__ import print_function
 
 import os
 import datetime
+import shutil
+import gzip
 
 import numpy as np
 
-# October 29, 2012 at 8:00 pm EDT (October 30, 2012 0:00 am UTC)
-sandy_landfall = datetime.datetime(2012,10,30,0,0) - datetime.datetime(2012,1,1,0)
+from clawpack.geoclaw.surge.storm import Storm
+import clawpack.clawutil as clawutil
 
-#                           days   s/hour    hours/day            
-days2seconds = lambda days: days * 60.0**2 * 24.0
-seconds2days = lambda seconds: seconds / (60.0**2 * 24.0)
+
+# Time Conversions
+def days2seconds(days):
+    return days * 60.0**2 * 24.0
 
 #------------------------------
 def setrun(claw_pkg='geoclaw'):
@@ -105,7 +109,7 @@ def setrun(claw_pkg='geoclaw'):
     # Initial time:
     # -------------
 
-    clawdata.t0 = days2seconds(sandy_landfall.days - 2) + sandy_landfall.seconds
+    clawdata.t0 = days2seconds(-2.0)
 
 
     # Restart from checkpoint file of a previous run?
@@ -132,7 +136,7 @@ def setrun(claw_pkg='geoclaw'):
         # Output nout frames at equally spaced times up to tfinal:
         #                 day     s/hour  hours/day
         
-        clawdata.tfinal = days2seconds(sandy_landfall.days + 1) + sandy_landfall.seconds
+        clawdata.tfinal = days2seconds(1.0)
 
         # Output occurrence per day, 24 = every hour, 4 = every 6 hours
         recurrence = 24
@@ -286,7 +290,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 6
+    amrdata.amr_levels_max = 2
 
     # List of refinement ratios at each level (length at least mxnest-1)
     # amrdata.refinement_ratios_x = [2, 2, 2, 6, 16]
@@ -379,28 +383,25 @@ def setgeo(rundata):
     geo_data.gravity = 9.81
     geo_data.coordinate_system = 2
     geo_data.earth_radius = 6367.5e3
+    geo_data.rho = 1025.0
     geo_data.rho_air = 1.15
     geo_data.ambient_pressure = 101.3e3
 
     # == Forcing Options
     geo_data.coriolis_forcing = True
     geo_data.friction_forcing = True
-    geo_data.manning_coefficient = 0.025 # Overridden below
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geo_data.sea_level = 0.28  # Due to seasonal swelling of gulf
+    geo_data.sea_level = 0.0
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
     refine_data = rundata.refinement_data
     refine_data.wave_tolerance = 1.0
-    # refine_data.wave_tolerance = 0.5
-    # refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
-    # refine_data.speed_tolerance = [0.5,1.0,1.5,2.0,2.5,3.0]
     refine_data.speed_tolerance = [1.0, 2.0, 3.0, 4.0]
-    refine_data.deep_depth = 1e6
-    refine_data.max_level_deep = 5
+    refine_data.deep_depth = 300.0
+    refine_data.max_level_deep = 4
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
@@ -408,21 +409,15 @@ def setgeo(rundata):
     topo_data.topofiles = []
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
-    # geodata.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
-    #                                    rundata.clawdata.tfinal, 
-    #                                    '../bathy/atlantic_2min.tt3'])
-    # topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
-    #                                    rundata.clawdata.tfinal, 
-    #                                    '../bathy/atlantic_2min.tt3'])
-    # topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
-    #                                    rundata.clawdata.tfinal, 
-    #                                    '../bathy/atlantic_2min.tt3'])
+    topo_path = os.path.join(os.environ["DATA_PATH"], "topography")
     topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
-                                       rundata.clawdata.tfinal, 
-                                       '../bathy/atlantic_1min.tt3'])
-    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, 
-                                       rundata.clawdata.tfinal, 
-                                       '../bathy/newyork_3s.tt3'])
+                                         rundata.clawdata.tfinal, 
+                                         os.path.join(topo_path, 'atlantic',
+                                                      'full_1min.tt3')])
+    topo_data.topofiles.append([4, 1, 5, rundata.clawdata.t0, 
+                                         rundata.clawdata.tfinal, 
+                                         os.path.join(topo_path, 
+                                                      'new_york_area_3second.nc')])
 
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0
@@ -436,60 +431,65 @@ def setgeo(rundata):
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]
 
-    # Set storm
-    set_storm(rundata)
-
-    # Set variable friction
-    set_friction(rundata)
-    
-    return rundata
-    # end of function setgeo
-    # ----------------------
-
-
-def set_storm(rundata):
-
+    # ================
+    #  Set Surge Data
+    # ================
     data = rundata.surge_data
 
-    # Source term controls - These are currently not respected
+    # Source term controls
     data.wind_forcing = True
     data.drag_law = 1
     data.pressure_forcing = True
-    
-    # Source term algorithm parameters
-    # data.wind_tolerance = 1e-4
-    # data.pressure_tolerance = 1e-4 # Pressure source term tolerance
+
+    data.display_landfall_time = True
 
     # AMR parameters
     data.wind_refine = [20.0,40.0,60.0] # m/s
     data.R_refine = [60.0e3,40e3,20e3]  # m
     
     # Storm parameters
-    data.storm_type = 1 # Type of storm
-    data.landfall = days2seconds(sandy_landfall.days) + sandy_landfall.seconds
-    data.display_landfall_time = True
+    data.storm_specification_type = "holland80" # Set type of storm field
+    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
+                                                      'sandy.storm'))
 
-    # Storm type 1 - Idealized storm track
-    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'sandy.storm'))
+    # Convert ATCF data to GeoClaw format
+    clawutil.data.get_remote_file(
+                   "http://ftp.nhc.noaa.gov/atcf/archive/2012/bal182012.dat.gz",
+                   output_dir=os.getcwd())
+    atcf_path = os.path.join(os.getcwd(), "bal182012.dat")
+    # Note that the get_remote_file function does not support gzip files which
+    # are not also tar files.  The following code handles this
+    with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \
+            open(atcf_path, 'w') as atcf_unzipped_file:
+        atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
 
-    return data
+    sandy = Storm(path=atcf_path, file_format="ATCF")
 
+    # Calculate landfall time - Need to specify as the file above does not
+    # include this info (9/13/2008 ~ 7 UTC)
+    sandy.time_offset = datetime.datetime(2012,10,30,0,0)
 
-def set_friction(rundata):
-
+    sandy.write(data.storm_file, file_format='geoclaw')
+    
+    # =======================
+    #  Set Variable Friction
+    # =======================
     data = rundata.friction_data
 
     # Variable friction
     data.variable_friction = True
 
     # Region based friction
-    # Entire domain
+    # Entire domain - seems high on land...
     data.friction_regions.append([rundata.clawdata.lower, 
                                   rundata.clawdata.upper,
                                   [np.infty,0.0,-np.infty],
                                   [0.050, 0.025]])
 
-    return data
+    
+    return rundata
+    # end of function setgeo
+    # ----------------------
 
 
 if __name__ == '__main__':
