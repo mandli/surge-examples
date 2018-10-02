@@ -21,10 +21,7 @@ import numpy as np
 import clawpack.clawutil.data as data
 import clawpack.geoclaw.topotools as topotools
 import clawpack.geoclaw.etopotools as etopotools
-
-# Landfall of hurricane 1110 UTC (6:10 a.m. CDT) on Monday, August 29, 2005
-katrina_landfall = datetime.datetime(2005, 8, 29, 11, 10) \
-                    - datetime.datetime(2005, 1, 1, 0, 0)
+from clawpack.geoclaw.surge.storm import Storm
 
 #                           days   s/hour    hours/day
 days2seconds = lambda days: days * 60.0**2 * 24.0
@@ -107,7 +104,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
 
     # Katrina 2005082412 20260800.000000000
-    clawdata.t0 = days2seconds(katrina_landfall.days - 3) + katrina_landfall.seconds
+    clawdata.t0 = days2seconds(-3.0)
 
     # -------------
     # Output times:
@@ -123,7 +120,7 @@ def setrun(claw_pkg='geoclaw'):
         # Output nout frames at equally spaced times up to tfinal:
         #                 day     s/hour  hours/day
         # Katrina 2005083012
-        clawdata.tfinal = days2seconds(katrina_landfall.days + 1) + katrina_landfall.seconds
+        clawdata.tfinal = days2seconds(1.0)
 
         # Output files per day requested
         recurrence = 48
@@ -461,14 +458,13 @@ def set_storm(rundata):
 
     # Storm parameters - Storm Type 1 is Holland parameterized
     data.storm_type = 1
-    data.landfall = days2seconds(katrina_landfall.days)         \
-                    + katrina_landfall.seconds
     data.display_landfall_time = True
 
     # Fetch storm track if needed
     storm_file = get_storm_track()
 
     # Storm type 1 - Idealized storm track
+    data.storm_specification_type = "holland80" # Set type of storm field
     data.storm_file = storm_file
 
     return data
@@ -557,19 +553,28 @@ def get_storm_track(verbose=True):
 
     claw_dir = os.environ['CLAW']
     scratch_dir = os.path.join(claw_dir, 'geoclaw', 'scratch')
-    output_path = os.path.join(scratch_dir, 'bal122005.dat')
+    atcf_path = os.path.join(scratch_dir, 'bal122005.dat')
 
     # Download and decompress storm track file if it does not already exist
-    if not os.path.exists(output_path):
+    if not os.path.exists(atcf_path):
         if verbose:
             print('Downloading storm track file')
         with urlopen(url) as response:
             with GzipFile(fileobj=response) as fin:
-                with open(output_path, 'wb') as fout:
+                with open(atcf_path, 'wb') as fout:
                     fout.write(fin.read())
     elif verbose:
         print('Using previously downloaded storm track file')
 
+    return convert_storm_track(atcf_path)
+
+
+def convert_storm_track(atcf_path):
+    output_path = os.path.join(os.getcwd(), 'katrina.storm')
+    katrina = Storm(path=atcf_path, file_format='ATCF')
+    # Landfall of hurricane 1110 UTC (6:10 a.m. CDT) on Monday, August 29, 2005
+    katrina.time_offset = datetime.datetime(2005, 8, 29, 11, 10)
+    katrina.write(output_path, file_format='geoclaw')
     return output_path
 
 
