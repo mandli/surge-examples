@@ -212,28 +212,28 @@ def setplot(plotdata):
                 begin_date, end_date)
 
         # Calculate times relative to landfall
-        days_rel_landfall = (date_time - landfall_time) / np.timedelta64(1, 'D')
+        secs_rel_landfall = (date_time - landfall_time) / np.timedelta64(1, 's')
 
         # Subtract tide predictions from measured water levels
         water_level -= tide
 
-        return days_rel_landfall, water_level
+        return secs_rel_landfall, water_level
 
     def gauge_afteraxes(cd):
         station_id, station_name = stations[cd.gaugeno - 1]
-        days_rel_landfall, actual_level = get_actual_water_levels(station_id)
+        secs_rel_landfall, actual_level = get_actual_water_levels(station_id)
 
         axes = plt.gca()
         surge.plot_landfall_gauge(cd.gaugesoln, axes, landfall=landfall)
-        axes.plot(days_rel_landfall, actual_level, 'g')
+        axes.plot(secs_rel_landfall, actual_level, 'g')
 
         # Fix up plot - in particular fix time labels
         axes.set_title(station_name)
         axes.set_xlabel('Days relative to landfall')
         axes.set_ylabel('Surface (m)')
-        axes.set_xlim([-3, 1])
+        axes.set_xlim(np.array([-3, 1]) * 86400)
         axes.set_ylim([-0.5, 2.5])
-        axes.set_xticks([-3, -2, -1, 0, 1])
+        axes.set_xticks(np.linspace(-3, 1, 5) * 86400)
         axes.set_xticklabels([r"$-3$", r"$-2$", r"$-1$", r"$0$", r"$1$"])
         axes.grid(True)
 
