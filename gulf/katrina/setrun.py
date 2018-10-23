@@ -450,7 +450,7 @@ def set_storm(rundata):
     # Source term controls - These are currently not respected
     data.wind_forcing = True
     data.pressure_forcing = True
-    data.drag_law = 2
+    data.drag_law = 1
 
     # AMR parameters - m/s for wind refinement and (m) for radius
     data.wind_refine = [20.0, 40.0, 60.0]
