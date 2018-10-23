@@ -46,14 +46,8 @@ def setplot(plotdata):
     # Load storm track32
     track = surge.track_data(os.path.join(plotdata.outdir,'fort.track'))
 
-    # Calculate landfall time
-    landfall_dt = datetime.datetime(2005, 8, 29, 11, 10) \
-                    - datetime.datetime(2005, 1, 1, 0, 0)
-    landfall = landfall_dt.days * 24.0 * 60**2 + landfall_dt.seconds
-
     # Set afteraxes function
-    surge_afteraxes = lambda cd: surge.surge_afteraxes(cd, 
-                                        track, landfall, plot_direction=False)
+    surge_afteraxes = lambda cd: surge.surge_afteraxes(cd, track, plot_direction=False)
 
     # Limits for plots
     dx = 0.5
@@ -80,15 +74,9 @@ def setplot(plotdata):
     speed_limits = [0.0, 3.0]
     speed_ticks = [0, 1, 2, 3]
     speed_labels = [str(value) for value in speed_ticks]
-    wind_limits = [0,40]
+    wind_limits = [15, 40]
     pressure_limits = [966,1013]
     friction_bounds = [0.01,0.04]
-
-    # Contours
-    # TODO Figure out how to plot contours at highest amr level available
-    #amr_levels_max = 2
-    #amr_contours = [0] * (amr_levels_max - 1) + [1] + [0] * (10 - amr_levels_max)
-    amr_contours = [1] + [0] * 9
 
     # ==========================================================================
     # ==========================================================================
@@ -115,10 +103,10 @@ def setplot(plotdata):
         plotaxes.ylimits = ylimits
         plotaxes.afteraxes = surge_afteraxes
 
-        surge.add_bathy_contours(plotaxes)
-        plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
         surge.add_surface_elevation(plotaxes, bounds=surface_limits)
         plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
+        surge.add_land(plotaxes)
+        plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
 
         # ======================================================================
         #  Water Speed
@@ -134,10 +122,10 @@ def setplot(plotdata):
         plotaxes.ylimits = ylimits
         plotaxes.afteraxes = surge_afteraxes
 
-        surge.add_bathy_contours(plotaxes)
-        plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
         surge.add_speed(plotaxes, bounds=speed_limits)
         plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0] * 10
+        surge.add_land(plotaxes)
+        plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
 
         # ======================================================================
         #  Wind Field
@@ -152,9 +140,10 @@ def setplot(plotdata):
         plotaxes.ylimits = ylimits
         plotaxes.afteraxes = surge_afteraxes
 
-        surge.add_bathy_contours(plotaxes)
-        plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
-        surge.add_wind(plotaxes, bounds=wind_limits, plot_type='imshow')
+        surge.add_wind(plotaxes, bounds=wind_limits)
+        plotaxes.plotitem_dict['wind'].amr_patchedges_show = [0] * 10
+        surge.add_land(plotaxes)
+        plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
 
 
         # ========================================================================
@@ -184,16 +173,16 @@ def setplot(plotdata):
         plotaxes.ylimits = ylimits
         plotaxes.afteraxes = surge_afteraxes
     
-        surge.add_bathy_contours(plotaxes)
-        plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
         surge.add_pressure(plotaxes, bounds=pressure_limits)
         plotaxes.plotitem_dict['pressure'].amr_patchedges_show = [0] * 10
+        surge.add_land(plotaxes)
+        plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
 
 
     # ========================================================================
     #  Figures for gauges
     # ========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Surface & topo', figno=300, \
+    plotfigure = plotdata.new_plotfigure(name='Surface & Topo', figno=300, \
                     type='each_gauge')
     plotfigure.show = True
     plotfigure.clf_each_gauge = True
@@ -224,7 +213,7 @@ def setplot(plotdata):
         secs_rel_landfall, actual_level = get_actual_water_levels(station_id)
 
         axes = plt.gca()
-        surge.plot_landfall_gauge(cd.gaugesoln, axes, landfall=landfall)
+        surge.plot_landfall_gauge(cd.gaugesoln, axes)
         axes.plot(secs_rel_landfall, actual_level, 'g')
 
         # Fix up plot - in particular fix time labels
@@ -236,6 +225,13 @@ def setplot(plotdata):
         axes.set_xticks(np.linspace(-3, 1, 5) * 86400)
         axes.set_xticklabels([r"$-3$", r"$-2$", r"$-1$", r"$0$", r"$1$"])
         axes.grid(True)
+
+        # Plot wind speed using second scale
+        wind_speed = np.linalg.norm(cd.gaugesoln.q[8:10, :], axis=0)
+        axes2 = axes.twinx()
+        axes2.plot(cd.gaugesoln.t, wind_speed, 'r.', markersize=0.3)
+        axes2.set_ylabel('Wind Speed (m/s)')
+        axes2.set_ylim([-2.5, 52.5])
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
@@ -266,10 +262,10 @@ def setplot(plotdata):
     plotaxes.ylimits = [28.0, 31.0]
     plotaxes.afteraxes = gauge_location_afteraxes
 
-    surge.add_bathy_contours(plotaxes)
-    plotaxes.plotitem_dict['bathy'].amr_contour_show = amr_contours
     surge.add_surface_elevation(plotaxes, bounds=surface_limits)
     plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
+    surge.add_land(plotaxes)
+    plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
 
 
     #-----------------------------------------
