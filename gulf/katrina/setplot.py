@@ -213,7 +213,6 @@ def setplot(plotdata):
         secs_rel_landfall, actual_level = get_actual_water_levels(station_id)
 
         axes = plt.gca()
-        surge.plot_landfall_gauge(cd.gaugesoln, axes)
         axes.plot(secs_rel_landfall, actual_level, 'g')
 
         # Fix up plot - in particular fix time labels
