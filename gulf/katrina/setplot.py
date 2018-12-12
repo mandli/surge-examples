@@ -47,7 +47,8 @@ def setplot(plotdata):
     track = surge.track_data(os.path.join(plotdata.outdir,'fort.track'))
 
     # Set afteraxes function
-    surge_afteraxes = lambda cd: surge.surge_afteraxes(cd, track, plot_direction=False)
+    def surge_afteraxes(cd):
+        return surge.surge_afteraxes(cd, track, plot_direction=False)
 
     # Limits for plots
     dx = 0.5
@@ -131,7 +132,7 @@ def setplot(plotdata):
         #  Wind Field
         # ======================================================================
         plotfigure = plotdata.new_plotfigure(name='Wind Speed - %s' % name)
-        plotfigure.show = surge_data.wind_forcing and True
+        plotfigure.show = surge_data.wind_forcing
 
         plotaxes = plotfigure.new_plotaxes()
         plotaxes.title = "Wind Field"
@@ -151,7 +152,7 @@ def setplot(plotdata):
         # ========================================================================
         # Friction field
         plotfigure = plotdata.new_plotfigure(name='Friction - %s' % name)
-        plotfigure.show = friction_data.variable_friction and True
+        plotfigure.show = friction_data.variable_friction
 
         plotaxes = plotfigure.new_plotaxes()
         plotaxes.title = "Manning's N Coefficients"
@@ -164,7 +165,7 @@ def setplot(plotdata):
 
         # Pressure field
         plotfigure = plotdata.new_plotfigure(name='Pressure - %s' % name)
-        plotfigure.show = surge_data.pressure_forcing and True
+        plotfigure.show = surge_data.pressure_forcing
 
         plotaxes = plotfigure.new_plotaxes()
         plotaxes.title = "Pressure Field"
