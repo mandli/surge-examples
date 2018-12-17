@@ -266,30 +266,6 @@ def setplot(plotdata):
     #
     #
 
-    #
-    #  Gauge Location Plot
-    #
-    def gauge_location_afteraxes(cd):
-        plt.subplots_adjust(left=0.12, bottom=0.06, right=0.97, top=0.97)
-        surge_afteraxes(cd)
-        gaugetools.plot_gauge_locations(cd.plotdata, gaugenos='all',
-                                        format_string='ko', add_labels=True)
-
-#    plotfigure = plotdata.new_plotfigure(name="Gauge Locations")
-#    plotfigure.show = True
-
-    # Set up for axes in this figure:
-#    plotaxes = plotfigure.new_plotaxes()
-#    plotaxes.title = 'Gauge Locations'
-#    plotaxes.scaled = True
-#    plotaxes.xlimits = [-74.2,-73.8]
-#    plotaxes.ylimits = [40.55,41.0]
-#    plotaxes.afteraxes = gauge_location_afteraxes
-
-    #surgeplot.add_bathy_contours(plotaxes)
-    #surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
-    #plotaxes.plotitem_dict['surface'].amr_patchedges_show = [1,0,0]
-
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
