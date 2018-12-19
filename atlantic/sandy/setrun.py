@@ -1,4 +1,8 @@
-# encoding: utf-8
+#!/usr/bin/python3
+from __future__ import absolute_import
+from __future__ import print_function
+
+#ensure# encoding: utf-8
 """
 Module to set up run time parameters for Clawpack.
 
@@ -7,10 +11,10 @@ that will be read in by the Fortran code.
 
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 import os
+# to exract all the fine grid topography data from /bathy
+import glob
+import sys
 import datetime
 import shutil
 import gzip
@@ -25,18 +29,18 @@ import clawpack.clawutil as clawutil
 def days2seconds(days):
     return days * 60.0**2 * 24.0
 
+
 #------------------------------
 def setrun(claw_pkg='geoclaw'):
 #------------------------------
-
     """
     Define the parameters used for running Clawpack.
 
     INPUT:
-        claw_pkg expected to be "geoclaw" for this setrun.
+    claw_pkg expected to be "geoclaw" for this setrun.
 
     OUTPUT:
-        rundata - object of class ClawRunData
+    rundata - object of class ClawRunData
 
     """
 
@@ -114,13 +118,13 @@ def setrun(claw_pkg='geoclaw'):
 
     # Restart from checkpoint file of a previous run?
     # Note: If restarting, you must also change the Makefile to set:
-    #    RESTART = True
+    #    RESTART = False
     # If restarting, t0 above should be from original run, and the
     # restart_file 'fort.chkNNNNN' specified below should be in 
     # the OUTDIR indicated in Makefile.
 
     clawdata.restart = False               # True to restart from prior results
-    clawdata.restart_file = 'fort.chk00006'  # File to use for restart data
+    clawdata.restart_file = 'fort.chk00043'  # File to use for restart data
 
     # -------------
     # Output times:
@@ -157,7 +161,7 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.output_t0 = True
         
 
-    clawdata.output_format = 'binary'      # 'ascii' or 'netcdf' 
+    clawdata.output_format = 'ascii'      # 'ascii' or 'netcdf' 
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'all'
@@ -172,7 +176,7 @@ def setrun(claw_pkg='geoclaw'):
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
     #   (E.g. verbosity == 2 means print only on levels 1 and 2.)
-    clawdata.verbosity = 1
+    clawdata.verbosity = 4
 
 
 
@@ -217,7 +221,7 @@ def setrun(claw_pkg='geoclaw'):
     #  0 or 'none'      ==> donor cell (only normal solver used)
     #  1 or 'increment' ==> corner transport of waves
     #  2 or 'all'       ==> corner transport of 2nd order corrections too
-    clawdata.transverse_waves = 1
+    clawdata.transverse_waves = 2
 
     # Number of waves in the Riemann solution:
     clawdata.num_waves = 3
@@ -290,7 +294,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 2
+    amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least mxnest-1)
     # amrdata.refinement_ratios_x = [2, 2, 2, 6, 16]
@@ -316,7 +320,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata.flag2refine = True
 
     # steps to take on each level L between regriddings of level L+1:
-    amrdata.regrid_interval = 3
+    amrdata.regrid_interval = 4
 
     # width of buffer zone around flagged points:
     # (typically the same as regrid_interval so waves don't escape):
@@ -349,11 +353,22 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    regions.append([1,7,clawdata.t0,clawdata.tfinal,-74.2,-73.8,40.55,41.0])
+    regions.append([1,6,days2seconds(-0.45),days2seconds(0.10),-74.1,-73.7,40.55,48.5])
+    regions.append([1,5,days2seconds(0.10),days2seconds(1),-74.2,-73.7,40.55,48.5])
+
+    
     # == setgauges.data values ==
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    # rundata.gaugedata.gauges.append([1,-74.0,40.55,clawdata.t0,clawdata.tfinal])
-    # rundata.gaugedata.gauges.append([2,-63.0,43.5,clawdata.t0,clawdata.tfinal])
+    # battery gauge
+    rundata.gaugedata.gauges.append([1,-74.013,40.7,clawdata.t0,clawdata.tfinal])
+    # Kings point gauge
+    rundata.gaugedata.gauges.append([2,-73.77,40.81,clawdata.t0,clawdata.tfinal])
+    # Sandy Hook gauge
+   # rundata.gaugedata.gauges.append([3,-74.01,40.47,clawdata.t0,clawdata.tfinal])
+    # Bergen Point West Reach
+    rundata.gaugedata.gauges.append([3,-74.14166,40.6367,clawdata.t0,clawdata.tfinal])
+   # Narrows
+   # rundata.gaugedata.gauges.append([4,-74.038,40.605,clawdata.t0,clawdata.tfinal])
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -393,7 +408,7 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geo_data.sea_level = 0.0
+    geo_data.sea_level = 0.33
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
@@ -409,16 +424,35 @@ def setgeo(rundata):
     topo_data.topofiles = []
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
-    topo_path = os.path.join(os.environ["DATA_PATH"], "topography")
-    topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, 
-                                         rundata.clawdata.tfinal, 
-                                         os.path.join(topo_path, 'atlantic',
-                                                      'full_1min.tt3')])
-    topo_data.topofiles.append([4, 1, 5, rundata.clawdata.t0, 
-                                         rundata.clawdata.tfinal, 
-                                         os.path.join(topo_path, 
-                                                      'new_york_area_3second.nc')])
+    topo_path = '../bathy'
 
+    topo_data.topofiles.append([3, 1, 3, days2seconds(-2), days2seconds(1), os.path.join(topo_path,'atlantic_1min.tt3')])
+    topo_data.topofiles.append([3, 1, 3, days2seconds(-2), days2seconds(1), os.path.join(topo_path,'newyork_3s.tt3')])
+    # restrict these make max lower and for all time
+   # for file in glob.glob("../bathy/*.nc"):
+    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_74x00.nc')])
+    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_74x00.nc')])
+   
+    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x50_74x00.nc')])
+    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_73x75.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_73x50.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_73x25.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'montauk_13.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_73x25.nc')])
+    
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x25_74x00.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x25_73x75.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x25_73x50.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x25_73x25.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_73x75.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_73x50.nc')])
+    
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_73x00.nc')])
+#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_73x00.nc')])
+ 
+    #print(topo_data.topofiles)
+
+    
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0
     rundata.qinit_data.qinitfiles = []
@@ -459,9 +493,9 @@ def setgeo(rundata):
     atcf_path = os.path.join(os.getcwd(), "bal182012.dat")
     # Note that the get_remote_file function does not support gzip files which
     # are not also tar files.  The following code handles this
-    with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \
-            open(atcf_path, 'w') as atcf_unzipped_file:
-        atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
+    with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file:
+        with open(atcf_path, 'w') as atcf_unzipped_file:
+            atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
 
     sandy = Storm(path=atcf_path, file_format="ATCF")
 
