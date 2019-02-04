@@ -1,5 +1,3 @@
-
-
 # encoding: utf-8
 """
 Module to set up run time parameters for Clawpack.
@@ -147,7 +145,7 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.output_t0 = True
         
 
-    clawdata.output_format = 'ascii'      # 'ascii' or 'netcdf' 
+    clawdata.output_format = 'binary'      # 'ascii' or 'binary' or 'netcdf' 
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'all' # could be list
