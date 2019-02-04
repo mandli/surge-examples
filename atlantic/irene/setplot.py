@@ -319,6 +319,7 @@ def setplot(plotdata):
     begin_date = datetime.datetime(2011, 8, 24 )
     end_date = datetime.datetime(2011, 8, 28)
 
+# need to uncomment this function if you want to compare with real data from NOAA
 #    def get_actual_water_levels(station_id):
 #        # Fetch water levels and tide predictions for given station
 #        date_time, water_level, tide = fetch_noaa_tide_data(station_id,
@@ -334,17 +335,18 @@ def setplot(plotdata):
  
     def gauge_afteraxes(cd):
         station_id, station_name = stations[cd.gaugeno-1]
+# uncomment the next line to plot against real NOAA data
 #        seconds_rel_landfall, actual_level = get_actual_water_levels(station_id)
 
         axes = plt.gca()
         #surgeplot.plot_landfall_gauge(cd.gaugesoln, axes, landfall=landfall)
- #       axes.plot(seconds_rel_landfall, actual_level, 'g')
+# uncomment the next line to plot against real NOAA data 
+#       axes.plot(seconds_rel_landfall, actual_level, 'g')
 
         # Fix up plot - in particular fix time labels
         axes.set_title(station_name)
         axes.set_xlabel('Seconds relative to landfall')
         axes.set_ylabel('Surface (m)')
- #       axes.set_xlim([days2seconds(-2), days2seconds(1)])
         axes.set_ylim([0, 4])
 #        axes.set_xticks([ days2seconds(-2), days2seconds(-1), 0, days2seconds(1)])
         #axes.set_xticklabels([r"$-3$", r"$-2$", r"$-1$", r"$0$", r"$1$"])
