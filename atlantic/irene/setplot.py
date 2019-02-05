@@ -8,8 +8,8 @@ function setplot is called to set the plot parameters.
 """
 import os
 
-# import numpy as np
-# import matplotlib
+import numpy as np
+import matplotlib
 
 import matplotlib.pyplot as plt
 import datetime
@@ -32,7 +32,7 @@ def setplot(plotdata):
     plotdata.clearfigures()  # clear any old figures,axes,items data
     plotdata.format = 'binary'
 
-    fig_num_counter = surge.figure_counter()
+    #fig_num_counter = surge.figure_counter()
 
     # Load data from output
     clawdata = clawpack.clawutil.data.ClawInputData(2)
@@ -58,9 +58,9 @@ def setplot(plotdata):
     full_xlimits = [clawdata.lower[0],clawdata.upper[0]]
     full_ylimits = [clawdata.lower[1],clawdata.upper[1]]
     full_shrink = 0.8
-    newyork_xlimits = [-74.5,-71.0]
-    newyork_ylimits = [40.0,41.5]
-    newyork_shrink = 0.5
+    newyork_xlimits = [-74.2,-73.7]
+    newyork_ylimits = [40.4,40.85]
+    newyork_shrink = 1.0
 
     # Color limits
     surface_range = 1.5
@@ -98,7 +98,7 @@ def setplot(plotdata):
     #  Surface Elevations - Entire Atlantic
     # ========================================================================
     plotfigure = plotdata.new_plotfigure(name='Surface - Atlantic',  
-                                         figno=fig_num_counter.get_counter())
+                                         figno=100)
     plotfigure.show = True
 
     # Set up for axes in this figure:
@@ -117,7 +117,7 @@ def setplot(plotdata):
     #  Water Speed - Entire Atlantic
     # ========================================================================
     plotfigure = plotdata.new_plotfigure(name='Currents - Atlantic',  
-                                         figno=fig_num_counter.get_counter())
+                                         figno=200)
     plotfigure.show = True
 
     # Set up for axes in this figure:
@@ -138,7 +138,7 @@ def setplot(plotdata):
     #  Surface Elevations - New York Area
     # ========================================================================
     plotfigure = plotdata.new_plotfigure(name='Surface - New York',  
-                                         figno=fig_num_counter.get_counter())
+                                         figno=300)
     plotfigure.show = True
 
     # Set up for axes in this figure:
@@ -159,7 +159,7 @@ def setplot(plotdata):
     #  Currents Elevations - New York Area
     # ========================================================================
     plotfigure = plotdata.new_plotfigure(name='Currents - New York',  
-                                         figno=fig_num_counter.get_counter())
+                                         figno=400)
     plotfigure.show = True
 
     # Set up for axes in this figure:
@@ -182,7 +182,7 @@ def setplot(plotdata):
     # ========================================================================
     # Friction field
     plotfigure = plotdata.new_plotfigure(name='Friction',
-                                         figno=fig_num_counter.get_counter())
+                                         figno=500)
     plotfigure.show = friction_data.variable_friction and True
 
     plotaxes = plotfigure.new_plotaxes()
@@ -196,7 +196,7 @@ def setplot(plotdata):
 
     # Pressure field
     plotfigure = plotdata.new_plotfigure(name='Pressure',  
-                                         figno=fig_num_counter.get_counter())
+                                         figno=600)
     plotfigure.show = surge_data.pressure_forcing and True
     
     plotaxes = plotfigure.new_plotaxes()
@@ -212,7 +212,7 @@ def setplot(plotdata):
     
     # Wind field
     plotfigure = plotdata.new_plotfigure(name='Wind Speed', 
-                                         figno=fig_num_counter.get_counter())
+                                         figno=700)
     plotfigure.show = surge_data.wind_forcing and True
     
     plotaxes = plotfigure.new_plotaxes()
@@ -229,7 +229,7 @@ def setplot(plotdata):
     
     # Surge field
     plotfigure = plotdata.new_plotfigure(name='Surge Field', 
-                                         figno=fig_num_counter.get_counter())
+                                         figno=800)
     plotfigure.show = ((surge_data.wind_forcing or surge_data.pressure_forcing) 
                         and False)
     
@@ -254,7 +254,7 @@ def setplot(plotdata):
     surge.add_land(plotaxes)
 
     plotfigure = plotdata.new_plotfigure(name='Friction/Coriolis Source', 
-                                         figno=fig_num_counter.get_counter())
+                                         figno=900)
     plotfigure.show = False
     
     plotaxes = plotfigure.new_plotaxes()
@@ -281,7 +281,7 @@ def setplot(plotdata):
     #  Depth
     # ==========================================================================
     plotfigure = plotdata.new_plotfigure(name='Depth - Entire Domain', 
-                                         figno=fig_num_counter.get_counter())
+                                         figno=1000)
     plotfigure.show = False
 
     # Set up for axes in this figure:
@@ -304,22 +304,66 @@ def setplot(plotdata):
     # ========================================================================
     #  Figures for gauges
     # ========================================================================
-    plotfigure = plotdata.new_plotfigure(name='Surface, Speeds',   
-                                         figno=fig_num_counter.get_counter(),
-                                         type='each_gauge')
+    plotfigure = plotdata.new_plotfigure(name='Surface',   
+                                         figno=250,type='each_gauge')
     plotfigure.show = True
     plotfigure.clf_each_gauge = True
+ 
+    stations = [('8518750', 'The Battery, NY'),
+                ('8516945', 'Kings Point, NY'),
+                ('8519483', 'Bergen Point West Reach, NY')]
+                #('8531680','Sandy Hook, NY'),
+                #('n03020','Narrows,NY')]
+  
+    landfall_time = np.datetime64('2011-08-27T11:30')
+    begin_date = datetime.datetime(2011, 8, 24 )
+    end_date = datetime.datetime(2011, 8, 28)
 
-    # Surface and Topography
+# need to uncomment this function if you want to compare with real data from NOAA
+#    def get_actual_water_levels(station_id):
+#        # Fetch water levels and tide predictions for given station
+#        date_time, water_level, tide = fetch_noaa_tide_data(station_id,
+#                begin_date, end_date)
+
+        # Calculate times relative to landfall
+#        seconds_rel_landfall = (date_time - landfall_time) / np.timedelta64(1, 's')
+        # Subtract tide predictions from measured water levels
+#        water_level -= tide
+
+ #       return seconds_rel_landfall, water_level
+
+ 
+    def gauge_afteraxes(cd):
+        station_id, station_name = stations[cd.gaugeno-1]
+# uncomment the next line to plot against real NOAA data
+#        seconds_rel_landfall, actual_level = get_actual_water_levels(station_id)
+
+        axes = plt.gca()
+        #surgeplot.plot_landfall_gauge(cd.gaugesoln, axes, landfall=landfall)
+# uncomment the next line to plot against real NOAA data 
+#       axes.plot(seconds_rel_landfall, actual_level, 'g')
+
+        # Fix up plot - in particular fix time labels
+        axes.set_title(station_name)
+        axes.set_xlabel('Seconds relative to landfall')
+        axes.set_ylabel('Surface (m)')
+        axes.set_ylim([0, 4])
+#        axes.set_xticks([ days2seconds(-2), days2seconds(-1), 0, days2seconds(1)])
+        #axes.set_xticklabels([r"$-3$", r"$-2$", r"$-1$", r"$0$", r"$1$"])
+        #axes.grid(True)
+ 
+
+    # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-    # plotaxes.axescmd = 'subplot(121)'
     try:
         plotaxes.xlimits = [amrdata.t0,amrdata.tfinal]
     except:
         pass
     plotaxes.ylimits = surface_limits
     plotaxes.title = 'Surface'
-    plotaxes.afteraxes = surge.gauge_afteraxes
+    plotaxes.afteraxes = gauge_afteraxes
+
+    # Plot surface as blue curve:
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
     plotitem.plot_var = 3
     plotitem.plotstyle = 'b-'
