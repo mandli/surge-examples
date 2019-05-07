@@ -24,7 +24,7 @@ FFLAGS += -DNETCDF -lnetcdff -I$(NETCDF4_DIR)/include -L$(NETCDF4_DIR)$
 
 
 # Need to add LFLAGS here explicitly otherwise will not be linked
-LFLAGS += -lnetcdff -L$(NETCDF4_DIR)/lib
+LFLAGS += $(FFLAGS) -L$(NETCDF4_DIR)/lib
 
 
 # ---------------------------------

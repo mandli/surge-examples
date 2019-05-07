@@ -76,15 +76,7 @@ def setplot(plotdata):
     regions = {'Full Domain': {"xlimits": [claw_data.lower[0], claw_data.upper[0]],
                                "ylimits": [claw_data.lower[1], claw_data.upper[1]],
                                "shrink": 1.0,
-                               "figsize": [6.4, 4.8]},
-               'Tri-State Region': {"xlimits": [-74.5,-71.0],
-                                    "ylimits": [40.0,41.5],
-                                    "shrink": 1.0,
-                                    "figsize": [6.4, 4.8]},
-                'NYC': {"xlimits": [-74.2,-73.7],
-                        "ylimits": [40.4,40.85],
-                        "shrink": 1.0,
-                        "figsize": [6.4, 4.8]}
+                               "figsize": [6.4, 4.8]}
                }
     def gauge_location_afteraxes(cd):
         plt.subplots_adjust(left=0.12, bottom=0.06, right=0.97, top=0.97)

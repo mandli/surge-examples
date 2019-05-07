@@ -439,39 +439,39 @@ def setgeo(rundata):
     data = rundata.surge_data
 
     # Source term controls
-    # data.wind_forcing = True
-    # data.drag_law = 1
-    # data.pressure_forcing = True
+    data.wind_forcing = True
+    data.drag_law = 1
+    data.pressure_forcing = True
 
-    # data.display_landfall_time = True
+    data.display_landfall_time = True
 
-    # # AMR parameters
-    # data.wind_refine = [20.0,40.0,60.0] # m/s
-    # data.R_refine = [60.0e3,40e3,20e3]  # m
+    # AMR parameters
+    data.wind_refine = [20.0,40.0,60.0] # m/s
+    data.R_refine = [60.0e3,40e3,20e3]  # m
     
     # Storm parameters
-    # data.storm_specification_type = "holland80" # Set type of storm field
-    # data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-    #                                                   'isabel.storm'))
+    data.storm_specification_type = "holland80" # Set type of storm field
+    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
+                                                      'isabel.storm'))
 
-    # # Convert ATCF data to GeoClaw format
-    # clawutil.data.get_remote_file(
-    #                "http://ftp.nhc.noaa.gov/atcf/archive/2003/.dat.gz",
-    #                output_dir=os.getcwd())
-    # atcf_path = os.path.join(os.getcwd(), ".dat")
-    # # Note that the get_remote_file function does not support gzip files which
-    # # are not also tar files.  The following code handles this
-    # with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file:
-    #     with open(atcf_path, 'w') as atcf_unzipped_file:
-    #         atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
+    # Convert ATCF data to GeoClaw format
+    clawutil.data.get_remote_file(
+                   "http://ftp.nhc.noaa.gov/atcf/archive/2003/bal132003.dat.gz",
+                   output_dir=os.getcwd())
+    atcf_path = os.path.join(os.getcwd(), "bal132003.dat")
+    # Note that the get_remote_file function does not support gzip files which
+    # are not also tar files.  The following code handles this
+    with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file:
+        with open(atcf_path, 'w') as atcf_unzipped_file:
+            atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
 
-    # isabel = Storm(path=atcf_path, file_format="ATCF")
+    isabel = Storm(path=atcf_path, file_format="ATCF")
 
-    # # Calculate landfall time - Need to specify as the file above does not
-    # # include this info (9/13/2008 ~ 7 UTC)
-    # isabel.time_offset = datetime.datetime(2012,10,30,0,0)
+    # Calculate landfall time - Need to specify as the file above does not
+    # include this info (9/13/2008 ~ 7 UTC)
+    isabel.time_offset = datetime.datetime(2003, 9, 18, 0, 0)
 
-    # isabel.write(data.storm_file, file_format='geoclaw')
+    isabel.write(data.storm_file, file_format='geoclaw')
     
     # =======================
     #  Set Variable Friction
