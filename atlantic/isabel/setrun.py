@@ -176,7 +176,7 @@ def setrun(claw_pkg='geoclaw'):
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
     #   (E.g. verbosity == 2 means print only on levels 1 and 2.)
-    clawdata.verbosity = 4
+    clawdata.verbosity = 1
 
 
 
@@ -294,7 +294,7 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 6
+    amrdata.amr_levels_max = 4
 
     # List of refinement ratios at each level (length at least mxnest-1)
     # amrdata.refinement_ratios_x = [2, 2, 2, 6, 16]
@@ -399,7 +399,7 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geo_data.sea_level = 0.33
+    geo_data.sea_level = 0.0
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
@@ -469,7 +469,7 @@ def setgeo(rundata):
 
     # Calculate landfall time - Need to specify as the file above does not
     # include this info (9/13/2008 ~ 7 UTC)
-    isabel.time_offset = datetime.datetime(2003, 9, 18, 0, 0)
+    isabel.time_offset = datetime.datetime(2003, 9, 19, 0, 0)
 
     isabel.write(data.storm_file, file_format='geoclaw')
     

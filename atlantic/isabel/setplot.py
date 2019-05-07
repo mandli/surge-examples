@@ -52,7 +52,7 @@ def setplot(plotdata):
                                                            plot_direction=False)
 
     # Color limits
-    surface_range = 4.5
+    surface_range = 1.0
     speed_range = 1.0
     # speed_range = 1.e-2
 
