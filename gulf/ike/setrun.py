@@ -7,6 +7,8 @@ that will be read in by the Fortran code.
 
 """
 
+from __future__ import print_function
+
 import os
 import datetime
 
@@ -437,7 +439,7 @@ def setgeo(rundata):
     try:
         geo_data = rundata.geo_data
     except:
-        print "*** Error, this rundata has no geo_data attribute"
+        print("*** Error, this rundata has no geo_data attribute")
         raise AttributeError("Missing geo_data attribute")
        
     # == Physics ==
@@ -473,7 +475,7 @@ def setgeo(rundata):
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for the
     # smaller domains
-    if os.environ.has_key("DATA_PATH"):
+    if "DATA_PATH" in os.environ.keys():
         topo_path = os.path.join(os.environ["DATA_PATH"], "topography", "gulf")
     else:
         topo_path = os.path.join(os.getcwd(),'../bathy/')
