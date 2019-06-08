@@ -43,28 +43,30 @@ def setplot(plotdata):
     # Color limits
     surface_limits = [-5.0, 5.0]
     speed_limits = [0.0, 3.0]
-    wind_limits = [0, 5]
-    pressure_limits = [935, 1013]
+    wind_limits = [0, 45]
+    pressure_limits = [940, 1013]
     friction_bounds = [0.01, 0.04]
 
     # ==========================================================================
     #   Plot specifications
     # ==========================================================================
     # Specify set of zooms for plotting
-    regions = {"Gulf": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
-                        "ylimits": (clawdata.lower[1], clawdata.upper[1]),
-                        "figsize": (6.4, 4.8)}}
+    regions = {"World": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
+                         "ylimits": (clawdata.lower[1], clawdata.upper[1]),
+                         "figsize": (6.4 * 2, 4.8)}}
 
     for (name, region_dict) in regions.items():
 
         # Surface Figure
         plotfigure = plotdata.new_plotfigure(name="Surface - %s" % name)
-        plotfigure.kwargs = {"figsize": region_dict['figsize']}
-        plotaxes = plotfigure.new_plotaxes()
+        if 'figsize' in region_dict.keys():
+            plotfigure.kwargs = {"figsize": region_dict['figsize']}
+        plotaxes = plotfigure.new_plotaxes('surface')
         plotaxes.title = "Surface"
         plotaxes.xlimits = region_dict["xlimits"]
         plotaxes.ylimits = region_dict["ylimits"]
         plotaxes.afteraxes = surge_afteraxes
+        plotaxes.scaled = True
 
         surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
         surgeplot.add_land(plotaxes)
@@ -73,34 +75,19 @@ def setplot(plotdata):
 
         # Speed Figure
         plotfigure = plotdata.new_plotfigure(name="Currents - %s" % name)
-        plotfigure.kwargs = {"figsize": region_dict['figsize']}
+        if 'figsize' in region_dict.keys():
+            plotfigure.kwargs = {"figsize": region_dict['figsize']}
         plotaxes = plotfigure.new_plotaxes()
         plotaxes.title = "Currents"
         plotaxes.xlimits = region_dict["xlimits"]
         plotaxes.ylimits = region_dict["ylimits"]
         plotaxes.afteraxes = surge_afteraxes
+        plotaxes.scaled = True
 
         surgeplot.add_speed(plotaxes, bounds=speed_limits)
         surgeplot.add_land(plotaxes)
         plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0] * 10
         plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
-
-    #
-    # Friction field
-    #
-    plotfigure = plotdata.new_plotfigure(name='Friction')
-    plotfigure.show = friction_data.variable_friction and True
-
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
-    # plotaxes.title = "Manning's N Coefficient"
-    plotaxes.afteraxes = friction_after_axes
-    plotaxes.scaled = True
-
-    surgeplot.add_friction(plotaxes, bounds=friction_bounds, shrink=0.9)
-    plotaxes.plotitem_dict['friction'].amr_patchedges_show = [0] * 10
-    plotaxes.plotitem_dict['friction'].colorbar_label = "$n$"
 
     #
     #  Hurricane Forcing fields
@@ -110,8 +97,10 @@ def setplot(plotdata):
     plotfigure.show = surge_data.pressure_forcing and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['World']['xlimits']
+    plotaxes.ylimits = regions['World']['ylimits']
+    if 'figsize' in regions['World'].keys():
+        plotfigure.kwargs = {"figsize": regions['World']['figsize']}
     plotaxes.title = "Pressure Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
@@ -123,8 +112,10 @@ def setplot(plotdata):
     plotfigure.show = surge_data.wind_forcing and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['World']['xlimits']
+    plotaxes.ylimits = regions['World']['ylimits']
+    if 'figsize' in regions['World'].keys():
+        plotfigure.kwargs = {"figsize": regions['World']['figsize']}
     plotaxes.title = "Wind Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
@@ -184,8 +175,10 @@ def setplot(plotdata):
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Gauge Locations'
     plotaxes.scaled = True
-    plotaxes.xlimits = [-95.5, -94]
-    plotaxes.ylimits = [29.0, 30.0]
+    if 'figsize' in regions['World'].keys():
+        plotfigure.kwargs = {"figsize": regions['World']['figsize']}
+    plotaxes.xlimits = regions['World']["xlimits"]
+    plotaxes.ylimits = regions['World']["ylimits"]
     plotaxes.afteraxes = gauge_location_afteraxes
     surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
     surgeplot.add_land(plotaxes)

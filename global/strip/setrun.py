@@ -20,13 +20,7 @@ import clawpack.geoclaw.surge.storm
 import clawpack.clawutil as clawutil
 
 
-def days2seconds(days):
-    """"""
-    return days * 60.0**2 * 24.0
-
-
-# Scratch directory for storing topo and dtopo files:
-scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
+days2seconds = lambda days: days * 60.0**2 * 24.0
 
 
 # ------------------------------
@@ -118,11 +112,11 @@ def setrun(claw_pkg='geoclaw'):
     # The solution at initial time t0 is always written in addition.
 
     clawdata.output_style = 1
+    clawdata.tfinal = days2seconds(4.0)
 
     if clawdata.output_style == 1:
         # Output nout frames at equally spaced times up to tfinal:
         # Note that this is overriden below when we know the storm length
-        clawdata.tfinal = days2seconds(4.0)
         recurrence = 4
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) *
                                         recurrence / (60**2 * 24))
@@ -136,7 +130,7 @@ def setrun(claw_pkg='geoclaw'):
     elif clawdata.output_style == 3:
         # Output every iout timesteps with a total of ntot time steps:
         clawdata.output_step_interval = 1
-        clawdata.total_steps = 1
+        clawdata.total_steps = 10
         clawdata.output_t0 = True
 
     clawdata.output_format = 'binary'      # 'ascii' or 'netcdf'
@@ -229,8 +223,8 @@ def setrun(claw_pkg='geoclaw'):
     #   2 => periodic (must specify this at both boundaries)
     #   3 => solid wall for systems where q(2) is normal velocity
 
-    clawdata.bc_lower[0] = 'extrap'
-    clawdata.bc_upper[0] = 'extrap'
+    clawdata.bc_lower[0] = 'periodic'
+    clawdata.bc_upper[0] = 'periodic'
 
     clawdata.bc_lower[1] = 'extrap'
     clawdata.bc_upper[1] = 'extrap'
@@ -263,7 +257,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 3
+    amrdata.amr_levels_max = 1
 
     # List of refinement ratios at each level (length at least mxnest-1)
     amrdata.refinement_ratios_x = [4, 4]
@@ -344,6 +338,9 @@ def setrun(claw_pkg='geoclaw'):
                                          gauge_data['location'][1],
                                          rundata.clawdata.t0,
                                          rundata.clawdata.tfinal])
+
+    # Also record wind at each gauge
+    rundata.gaugedata.aux_out_fields = [4, 5, 6]
 
     # ------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -428,25 +425,25 @@ def setgeo(rundata):
     # Load only one storm for this case, refer to the run_storms.py script
     # to see how all (or some portion) of the entire ensemble can be run
     data.storm_file = os.path.abspath(os.path.join(os.getcwd(),
-                                                   'storm_0000.storm'))
+                                                   'storm_0040.storm'))
     if os.path.exists(data.storm_file):
         storm = clawpack.geoclaw.surge.storm.Storm(data.storm_file,
                                                    file_format="geoclaw")
     else:
         path = os.path.expandvars(os.path.join("$DATA_PATH", "storms", "global",
                                                "Trial1_GB_dkipsl_rcp60cal.mat"))
-        storm = clawpack.geoclaw.surge.storm.load_emmanuel_storms(path)[0]
+        storm = clawpack.geoclaw.surge.storm.load_emmanuel_storms(path)[6]
         storm.time_offset = storm.t[0]
         storm.write(data.storm_file)
 
     # Set the simulation time to the beginning and end of the ensemble storms
-    rundata.clawdata.output_style = 2
-    recurrence = 6.0
-    tfinal = (storm.t[-1] - storm.t[0]).total_seconds()
-    N = int(tfinal / (recurrence * 60**2))
-    rundata.clawdata.output_times = [t for t in
-                 numpy.arange(0.0, N * recurrence * 60**2, recurrence * 60**2)]
-    rundata.clawdata.output_times.append(tfinal)
+    # rundata.clawdata.output_style = 2
+    # recurrence = 6.0
+    # tfinal = (storm.t[-1] - storm.t[0]).total_seconds()
+    # N = int(tfinal / (recurrence * 60**2))
+    # rundata.clawdata.output_times = [t for t in
+    #              numpy.arange(0.0, N * recurrence * 60**2, recurrence * 60**2)]
+    # rundata.clawdata.output_times.append(tfinal)
 
     # =======================
     #  Set Variable Friction
