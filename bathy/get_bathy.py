@@ -10,10 +10,16 @@ import matplotlib.pyplot as plt
 import clawpack.clawutil.data as data
 import clawpack.geoclaw.topotools as topotools
 
+# These are the URLs to the topography needed to run each storm
 topo_urls = {"sandy": ["https://www.dropbox.com/s/jkww7jm78azswk5/atlantic_1min.tt3.tar.bz2?dl=0",
-                       "https://www.dropbox.com/s/vafi7k6zqn5cfs1/newyork_3s.tt3.tar.bz2?dl=0"]
+                       "https://www.dropbox.com/s/vafi7k6zqn5cfs1/newyork_3s.tt3.tar.bz2?dl=0"],
+             "irene": ["https://www.dropbox.com/s/jkww7jm78azswk5/atlantic_1min.tt3.tar.bz2?dl=0",
+                       "https://www.dropbox.com/s/vafi7k6zqn5cfs1/newyork_3s.tt3.tar.bz2?dl=0"],
+             "isabel": ["https://www.dropbox.com/s/jkww7jm78azswk5/atlantic_1min.tt3.tar.bz2?dl=0",
+                        "chesapeake.nc"]                     
             }
 
+# Etopo support
 def form_etopo_URL(lower, upper, file_name="etopo1.nc", file_format="netcdf"):
 
     URL = "https://maps.ngdc.noaa.gov/mapviewer-support/wcs-proxy/wcs.groovy"
@@ -31,49 +37,51 @@ def form_etopo_URL(lower, upper, file_name="etopo1.nc", file_format="netcdf"):
     return URL
 
 
-def get_etopo(output_dir=None, force=False, plot=False, verbose=False):
-    """Retrieve ETOPO1 data from NOAA"""
+def plot_topo(path, stride=[1, 1], axes=None):
+    """"""
+    
+    if axes is None:
+        fig, axes = plt.subplots(1, 1)
 
-    if output_dir is None:
-        output_dir = os.getcwd()
+    topo = topotools.Topography(path=path)
 
-    strips = [-45.0, -30.0, -15.0, 0.0, 15.0, 30.0]
-    for (i, lower_bound) in enumerate(strips):
-        file_name = "strip%s.nc" % i
-        URL = form_etopo_URL([-180, lower_bound],
-                             [180, lower_bound + 15.0],
-                             file_name=file_name)
-        file_path = os.path.join(output_dir, file_name)
-        if os.path.exists(file_path) and (not force):
-            print("Skipping download... file already exists: ", file_path)
 
-        else:
-            data.get_remote_file(URL, output_dir=output_dir,
-                                      file_name=file_name,
-                                      verbose=verbose,
-                                      force=force)
-
-    if plot:
-        fig = plt.figure()
-        axes = fig.add_subplot(1, 1, 1)
-        for i in range(len(strips)):
-            topo = topotools.Topography(
-                               path=os.path.join(output_dir, "strip%s.nc" % i))
-            topo.read(stride=[100, 100])
-            topo.plot(axes=axes)
-        plt.show()
+    for i in range(len(strips)):
+        topo = topotools.Topography(
+                           path=os.path.join(output_dir, "strip%s.nc" % i))
+        topo.read(stride=stride)
+        topo.plot(axes=axes)
+    
+    return axes
 
 
 if __name__ == "__main__":
+
+    # Input:  Storm names, location to download to, plot, verbose 
+    #
+    #
+    #
+
+    output_dir = os.getwcd()
+    force = False
+    verbose = False
+
 
     # Override download location
     if len(sys.argv) > 1:
         storm_names = sys.argv[1:]
     else:
+        # TODO: Add better failure
         sys.exit()
 
     if name == "global_strip":
-        get_topo(verbose=True, plot=True)
+        strips = [-45.0, -30.0, -15.0, 0.0, 15.0, 30.0]
+        for (i, lower_bound) in enumerate(strips):
+            file_name = "strip%s.nc" % i
+            urls.append(form_etopo_URL([-180, lower_bound],
+                                       [180, lower_bound + 15.0]))
+            # TODO specify file name
+
         storm_names.pop("global_strip")
 
     # Construct list of downloads
@@ -82,4 +90,4 @@ if __name__ == "__main__":
         urls.append(topo_urls[name])
 
     for url in urls:
-        data.get_remote_file(url)
+        data.get_remote_file(url, output_dir=output_dir, verbose=verbose, force=force)
