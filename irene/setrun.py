@@ -400,7 +400,7 @@ def setgeo(rundata):
     topo_data.topofiles = []
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
-    topo_path = '../bathy'
+    topo_path = os.path.join('..', 'bathy')
     t0 = days2seconds(-3)
     tfinal = days2seconds(2)
     topo_data.topofiles.append([3, 1, 3, t0, tfinal, os.path.join(topo_path,'atlantic_1min.tt3')])

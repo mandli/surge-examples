@@ -478,7 +478,7 @@ def setgeo(rundata):
     if "DATA_PATH" in os.environ.keys():
         topo_path = os.path.join(os.environ["DATA_PATH"], "topography", "gulf")
     else:
-        topo_path = os.path.join(os.getcwd(),'../bathy/')
+        topo_path = os.path.join("..", "bathy")
 
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, 
                                          rundata.clawdata.tfinal, 

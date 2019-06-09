@@ -420,7 +420,7 @@ def setgeo(rundata):
     # if os.environ.has_key("DATA_PATH"):
     #     topo_path = os.path.join(os.environ["DATA_PATH"], "topography", "indian")
     # else:
-    topo_path = os.path.join(os.getcwd(),'../bathy/')
+    topo_path = os.path.join('..', 'bathy')
     indian_ocean = os.path.join(topo_path, "indian_ocean.nc")
     mumbai_topo = os.path.join(topo_path, "mumbai.tt3")
 

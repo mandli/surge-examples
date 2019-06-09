@@ -391,7 +391,7 @@ def setgeo(rundata):
     topo_data.topofiles = []
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
-    topo_path = os.path.expandvars(os.path.join(os.getcwd(), "topo"))
+    topo_path = os.path.join("..", "bathy")
     for i in range(6):
         topo_file_name = os.path.join(topo_path, "strip%s.nc" % i)
         topo_data.topofiles.append([4, 1, 3, rundata.clawdata.t0,
