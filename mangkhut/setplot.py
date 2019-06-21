@@ -133,8 +133,8 @@ def setplot(plotdata=None):
     plotfigure.show = friction_data.variable_friction and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['Coast']['xlimits']
+    plotaxes.ylimits = regions['Coast']['ylimits']
     # plotaxes.title = "Manning's N Coefficient"
     plotaxes.afteraxes = friction_after_axes
     plotaxes.scaled = True
@@ -151,8 +151,8 @@ def setplot(plotdata=None):
     plotfigure.show = surge_data.pressure_forcing and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['Coast']['xlimits']
+    plotaxes.ylimits = regions['Coast']['ylimits']
     plotaxes.title = "Pressure Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
@@ -164,8 +164,8 @@ def setplot(plotdata=None):
     plotfigure.show = surge_data.wind_forcing and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['Coast']['xlimits']
+    plotaxes.ylimits = regions['Coast']['ylimits']
     plotaxes.title = "Wind Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
