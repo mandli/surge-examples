@@ -138,7 +138,7 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.total_steps = 1
         clawdata.output_t0 = True
 
-    clawdata.output_format = 'ascii'      # 'ascii' or 'netcdf'
+    clawdata.output_format = 'binary'      # 'ascii' or 'binary'
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'all'
     clawdata.output_aux_onlyonce = False    # output aux arrays only at t0
@@ -320,12 +320,6 @@ def setrun(claw_pkg='geoclaw'):
     rundata.gaugedata.gauges.append([2, 114.12, 22.17,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-        #rundata.gaugedata.gauges.append([3, 113.43, 21.56,
-        #rundata.clawdata.t0,
-        #rundata.clawdata.tfinal])
-        #rundata.gaugedata.gauges.append([4, 114.10, 22.18,
-        #rundata.clawdata.t0,
-        #rundata.clawdata.tfinal])
 
     # Force the gauges to also record the wind and pressure fields
     rundata.gaugedata.aux_out_fields = [4, 5, 6]
@@ -368,7 +362,7 @@ def setgeo(rundata):
 
     # == Algorithm and Initial Conditions ==
     # Due to seasonal swelling of gulf we set sea level higher
-    geo_data.sea_level = 0.28
+    geo_data.sea_level = 0.0
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
@@ -376,7 +370,7 @@ def setgeo(rundata):
     refine_data.wave_tolerance = 1.0
     refine_data.speed_tolerance = [1.0, 2.0, 3.0, 4.0]
     refine_data.deep_depth = 300.0
-    refine_data.max_level_deep = 4
+    refine_data.max_level_deep = 6
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
@@ -421,36 +415,16 @@ def setgeo(rundata):
     # Convert ATCF data to GeoClaw format
     atcf_path = os.path.join(scratch_dir, "MangkhutATCF.dat")
     
+    with open(atcf_path, 'rb') as atcf_file:
+        atcf_file.read().decode('ascii')
+    
     mangkhut = Storm(path=atcf_path, file_format="ATCF")
 
     # Calculate landfall time - Need to specify as the file above does not
     # include this info (~2345 UTC - 6:45 p.m. CDT - on August 28)
     mangkhut.time_offset = datetime.datetime(2018, 9, 16, 6)
-    
-    #test.max_wind_radius_test(mangkhut)
-    
+        
     mangkhut.write(data.storm_file, file_format='geoclaw')
-    #mangkhut.write(data.storm_file, file_format='geoclaw')
-
-    # =======================
-    #  Set Variable Friction
-    # =======================
-    data = rundata.friction_data
-
-    # Variable friction
-    data.variable_friction = True
-
-    # Region based friction
-    # Entire domain
-    data.friction_regions.append([rundata.clawdata.lower,
-                                  rundata.clawdata.upper,
-                                  [np.infty, 0.0, -np.infty],
-                                  [0.030, 0.022]])
-
-    # La-Tex Shelf
-    data.friction_regions.append([(140.0, 8.0), (105.0, 30.0),
-                                  [np.infty, -10.0, -200.0, -np.infty],
-                                  [0.030, 0.012, 0.022]])
 
     return rundata
     # end of function setgeo
