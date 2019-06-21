@@ -32,7 +32,7 @@ def setplot(plotdata=None):
 
     # clear any old figures,axes,items data
     plotdata.clearfigures()
-    plotdata.format = 'ascii'
+    plotdata.format = 'binary'
 
     # Load data from output
     clawdata = clawutil.ClawInputData(2)
@@ -85,7 +85,7 @@ def setplot(plotdata=None):
     # ==========================================================================
     #   Plot specifications
     # ==========================================================================
-    regions = {"Gulf": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
+    regions = {"Coast": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
                         "ylimits": (clawdata.lower[1], clawdata.upper[1]),
                         "figsize": (6.4, 4.8)},
                 "GuangDong": {"xlimits": (110.0, 120.0),
