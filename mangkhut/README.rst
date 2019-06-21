@@ -5,7 +5,7 @@ Basic Example of Storm Surge from Hurricane Isaac
 =================================================
 
 This example contains the data and setup for running a storm surge forecast for
-Hurricane Isaac.  The example can be run via::
+Typhoon Mangkhut.  The example can be run via::
 
     make all
 
