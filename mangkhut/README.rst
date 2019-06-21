@@ -1,7 +1,7 @@
 
-.. _geoclaw_examples_storm_surge_hurricane_isaac:
+.. _geoclaw_examples_storm_surge_typhoon mangkhut:
 
-Basic Example of Storm Surge from Hurricane Isaac
+Basic Example of Storm Surge from Typhoon Mangkhut
 =================================================
 
 This example contains the data and setup for running a storm surge forecast for
