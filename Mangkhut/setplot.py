@@ -87,7 +87,7 @@ def setplot(plotdata=None):
     # ==========================================================================
     regions = {"Coast": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
                         "ylimits": (clawdata.lower[1], clawdata.upper[1]),
-                        "figsize": (7, 7.5)},
+                        "figsize": (8, 7.5)},
                "Zhapo Station": {"xlimits": (111.71666667, 111.91666667),
                                  "ylimits": (21.48333333, 21.68333333),
                                  "figsize": (6, 6)},
