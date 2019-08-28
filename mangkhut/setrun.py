@@ -9,6 +9,9 @@ that will be read in by the Fortran code.
 
 from __future__ import absolute_import
 from __future__ import print_function
+from scipy.integrate import solve_ivp, odeint
+from scipy.optimize import root,fsolve
+from sympy import *
 
 import os
 import datetime
@@ -18,7 +21,187 @@ import gzip
 import numpy as np
 
 import clawpack.clawutil as clawutil
+import clawpack.geoclaw.units as units
 from clawpack.geoclaw.surge.storm_Mangkhut import Storm
+
+# Function solving the outer-region equation.
+def solve_outer_region(r0, chi, f, v0=0, num=0):
+    
+    # Calculate initial value for outer-region equation
+    def f0(x):
+        M0 = 0.5 * f * r0**2 * 1000
+        return (M0 - x[0]) / 0.1 - (x[0] - 0.5 * f * (r0-0.1)**2 * 1000)**2 / (r0**2 - (r0-0.1)**2)
+    y0 = fsolve(f0, 0.5 * f * r0**2 * 1000)[0]
+    def outer_region(y, t):
+        return -chi * (y - 0.5 * f * t**2 * 1000)**2 / (r0**2 - t**2)
+    n = int((r0 - 0.1 - 0.1) * 10 + 1)
+    t = np.linspace(-r0+0.1, -0.1, n)
+    
+    # Solve outer-region equation to get absolute angular momentum
+    M_solver = odeint(outer_region, y0=y0, t=t)
+    v = np.empty(n)
+    n1 = -1
+    
+    # Calculate velocity of every radius
+    for i in range(n):
+        v[n - i - 1] = -(M_solver[i] - 0.5 * f * t[i]**2 * 1000) / t[i]
+        
+        # Find the given velocity v0 and its radius r[n1]
+        if np.abs(v[n - i - 1] - v0) < 1e-1:
+            n1 = n - i - 1
+    r = np.linspace(0.1, r0-0.1, n)
+    
+    # Absolute angular momentum at radius r[num]
+    M = v[num] * r[num] + 0.5 * f * r[num]**2 * 1000
+    return r[n1], M, v[num]
+    
+# Find r0, parameter of outer-region equation.
+def Find_r0(r_r0, v_r0, chi, f):
+    r0_find = np.linspace(r_r0 + 1, 5000, 5000)
+    number = len(r0_find)
+    
+    # Giving specific v, v_r0, find r0 which make v_r0's radius equal to r_r0
+    for m in range(number):
+        r_test = solve_outer_region(r0_find[m], chi, f, v0=v_r0, num=0)[0]
+        if np.abs(r_test - r_r0) < 5e-1:
+            return(r0_find[m])
+            break
+            
+# Calculate radius of maximum wind
+def max_wind_radius_calculation(storm):
+    r"""
+    Use the approach: Complete Radial Structure in the paper [1] to calculate 
+    radius of maximum wind.
+    
+    :Input:
+    - *storm* (object) Storm
+    
+    1. Chavas, D. R., N. Lin, and K. Emanuel, A model for the complete radial 
+    structure of the tropical cyclone wind field. Part I: Comparison with 
+    observed structure. J. Atmos. Sci., 72, 3647–3662 (2015).
+    """
+    
+    rm, ra, va = symbols('rm ra va')
+    A = np.mat(zeros(3,3))
+    B = np.matrix(np.arange(9).reshape((3,3)), dtype = 'float')
+
+    
+    # Number of data lines in storm object
+    num = len(storm.t)
+
+    # w - the average angular velocity of Earth’s rotation
+    w = 7.292e-5
+    
+    v30 = units.convert(30.0, 'knots', 'm/s')
+    
+    # Calculate radius of maximum wind with Newton Method
+    for i in range(num):
+        if (i != 0) & (storm.t[i] == storm.t[i-1]):
+            storm.max_wind_radius[i] = storm.max_wind_radius[i-1]
+            continue
+        
+        # Radius of 30kts wind
+        r30 = -1
+        for j in range(max(i-2, 0), min(i+3, num)):
+            if (storm.wind_speeds[i, 1] != -1) & (np.abs(storm.wind_speeds[i, 0] - v30) < 1e-5) & (storm.t[j] == storm.t[i]):
+                r30 = units.convert(storm.wind_speeds[i, 1], 'm', 'nmi')
+                break
+            else:
+                r30 = -1
+                 
+        # Find radius of maximum defined wind speed (such as 30kt, 50kt in atcf
+        # file) in every record.        
+        max_record_wind_radius = -1
+        a = storm.wind_speeds[i, 0]
+        b = i
+        for k in range(max(i-2, 0), min(i+3, num)):
+            if (storm.t[k] == storm.t[i]) & (storm.wind_speeds[k, 0] > a) & (storm.wind_speeds[k, 1] != -1):
+                b = k
+                a = storm.wind_speeds[k, 0]
+        max_record_wind_radius = units.convert(storm.wind_speeds[b, 1], 'm', 'nmi')
+            
+        # Latitude
+        phi = storm.eye_location[i, 1] * np.pi / 180.0
+        
+        # Coriolis parameter
+        f = 2 * np.sin(phi) * w
+                
+        # Speed of maximum wind
+        vm = units.convert(storm.max_wind_speed[i], 'm/s', 'knots')
+        chi_30 = 1.0
+        if (np.abs(r30) < 1e-5) | (np.abs(r30 + 1) < 1e-5):
+            storm.max_wind_radius[i] = -1
+            continue
+        
+        # Parameter of the equationn set
+        r0 = Find_r0(r30, v30, chi_30, f)
+        chi = 1.0
+        CkCd = 1.0
+        
+        # The equation set
+        f1 = ((ra * va + 0.5 * f * ra**2 * 1000) / (rm * vm + 0.5 * f * rm**2 * 1000))**(CkCd) - 2 * (ra / rm)**2 / (2 - CkCd + CkCd * (ra / rm)**2)
+        f2 = 2 * (ra * va + 0.5 * f * ra**2 * 1000) / (ra * ((ra / rm)**2 + 1)) - chi * (ra * va)**2 / (r0**2 - ra**2)
+        f32 = lambda ra, v, va: chi * (ra * v)**2 / (r0**2 - ra**2) - va - f * ra * 1000
+        
+        # Initial Guess for Newton Method
+        x0 = [1.0, 1.0, 1.0]
+        xk = [0, 0, 0]
+        step = 0
+        if (max_record_wind_radius == -1) | (np.abs(max_record_wind_radius) < 1e-5):
+            storm.max_wind_radius[i] = -1
+            continue
+        x0[0] = max_record_wind_radius / 2.0
+        x0[1] = max_record_wind_radius
+        num_1 = int((x0[1] - 0.1) * 10)
+        M1 = solve_outer_region(r0, chi, f, v0=0, num=num_1)
+        x0[2] = M1[2]
+        Fx0 = [-1, -1, -1]
+        max_wind_radius = 0
+        
+        # Newton Method
+        while((abs(Fx0[0]) > 1.e-3) | (abs(Fx0[1]) > 1.e-3) | (abs(Fx0[2]) > 1.e-3)):
+            F = [f1, f2]
+            x = [rm, ra, va]
+            for m in range(2):
+                for n in range(3):
+                    A[m, n] = diff(F[m], x[n])
+            xk = x0
+            for m in range(2):
+                for n in range(3):
+                    B[m, n] = A[m, n].evalf(subs={rm:xk[0], ra:xk[1], va:xk[2]})
+                    
+            # Check whether va is negative or whether ra is larger than outer radius r0
+            num_2 = int((xk[1] - 0.1) * 10)
+            if (num_2 < 0) | (xk[1] > r0):
+                max_wind_radius = -1
+                break
+            M2 = solve_outer_region(r0, chi, f, v0=0, num=num_2)
+            B[2, 0] = 0
+            B[2, 1] = f32(xk[1], M2[2], xk[2])
+            B[2, 2] = -xk[1]
+            Fx1 = f1.evalf(subs={rm:xk[0], ra:xk[1], va:xk[2]})
+            Fx2 = f2.evalf(subs={rm:xk[0], ra:xk[1], va:xk[2]})
+            Fx3 = M2[1] - (xk[1] * xk[2] + 0.5 * f * xk[1]**2 * 1000)
+            Fx0 = [Fx1, Fx2, Fx3]
+            Fx = np.array(Fx0).reshape(-1,1)
+            
+            # Check whether inv(B) exists
+            if np.linalg.matrix_rank(B) != 3:
+                break
+            B1 = np.linalg.inv(B)
+            B2 = B1 * Fx
+            for l in range(3):
+                x0[l] = xk[l] - B2.sum(axis=1)[l, 0]
+            step = step + 1
+            if step > 1.e3:
+                max_wind_radius = -1
+                break
+        if (max_wind_radius != -1) & (x0[0] > 0) & (x0[0] < r0):
+            max_wind_radius = x0[0]
+            storm.max_wind_radius[i] = units.convert(float(max_wind_radius), 'km', 'm')
+        else:
+            storm.max_wind_radius[i] = -1
+    return None
 
 # Time Conversions
 def days2seconds(days):
@@ -431,6 +614,8 @@ def setgeo(rundata):
     # Calculate landfall time - Need to specify as the file above does not
     # include this info (~2345 UTC - 6:45 p.m. CDT - on August 28)
     mangkhut.time_offset = datetime.datetime(2018, 9, 16, 6)
+    
+    max_wind_radius_calculation(mangkhut)
 
     mangkhut.write(data.storm_file, file_format='geoclaw')
 
