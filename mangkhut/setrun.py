@@ -197,7 +197,7 @@ def max_wind_radius_calculation(storm):
         chi = 1.0
         CkCd = 1.0
         
-        # The equation set: Eqs. (8) and (9)
+        # Two equations of the equation set: Eqs. (8) and (9)
         f1 = ((ra * va + 0.5 * f * ra**2 * 1000) / (rm * vm + 0.5 * f * rm**2 * 1000))**(CkCd) - 2 * (ra / rm)**2 / (2 - CkCd + CkCd * (ra / rm)**2)
         f2 = 2 * (ra * va + 0.5 * f * ra**2 * 1000) / (ra * ((ra / rm)**2 + 1)) - chi * (ra * va)**2 / (r0**2 - ra**2)
         
