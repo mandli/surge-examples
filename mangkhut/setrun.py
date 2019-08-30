@@ -26,23 +26,53 @@ from clawpack.geoclaw.surge.storm_Mangkhut import Storm
 
 # Function solving the outer-region equation.
 def solve_outer_region(r0, chi, f, v0=0, num=0):
+    r"""
+    To use Complete Radial Structure to calculate radius of maximum wind, 
+    the Eq. (2) in [1] needs to be solved first.
     
-    # Calculate initial value for outer-region equation
+    :Input:
+    - *r0* (float) The outer radius where the rotational wind is zero. Default
+      units are kilometers.
+    - *chi* (float) A parameter of the outer region equation.
+    - *f* (float) Coriolis parameter. Default units are rad per second.
+    - *v0* (float) The velocity in the outer-region equation, whose radius is 
+      expected to be found. Default units are meters per second.
+    - *num* (int) The sequence of the radius, whose velocity is expected to be 
+      found in the outer-region equation. The interval of the radius is 
+      0.1 kilometers. Default units are kilometers.
+      
+    :Output:
+    - *r[n1]* (float) The radius of given velocity v0 in the outer-region 
+      equation. Default units are kilometers.
+    - *M* (ndarray(:)) The absolute angular momentum of the outer region 
+      equation. Default units are meters per second * kilometers.
+    - *v[num]* (float) The velocity of given radius r[num]. Default units 
+      are meters per second.
+        
+    1. Chavas, D. R., N. Lin, and K. Emanuel, A model for the complete radial 
+    structure of the tropical cyclone wind field. Part I: Comparison with 
+    observed structure. J. Atmos. Sci., 72, 3647–3662 (2015).
+    """
+    
+    # Calculate initial value for solving outer-region equation
     def f0(x):
         M0 = 0.5 * f * r0**2 * 1000
         return (M0 - x[0]) / 0.1 - (x[0] - 0.5 * f * (r0-0.1)**2 * 1000)**2 / (r0**2 - (r0-0.1)**2)
     y0 = fsolve(f0, 0.5 * f * r0**2 * 1000)[0]
+    
+    # The outer-region equation, the Eq. (2) in [1]
     def outer_region(y, t):
         return -chi * (y - 0.5 * f * t**2 * 1000)**2 / (r0**2 - t**2)
     n = int((r0 - 0.1 - 0.1) * 10 + 1)
     t = np.linspace(-r0+0.1, -0.1, n)
     
-    # Solve outer-region equation to get absolute angular momentum
+    # Solve the outer-region equation to get absolute angular momentum of
+    # radii in the outer-region
     M_solver = odeint(outer_region, y0=y0, t=t)
     v = np.empty(n)
     n1 = -1
     
-    # Calculate velocity of every radius
+    # Calculate velocity for every radius
     for i in range(n):
         v[n - i - 1] = -(M_solver[i] - 0.5 * f * t[i]**2 * 1000) / t[i]
         
@@ -55,12 +85,38 @@ def solve_outer_region(r0, chi, f, v0=0, num=0):
     M = v[num] * r[num] + 0.5 * f * r[num]**2 * 1000
     return r[n1], M, v[num]
     
-# Find r0, parameter of outer-region equation.
+# Find r0, the outer radius where the rotational wind is zero.
 def Find_r0(r_r0, v_r0, chi, f):
+    r"""
+    r0, the outer radius where the rotational wind is zero, is the important 
+    parameter in the outer-region equation, the Eq.(2) in [1]. Giving radius 
+    of wind in the outer-region equation, find the r0 which makes the radius 
+    of given wind in r0's outer-region equation match the given one. Here for 
+    Mangkhut, assume 30kt wind in the outer-region equation.
+    
+    :Input:
+    - *r_r0* (float) The radius of the wind(v_r0) in the outer-region equation.
+      Default units are kilometers.
+    - *v_r0* (float) The random wind in the outer-region equation. Default 
+      units are meters per second.
+    - *chi* (float) A parameter of the outer region equation.
+    - *f* (float) Coriolis parameter. Default units are rad per second.
+      
+    :Output:
+    - *r0_find[m]* (float) The found r0 for the outer-region equation. Default 
+      units are kilometers.
+        
+    1. Chavas, D. R., N. Lin, and K. Emanuel, A model for the complete radial 
+    structure of the tropical cyclone wind field. Part I: Comparison with 
+    observed structure. J. Atmos. Sci., 72, 3647–3662 (2015).
+    """
+    
+    
     r0_find = np.linspace(r_r0 + 1, 5000, 5000)
     number = len(r0_find)
     
-    # Giving specific v, v_r0, find r0 which make v_r0's radius equal to r_r0
+    # Giving specific velocity, v_r0, find r0 which make v_r0's radius 
+    # equal to r_r0
     for m in range(number):
         r_test = solve_outer_region(r0_find[m], chi, f, v0=v_r0, num=0)[0]
         if np.abs(r_test - r_r0) < 5e-1:
@@ -71,7 +127,10 @@ def Find_r0(r_r0, v_r0, chi, f):
 def max_wind_radius_calculation(storm):
     r"""
     Use the approach: Complete Radial Structure in the paper [1] to calculate 
-    radius of maximum wind.
+    radius of maximum wind. To calculate radius of maximum wind, seek to merge
+    the solutions for the inner ascending and outer descending regions given 
+    by Eqs. (6) and (2), respectively [1]. Combined with Eq. (10), this equation 
+    set is solved by Newton method.
     
     :Input:
     - *storm* (object) Storm
@@ -94,7 +153,7 @@ def max_wind_radius_calculation(storm):
     
     v30 = units.convert(30.0, 'knots', 'm/s')
     
-    # Calculate radius of maximum wind with Newton Method
+    # Calculate radius of maximum wind by Newton Method
     for i in range(num):
         if (i != 0) & (storm.t[i] == storm.t[i-1]):
             storm.max_wind_radius[i] = storm.max_wind_radius[i-1]
@@ -138,9 +197,11 @@ def max_wind_radius_calculation(storm):
         chi = 1.0
         CkCd = 1.0
         
-        # The equation set
+        # The equation set: Eqs. (8) and (9)
         f1 = ((ra * va + 0.5 * f * ra**2 * 1000) / (rm * vm + 0.5 * f * rm**2 * 1000))**(CkCd) - 2 * (ra / rm)**2 / (2 - CkCd + CkCd * (ra / rm)**2)
         f2 = 2 * (ra * va + 0.5 * f * ra**2 * 1000) / (ra * ((ra / rm)**2 + 1)) - chi * (ra * va)**2 / (r0**2 - ra**2)
+        
+        # The derivative of Eq. (10) with the respect of ra
         f32 = lambda ra, v, va: chi * (ra * v)**2 / (r0**2 - ra**2) - va - f * ra * 1000
         
         # Initial Guess for Newton Method
