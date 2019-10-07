@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+"""Script for plotting number of cells or grids in time
+"""
+
+from __future__ import print_function
+
 import os
 import sys
 import glob
@@ -31,86 +36,55 @@ convert2rgbfloat = lambda rgb: [value / 256.0 for value in rgb]
 days2seconds = lambda days: days * 60.0**2 * 24.0
 seconds2days = lambda seconds: seconds / (60.0**2 * 24.0)
 
-def set_day_ticks(new_ticks=[-3, -2, -1, 0, 1]):
-    plt.xticks(new_ticks, [str(tick) for tick in new_ticks])
-
-def set_cell_ticks():
-    # plt.ticklabel_format(style='sci')
-    locs,labels = plt.yticks()
-    labels = locs / 1e6
-    plt.yticks(locs,labels)
-    # plt.yticks(new_ticks, [str(tick) for tick in new_ticks])
-
-def plot_num_grids(axes=None, path="./_output"):
-    r"""Plot number of grids used over time."""
-    
-    if axes is None:
-        fig = plt.figure()
-        axes = fig.add_subplot(1, 1, 1)
-
-
-def plot_num_cells(axes=None, path="./_output"):
-    r"""Plot number of cells used over time."""
-    
-    if axes is None:
-        fig = plt.figure()
-        axes = fig.add_subplot(1, 1, 1)
-
-    return axes
-    
-
-if __name__ == "__main__":
-
-    output_path = "./_output"    
-    if len(sys.argv) > 1:
-        output_path = sys.argv[1]
+def get_num_cells_grids(output_path="./_output"):
 
     MAX_LEVELS = 10
-    landfall = datetime.datetime(2008,9,13 - 1,7) - datetime.datetime(2008,1,1,0)
-    landfall = days2seconds(landfall.days) + landfall.seconds
 
-    file_list = glob.glob(os.path.join(output_path,"fort.q*"))
+    num_files = len(glob.glob(os.path.join(output_path, "fort.q*")))
 
-    time = numpy.empty(len(file_list), dtype=float)
-    num_grids = numpy.zeros((time.shape[0], MAX_LEVELS), dtype=int)
-    num_cells = numpy.zeros((time.shape[0], MAX_LEVELS), dtype=int)
+    time = numpy.empty(num_files, dtype=float)
+    num_grids = numpy.zeros((num_files, MAX_LEVELS), dtype=int)
+    num_cells = numpy.zeros((num_files, MAX_LEVELS), dtype=int)
     num_levels = 0
 
-    for (n,path) in enumerate(file_list):
+    for n in range(num_files):
         # Read t file
-        t_path = path[:-5] + "t" + path[-4:]
-        t_file = open(t_path, 'r')
-        time[n] = seconds2days(float(t_file.readline().split()[0]) - landfall)
-        t_file.readline()
-        t_file_num_grids = int(t_file.readline().split()[0])
-        t_file.close()
+        path = os.path.join(output_path, "fort.t%s" % (str(n).zfill(4)))
+        with open(path, 'r') as t_file:
+            time[n] = seconds2days(float(t_file.readline().split()[0]))
+            t_file.readline()
+            t_file_num_grids = int(t_file.readline().split()[0])
 
         # Read q_file
-        q_file = open(path, 'r')
-        line = "\n"
-        while line != "":
-            line = q_file.readline()
-            if "grid_number" in line:
-                # print "grid number:", int(line.split()[0])
-                level = int(q_file.readline().split()[0])
-                num_levels = max(level, num_levels)
-                num_grids[n,level - 1] += 1 
-                mx = int(q_file.readline().split()[0])
-                my = int(q_file.readline().split()[0])
-                num_cells[n,level - 1] += mx * my
-
-        q_file.close()
+        path = os.path.join(output_path, "fort.q%s" % (str(n).zfill(4)))
+        with open(path, 'r') as q_file:
+            line = "\n"
+            while line != "":
+                line = q_file.readline()
+                if "grid_number" in line:
+                    # print "grid number:", int(line.split()[0])
+                    level = int(q_file.readline().split()[0])
+                    num_levels = max(level, num_levels)
+                    num_grids[n,level - 1] += 1 
+                    mx = int(q_file.readline().split()[0])
+                    my = int(q_file.readline().split()[0])
+                    num_cells[n,level - 1] += mx * my
 
         # File checking
         if numpy.sum(num_grids[n,:]) != t_file_num_grids:
             raise ValueError("Number of grids in fort.t* file and fort.q*"
                              " file do not match.")
 
+    return num_levels, time, num_grids, num_cells
+
+
+def plot_num_cells_grids(num_levels, time, num_grids, num_cells):
+    
     # Plot cascading time histories per level
     colors = [ (value / 256.0, value / 256.0, value / 256.0) 
                                 for value in [247, 217, 189, 150, 115, 82, 37] ]
     proxy_artists = [plt.Rectangle((0, 0), 1, 1, fc=colors[level], 
-            label="Level %s" % (str(level+1))) for level in xrange(num_levels)]
+            label="Level %s" % (str(level+1))) for level in range(num_levels)]
 
     # Number of grids
     fig = plt.figure()
@@ -122,7 +96,8 @@ if __name__ == "__main__":
     set_day_ticks()
     axes.set_ylabel('Number of Grids')
     axes.set_title("Number of Grids per Level in Time")
-    axes.legend(proxy_artists, ["Level %s" % (str(level+1)) for level in xrange(num_levels)], loc=2)
+    axes.legend(proxy_artists, ["Level %s" % (str(level+1)) 
+                                    for level in range(num_levels)], loc=2)
     axes.set_ylim(bottom=0.0)
     axes.set_xlim([-3,1])
     fig.savefig("num_grids.png")
@@ -137,7 +112,8 @@ if __name__ == "__main__":
     axes.set_xlabel('Days from landfall')
     axes.set_ylabel('Number of Cells')
     axes.set_title("Number of Cells per Level in Time")
-    axes.legend(proxy_artists, ["Level %s" % (str(level+1)) for level in xrange(num_levels)], loc=2)
+    axes.legend(proxy_artists, ["Level %s" % (str(level+1)) 
+                                    for level in range(num_levels)], loc=2)
     axes.set_ylim(bottom=0.0) 
     axes.set_xlim([-3,1]) 
     fig.savefig("num_cells.png")
@@ -145,3 +121,19 @@ if __name__ == "__main__":
     plt.show()
 
 
+def set_day_ticks(new_ticks=[-3, -2, -1, 0, 1]):
+    plt.xticks(new_ticks, [str(tick) for tick in new_ticks])
+
+
+if __name__ == "__main__":
+
+    output_path = "./_output"    
+    verbose = False
+    if len(sys.argv) > 1:
+        output_path = sys.argv[1]
+
+
+    num_levels, time, num_grids, num_cells = get_num_cells_grids(output_path)
+    if verbose:
+        print(num_levels, time, num_grids, num_cells)
+    plot_num_cells_grids(num_levels, time, num_grids, num_cells)
