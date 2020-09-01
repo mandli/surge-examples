@@ -39,6 +39,7 @@ include $(GEOLIB)/Makefile.geoclaw
 # ---------------------------------------
 
 EXCLUDE_MODULES = \
+
 EXCLUDE_SOURCES = \
 # ----------------------------------------
 # List of custom sources for this program:
@@ -47,6 +48,7 @@ EXCLUDE_SOURCES = \
 RIEMANN = $(CLAW)/riemann/src
 
 MODULES = \
+
 SOURCES =   $(RIEMANN)/rpn2_geoclaw.f   $(RIEMANN)/rpt2_geoclaw.f   $(RIEMANN)/geoclaw_riemann_utils.f 
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
