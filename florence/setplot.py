@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
 
 """ 
 Set up the plot figures, axes, and items to be done for each frame.
