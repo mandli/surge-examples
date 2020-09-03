@@ -16,7 +16,8 @@ topo_urls = {"sandy": ["https://www.dropbox.com/s/jkww7jm78azswk5/atlantic_1min.
              "irene": ["https://www.dropbox.com/s/jkww7jm78azswk5/atlantic_1min.tt3.tar.bz2?dl=0",
                        "https://www.dropbox.com/s/vafi7k6zqn5cfs1/newyork_3s.tt3.tar.bz2?dl=0"],
              "isabel": ["https://www.dropbox.com/s/jkww7jm78azswk5/atlantic_1min.tt3.tar.bz2?dl=0",
-                        "chesapeake.nc"]                     
+                        "chesapeake.nc"],
+             "florence": ["https://www.dropbox.com/s/jkww7jm78azswk5/atlantic_1min.tt3.tar.bz2?dl=0"]
             }
 
 # Etopo support
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     #
     #
 
-    output_dir = os.getwcd()
+    output_dir = os.getcwd()
     force = False
     verbose = False
 
