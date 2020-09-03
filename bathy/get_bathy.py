@@ -63,7 +63,7 @@ if __name__ == "__main__":
     #
     #
 
-    output_dir = os.getwcd()
+    output_dir = os.getcwd()
     force = False
     verbose = False
 
