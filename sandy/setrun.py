@@ -212,7 +212,7 @@ def setrun(claw_pkg='geoclaw'):
     # ------------------
 
     # Order of accuracy:  1 => Godunov,  2 => Lax-Wendroff plus limiters
-    clawdata.order = 1
+    clawdata.order = 2
     
     # Use dimensional splitting? (not yet available for AMR)
     clawdata.dimensional_split = 'unsplit'
@@ -294,16 +294,16 @@ def setrun(claw_pkg='geoclaw'):
 
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 6
+    amrdata.amr_levels_max = 7
 
     # List of refinement ratios at each level (length at least mxnest-1)
     # amrdata.refinement_ratios_x = [2, 2, 2, 6, 16]
     # amrdata.refinement_ratios_y = [2, 2, 2, 6, 16]
-    # amrdata.refinement_ratios_t = [2, 2, 2, 6, 16]
+    # amrdata.refinement_ratios_t = [2, 2, 2, 6, 16] <- ~ 9 meters
 
-    amrdata.refinement_ratios_x = [2, 2, 2, 6, 8]
-    amrdata.refinement_ratios_y = [2, 2, 2, 6, 8]
-    amrdata.refinement_ratios_t = [2, 2, 2, 6, 8]
+    amrdata.refinement_ratios_x = [2, 2, 2, 6, 8, 8]
+    amrdata.refinement_ratios_y = [2, 2, 2, 6, 8, 8]
+    amrdata.refinement_ratios_t = [2, 2, 2, 6, 8, 8]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -353,8 +353,8 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    regions.append([1,6,days2seconds(-0.45),days2seconds(0.10),-74.1,-73.7,40.55,48.5])
-    regions.append([1,5,days2seconds(0.10),days2seconds(1),-74.2,-73.7,40.55,48.5])
+    # regions.append([1,6,days2seconds(-0.45),days2seconds(0.10),-74.1,-73.7,40.55,48.5])
+    # regions.append([1,5,days2seconds(0.10),days2seconds(1),-74.2,-73.7,40.55,48.5])
 
     
     # == setgauges.data values ==
@@ -408,7 +408,7 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geo_data.sea_level = 0.33
+    geo_data.sea_level = 0.0
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
@@ -427,31 +427,7 @@ def setgeo(rundata):
     topo_path = os.path.join('..', 'bathy')
 
     topo_data.topofiles.append([3, 1, 3, days2seconds(-2), days2seconds(1), os.path.join(topo_path,'atlantic_1min.tt3')])
-    topo_data.topofiles.append([3, 1, 3, days2seconds(-2), days2seconds(1), os.path.join(topo_path,'newyork_3s.tt3')])
-    # restrict these make max lower and for all time
-   # for file in glob.glob("../bathy/*.nc"):
-    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_74x00.nc')])
-    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_74x00.nc')])
-   
-    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x50_74x00.nc')])
-    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_73x75.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_73x50.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_73x25.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'montauk_13.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_73x25.nc')])
-    
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x25_74x00.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x25_73x75.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x25_73x50.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x25_73x25.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_73x75.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_73x50.nc')])
-    
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc40x75_73x00.nc')])
-#    topo_data.topofiles.append([4, 1, 6, days2seconds(-0.45),days2seconds(0.46),os.path.join(topo_path,'nc41x00_73x00.nc')])
- 
-    #print(topo_data.topofiles)
-
+    topo_data.topofiles.append([3, 1, 7, days2seconds(-2), days2seconds(1), os.path.join(topo_path,'newyork_3s.tt3')]) # 90 meter accuracy
     
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0

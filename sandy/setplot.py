@@ -12,6 +12,7 @@ import clawpack.visclaw.gaugetools as gaugetools
 import clawpack.clawutil.data as clawdata
 import clawpack.amrclaw.data as amrclaw
 import clawpack.geoclaw.data as geodata
+import clawpack.geoclaw.topotools as topotools
 
 import clawpack.geoclaw.util as geoutil
 import clawpack.geoclaw.surge.plot as surgeplot
@@ -50,6 +51,25 @@ def setplot(plotdata):
     # Set afteraxes function
     surge_afteraxes = lambda cd: surgeplot.surge_afteraxes(cd, track,
                                                            plot_direction=False)
+
+    def plot_coastline(cd):
+        """Load fine coastline for plotting around NYC"""
+        try:
+            # Assumes that at path theres a fine topography file in NetCDF file format
+            path = "/Users/mandli/Dropbox/research/data/topography/atlantic/sandy_bathy/ny_area.nc"
+            topo_file = topotools.Topography(path, topo_type=4)
+            topo_file.read(nc_params={"x_var":"lon", 
+                                      "y_var":"lat", 
+                                      "z_var": "Band1"})
+
+            axes = plt.gca()
+            axes.contour(topo_file.X, topo_file.Y, topo_file.Z, 
+                         levels=[-0.001, 0.001], 
+                         colors='k', linestyles='-')
+        except:
+            pass
+
+        surge_afteraxes(cd)
 
     # Color limits
     surface_range = 4.5
@@ -105,15 +125,16 @@ def setplot(plotdata):
         plotaxes.scaled = True
         plotaxes.xlimits = region_dict['xlimits']
         plotaxes.ylimits = region_dict['ylimits']
-        plotaxes.afteraxes = surge_afteraxes
-        plotaxes.afteraxes = gauge_location_afteraxes
+        plotaxes.afteraxes = plot_coastline
+        # plotaxes.afteraxes = surge_afteraxes
+        # plotaxes.afteraxes = gauge_location_afteraxes
 
         surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits,
                                     shrink=region_dict['shrink'])
         surgeplot.add_land(plotaxes, bounds=land_bounds)
 
-        plotaxes.plotitem_dict['land'].amr_patchedges_show = [1,0,0]
-        plotaxes.plotitem_dict['surface'].amr_patchedges_show = [1,0,0]
+        plotaxes.plotitem_dict['land'].amr_patchedges_show = [0,0,0]
+        plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0,0,0]
 
 
         # ========================================================================
@@ -128,11 +149,14 @@ def setplot(plotdata):
         plotaxes.scaled = True
         plotaxes.xlimits = region_dict['xlimits']
         plotaxes.ylimits = region_dict['ylimits']
-        plotaxes.afteraxes = surge_afteraxes
-
+        plotaxes.afteraxes = plot_coastline
+        
         surgeplot.add_speed(plotaxes, bounds=speed_limits,
                         shrink=region_dict['shrink'])
         surgeplot.add_land(plotaxes, bounds=land_bounds)
+
+        plotaxes.plotitem_dict['land'].amr_patchedges_show = [0,0,0]
+        plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0,0,0]
 
 
 
@@ -210,24 +234,6 @@ def setplot(plotdata):
 
         return seconds_rel_landfall, water_level
 
-    # def get_actual_current(station_id):
-    #     # Fetch currents for given station_name
-    #     date_time, water_level, tide, currents = fetch_noaa_tide_data(station_id,
-    #             begin_date, end_date)
-    #
-    #     # calculate times relative to landfall_time
-    #     secs_rel_landfall = (date_time - landfall_time) / np.timedelta64(1, 's')
-    #     return secs_rel_landfall, currents
-    #
-    # def calc_currents(cd):
-    #     height = cd.q[0,:]
-    #     where_zero = np.where(height == 0)[0]
-    #     for index in where_zero:
-    #         height[index] = 1
-    #     vel_magnitude = (cd.q[1,:]/height)**2 + (cd.q[2,:]/height)**2
-    #     vel_magnitude = vel_magnitude**0.5
-    #     return vel_magnitude
-
     def gauge_afteraxes(cd):
         station_id, station_name = stations[cd.gaugeno-1]
         seconds_rel_landfall, actual_level = get_actual_water_levels(station_id)
@@ -246,27 +252,6 @@ def setplot(plotdata):
         #axes.set_xticklabels([r"$-3$", r"$-2$", r"$-1$", r"$0$", r"$1$"])
         #axes.grid(True)
 
-    # def current_afterxes(cd):
-    #     station_id, station_name = stations[cd.gaugeno-1]
-    #     if len(station_id)==6:
-    #         seconds_rel_landfall, currents = get_actual_currents(station_id)
-    #
-    #         axes = plt.gca()
-    #         #surgeplot.plot_landfall_gauge(cd.gaugesoln, axes, landfall=landfall)
-    #         axes.plot(seconds_rel_landfall, currents, 'g')
-    #
-    #         # Fix up plot - in particular fix time labels
-    #         axes.set_title(station_name)
-    #         axes.set_xlabel('Seconds relative to landfall')
-    #         axes.set_ylabel('Surface (m)')
-    #         axes.set_xlim([days2seconds(-2), days2seconds(1)])
-    #         axes.set_xticks([ days2seconds(-2), days2seconds(-1), 0, days2seconds(1)])
-    #         #axes.set_xticklabels([r"$-3$", r"$-2$", r"$-1$", r"$0$", r"$1$"])
-    #         #axes.grid(True)
-    #
-    #
-
-
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.afteraxes = gauge_afteraxes
@@ -275,32 +260,6 @@ def setplot(plotdata):
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
     plotitem.plot_var = 3
     plotitem.plotstyle = 'b-'
-
-
-    # Speeds
-
-#    plotfigure = plotdata.new_plotfigure(name='Currents', figno=400, \
-#                        type='each_gauge')
-#    plotfigure.show = True
-#    plotfigure.clf_each_gauge = True
-
-#    plotaxes = plotfigure.new_plotaxes()
-    #plotaxes.afteraxes = current_afterxes
-   # plotaxes.axescmd = 'subplot(122)'
-   # try:
-   #     plotaxes.xlimits = [amrdata.t0, amrdata.tfinal]
-   # except:
-   #     pass
-   # plotaxes.ylimits = surface_limits
-    #plotaxes.title = 'Momenta'
-    # plotaxes.afteraxes = surge.gauge_afteraxes
-
-#    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-#    plotitem.plot_var = calc_currents
-#    plotitem.plotstyle = 'r-.'
-    #plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    #plotitem.plot_var = 2
-    #plotitem.plotstyle = 'b-'
 
     #-----------------------------------------
 
