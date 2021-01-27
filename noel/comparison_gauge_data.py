@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[10]:
+# In[31]:
 
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+import urllib.request
+
 ## convert time relative to landfall day
 def landfallTimeConvert(str):
         
-    hours = (int(str[10:12]) + (int(str[13:])/60))/24
+    hours = (int(str[11:13]) + (int(str[14:])/60))/24
     
     if(str[5:7] == "10"):
         rel = int(str[8:10]) - 29
@@ -20,70 +22,103 @@ def landfallTimeConvert(str):
     if(str[5:7] == "11"):
         rel = int(str[8:10]) + 2
         rel += hours
-        return rel
-        
+        return rel 
+    
+## download NOAA water level data
+url_verified = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?'               'begin_date=20071026&end_date=20071103&station=8723214&prod'               'uct=water_level&datum=mllw&units=english&time_zone=gmt&application=web_services&format=csv'
 
+url_predicted = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'                '?begin_date=20071026&end_date=20071103&station=8723214&pr'                'oduct=predictions&datum=mllw&units=english&time_zone=gmt&application=web_services&format=csv'
+
+urllib.request.urlretrieve(url_verified,'virginiakey_florida_verified_water_level_noaa.csv')
+urllib.request.urlretrieve(url_predicted,'virginiakey_florida_predicted_water_level_noaa.csv')
+        
 ## read data of Virginia Key water level
-fwl = pd.read_csv("virginiakey_biscaynebay_florida_water_level_noaa.csv")
-fwl["Difference (m)"] = (fwl["Verified (ft)"] - fwl["Predicted (ft)"])*0.3048
-fwl["Verified (m)"] = fwl["Verified (ft)"]*0.3048
+vkwl_ver = pd.read_csv('virginiakey_florida_verified_water_level_noaa.csv')
+vkwl_pre = pd.read_csv('virginiakey_florida_predicted_water_level_noaa.csv')
+
+vkwl_ver["Difference (m)"] = (vkwl_ver[' Water Level'] - vkwl_pre[' Prediction'])*0.3048
 
 ## changing date relative to landfall time
-fwl["Datetime"] = fwl["Date"]+fwl["Time (LST/LDT)"]
-fwl["Datetime"] = fwl["Datetime"].apply(landfallTimeConvert)
+vkwl_ver["Datetime"] = vkwl_ver['Date Time']
+vkwl_ver["Datetime"] = vkwl_ver["Datetime"].apply(landfallTimeConvert)
 
-gauge_data_1 = fwl[["Difference (m)", "Datetime"]].copy()
+gauge_data_1 = vkwl_ver[["Difference (m)", "Datetime"]].copy()
 
 
-# In[11]:
+# In[32]:
 
+
+## download NOAA water level data
+url_verified = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?'               'begin_date=20071026&end_date=20071103&station=8724580&prod'               'uct=water_level&datum=mllw&units=english&time_zone=gmt&application=web_services&format=csv'
+
+url_predicted = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'                '?begin_date=20071026&end_date=20071103&station=8724580&pr'                'oduct=predictions&datum=mllw&units=english&time_zone=gmt&application=web_services&format=csv'
+
+urllib.request.urlretrieve(url_verified,'key_west_verified_water_level_noaa.csv')
+urllib.request.urlretrieve(url_predicted,'key_west_predicted_water_level_noaa.csv')
 
 ## read data of Key West water level
-kwwl = pd.read_csv("key_west_water_level_noaa.csv")
-kwwl["Difference (m)"] = (kwwl["Verified (ft)"] - kwwl["Predicted (ft)"])*0.3048
-kwwl["Verified (m)"] = kwwl["Verified (ft)"]*0.3048
+kwwl_ver = pd.read_csv('key_west_verified_water_level_noaa.csv')
+kwwl_pred = pd.read_csv('key_west_predicted_water_level_noaa.csv')
+
+kwwl_ver["Difference (m)"] = (kwwl_ver[' Water Level'] - kwwl_pred[' Prediction'])*0.3048
+
+## changing date relative to landfall time
+kwwl_ver["Datetime"] = kwwl_ver['Date Time']
+kwwl_ver["Datetime"] = kwwl_ver["Datetime"].apply(landfallTimeConvert)
 
 
-## changing date to relative to landfall time
-kwwl["Datetime"] = kwwl["Date"]+kwwl["Time (GMT)"]
-kwwl["Datetime"] = kwwl["Datetime"].apply(landfallTimeConvert)
-
-gauge_data_2 = kwwl[["Difference (m)", "Datetime"]].copy()
+gauge_data_2 = kwwl_ver[["Difference (m)", "Datetime"]].copy()
 
 
-# In[12]:
+# In[33]:
 
+
+## download NOAA water level data
+url_verified = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?'               'begin_date=20071026&end_date=20071103&station=9759938&prod'               'uct=water_level&datum=mllw&units=english&time_zone=gmt&application=web_services&format=csv'
+
+url_predicted = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'                '?begin_date=20071026&end_date=20071103&station=9759938&pr'                'oduct=predictions&datum=mllw&units=english&time_zone=gmt&application=web_services&format=csv'
+
+urllib.request.urlretrieve(url_verified,'mona_island_puerto_rico_verified_water_level_noaa.csv')
+urllib.request.urlretrieve(url_predicted,'mona_island_puerto_rico_predicted_water_level_noaa.csv')
 
 ## read data of mona island water level
-prwl = pd.read_csv("mona_island_puerto_rico_water_level_noaa.csv")
-prwl["Difference (m)"] = (prwl["Verified (ft)"] - prwl["Predicted (ft)"])*0.3048
-prwl["Verified (m)"] = prwl["Verified (ft)"]*0.3048
+prwl_ver = pd.read_csv('mona_island_puerto_rico_verified_water_level_noaa.csv')
+prwl_pre = pd.read_csv('mona_island_puerto_rico_predicted_water_level_noaa.csv')
+
+prwl_ver["Difference (m)"] = (prwl_ver[' Water Level'] - prwl_pre[' Prediction'])*0.3048
+
+## changing date relative to landfall time
+prwl_ver["Datetime"] = prwl_ver['Date Time']
+prwl_ver["Datetime"] = prwl_ver["Datetime"].apply(landfallTimeConvert)
+
+gauge_data_3 = prwl_ver[["Difference (m)", "Datetime"]].copy()
 
 
-## changing date to relative to landfall time
-prwl["Datetime"] = prwl["Date"]+prwl["Time (LST/LDT)"]
-prwl["Datetime"] = prwl["Datetime"].apply(landfallTimeConvert)
-
-gauge_data_3 = prwl[["Difference (m)", "Datetime"]].copy()
+# In[34]:
 
 
-# In[13]:
+## download NOAA water level data
+url_verified = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?'               'begin_date=20071026&end_date=20071103&station=9759110&prod'               'uct=water_level&datum=mllw&units=english&time_zone=gmt&application=web_services&format=csv'
 
+url_predicted = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'                '?begin_date=20071026&end_date=20071103&station=9759110&pr'                'oduct=predictions&datum=mllw&units=english&time_zone=gmt&application=web_services&format=csv'
+
+urllib.request.urlretrieve(url_verified,'magueyes_island_puerto_rico_verified_water_level_noaa.csv')
+urllib.request.urlretrieve(url_predicted,'magueyes_island_puerto_rico_predicted_water_level_noaa.csv')
 
 ## read data of magueyes island water level
-miwl = pd.read_csv("magueyes_island_puerto_rico_water_level_noaa.csv")
-miwl["Difference (m)"] = (miwl["Verified (ft)"] - miwl["Predicted (ft)"])*0.3048
-miwl["Verified (m)"] = miwl["Verified (ft)"]*0.3048
+miwl_ver = pd.read_csv('magueyes_island_puerto_rico_verified_water_level_noaa.csv')
+miwl_pre = pd.read_csv('magueyes_island_puerto_rico_predicted_water_level_noaa.csv')
+
+miwl_ver["Difference (m)"] = (miwl_ver[' Water Level'] - miwl_pre[' Prediction'])*0.3048
+
+## changing date relative to landfall time
+miwl_ver["Datetime"] = miwl_ver['Date Time']
+miwl_ver["Datetime"] = miwl_ver["Datetime"].apply(landfallTimeConvert)
+
+gauge_data_4 = miwl_ver[["Difference (m)", "Datetime"]].copy()
 
 
-## changing date to relative to landfall time
-miwl["Datetime"] = miwl["Date"]+miwl["Time (GMT)"]
-miwl["Datetime"] = miwl["Datetime"].apply(landfallTimeConvert)
-
-gauge_data_4 = miwl[["Difference (m)", "Datetime"]].copy()
-
-
-# In[8]:
+# In[35]:
 
 
 # save data as a text file for GeoClaw
@@ -92,4 +127,10 @@ np.savetxt('gauge_data_1.txt', gauge_data_1.values)
 np.savetxt('gauge_data_2.txt', gauge_data_2.values)
 np.savetxt('gauge_data_3.txt', gauge_data_3.values)
 np.savetxt('gauge_data_4.txt', gauge_data_4.values)
+
+
+# In[ ]:
+
+
+
 

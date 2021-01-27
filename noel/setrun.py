@@ -27,11 +27,10 @@ def days2seconds(days):
     return days * 60.0**2 * 24.0
 
 
-# Scratch directory for storing topo and dtopo files:
+# directory for storing topo and dtopo files:
 CLAW = os.environ['CLAW']
 
-scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
-datadir = os.path.join(CLAW,'geoclaw','noel') # directory with noel topo data
+DATA = os.path.join(os.environ.get('DATA_DIR', os.getcwd()))
 
 
 # ------------------------------
@@ -177,7 +176,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.cfl_max = 1.0
 
     # Maximum number of time steps to allow between output times:
-    clawdata.steps_max = 12000
+    clawdata.steps_max = 15000
 
     # ------------------
     # Method to be used:
@@ -392,15 +391,8 @@ def setgeo(rundata):
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
 
-    # use topography data from seperate noel directory
-    topo_path_nc = os.path.join(datadir, 'noel_topo.nc')
-    noel_topo = topotools.read_netcdf(topo_path_nc, coarsen=2, verbose=True)
-
-    # make netcdf file into .tt3 topography file
-    noel_topo.write(os.path.join(datadir, 'topo_for_noel.tt3'), topo_type=3, header_style='geoclaw', Z_format='%15.7e')
-
-    # use new .tt3 file for the topography data
-    topo_path = os.path.join(datadir, 'topo_for_noel.tt3')
+    #use .tt3 file from data directory
+    topo_path = os.path.join(DATA, 'topo_for_noel.tt3')
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, topo_path])
 
     # == setfixedgrids.data values ==
@@ -433,7 +425,7 @@ def setgeo(rundata):
     # Convert ATCF data to GeoClaw format
     clawutil.data.get_remote_file(
                    "http://ftp.nhc.noaa.gov/atcf/archive/2007/bal162007.dat.gz")
-    atcf_path = os.path.join(scratch_dir, "bal162007.dat")
+    atcf_path = os.path.join(DATA, "bal162007.dat")
     # Note that the get_remote_file function does not support gzip files which
     # are not also tar files.  The following code handles this
     with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \

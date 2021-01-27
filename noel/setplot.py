@@ -174,23 +174,23 @@ def setplot(plotdata=None):
     plotaxes.ylimits = [-2, 3]
     plotaxes.title = 'Surface'
 
-    # comparison water level files
-    gauges = [np.loadtxt('gauge_data_1.txt'), np.loadtxt('gauge_data_2.txt'),
-              np.loadtxt('gauge_data_3.txt'), np.loadtxt('gauge_data_4.txt'),
-              np.loadtxt('gauge_data_4.txt'), np.loadtxt('gauge_data_4.txt')]
+    try:
+        # comparison water level files
+        gauges = [np.loadtxt('gauge_data_1.txt'), np.loadtxt('gauge_data_2.txt'),
+                  np.loadtxt('gauge_data_3.txt'), np.loadtxt('gauge_data_4.txt')]
 
-    # origin of comparison data (for legend)
-    data_names = ["Difference in Water level of Virginia Key, Biscanay Bay, Florida from NOAA",
-                  "Difference in Water level of Key West, Florida from NOAA",
-                  "Difference in Water level of Mona Island, Puerto Rico from NOAA",
-                  "Difference in Water level of Magueyes Island, Puerto Rico from NOAA",
-                  "Flood Height of Rum Cay, the Bahamas from local newspaper, Bahamas Press",
-                  "Flood Height of Cat Island, the Bahamas from local newspaper, The Tribune"]
+        # origin of comparison data (for legend)
+        data_names = ["Difference in Water level of Virginia Key, Biscanay Bay, Florida from NOAA",
+                      "Difference in Water level of Key West, Florida from NOAA",
+                      "Difference in Water level of Mona Island, Puerto Rico from NOAA",
+                      "Difference in Water level of Magueyes Island, Puerto Rico from NOAA",
+                      "Flood Height of Rum Cay, the Bahamas from local newspaper, Bahamas Press",
+                      "Flood Height of Cat Island, the Bahamas from local newspaper, The Tribune"]
+
+    except:
+        pass
 
     def gauge_afteraxes(cd):
-
-        # read water level data
-        gauge_data = gauges[cd.gaugeno - 1]
 
         axes = plt.gca()
         surgeplot.plot_landfall_gauge(cd.gaugesoln, axes)
@@ -206,19 +206,26 @@ def setplot(plotdata=None):
         axes.set_xticklabels([r"$-3$", r"$-2$", r"$-1$", r"$0$", r"$1$", r"$2$", r"$3$", r"$4$", r"$5$"])
         axes.grid(True)
 
-        # gauge 5 and 6 are in the Bahamas, and there's no water level data,
-        # comparison data is estimate flood heights from newspapers
-        if(cd.gaugeno == 5 or cd.gaugeno == 6):
-            if(cd.gaugeno == 5):
-            	axes.axhline(y=4*0.3040, color = 'r', label = data_names[4]) # flood height was 4 feet
+        try:
+
+            # gauge 5 and 6 are in the Bahamas, and there's no water level data,
+            # comparison data is estimate flood heights from newspapers
+            if(cd.gaugeno == 5 or cd.gaugeno == 6):
+                if(cd.gaugeno == 5):
+            	    axes.axhline(y=4*0.3040, color = 'r', label = data_names[4]) # flood height was 4 feet
+                else:
+                    axes.axhline(y=5*0.3040, color = 'r', label = data_names[5]) # flood height was 5 feet
+
+            # the rest have NOAA water level files
             else:
-                axes.axhline(y=5*0.3040, color = 'r', label = data_names[5]) # flood height was 5 feet
+                # read water level data
+                gauge_data = gauges[cd.gaugeno - 1]
 
-        # the rest have NOAA water level files
-        else:
-            axes.plot(gauge_data[:, 1], gauge_data[:, 0], label = data_names[cd.gaugeno - 1])
+                axes.plot(gauge_data[:, 1], gauge_data[:, 0], label = data_names[cd.gaugeno - 1])
 
-        axes.legend()
+            axes.legend()
+        except:
+            pass
 
     plotaxes.afteraxes = gauge_afteraxes
 

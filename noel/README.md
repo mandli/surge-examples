@@ -9,7 +9,15 @@ Source: NOAA (National Oceanic and Atmospheric Administration) Tropical Cyclone 
 The data from the storm was taken from NOAA’s storm data archive found here: https://ftp.nhc.noaa.gov/atcf/archive/2007/. Hurricane Noel data is found in the file bal162007.dat.gz. 
 
 # Topography/Bathymetry data:
-Topography/bathymetry data for the Atlantic ocean was taken from the NOAA Grid Extract website where you can extract Earth surface data (https://maps.ngdc.noaa.gov/viewers/grid-extract/index.html). An ETOPO1 (ice) area of  longitude around -89.83 W to -28.62 W, and latitude 12.96 N to 63.80 N was extracted, which is most of the Atlantic ocean, North America, and the Caribbean. The data from this website was of type .tif, so it was converted to NetCDF so it was compatible with GeoClaw through this website: https://mygeodata.cloud/converter/tif-to-netcdf. This topography data was imported into a separate directory and it was then called from setrun.py
+Topography/bathymetry data for the Atlantic ocean was taken from the NOAA Grid Extract website where you can extract Earth surface data (https://maps.ngdc.noaa.gov/viewers/grid-extract/index.html). An ETOPO1 (ice) area of  longitude around -89.83 W to -28.62 W, and latitude 12.96 N to 63.80 N was extracted, which is most of the Atlantic ocean, North America, and the Caribbean. The data from this website was of type .tif, so it was converted to NetCDF so it was compatible with GeoClaw through this website: https://mygeodata.cloud/converter/tif-to-netcdf. It was then converted to a .tt3 file with this code
+
+> #get NetCDF file and use the read_netcf function 
+topo_path_nc = os.path.join(DATA, 'noel_topo.nc')
+noel_topo = topotools.read_netcdf(topo_path_nc, coarsen=2, verbose=True)
+
+> #make netcdf file into .tt3 topography file
+noel_topo.write(os.path.join(DATA, 'topo_for_noel.tt3'), topo_type=3, header_style='geoclaw', Z_format='%15.7e')
+
 
 # GeoClaw results:
 After importing the storm data and the bathymetry data into setrun.py, the simulation reported there was no significant change in water level in Florida, the Bahamas, and Puerto Rico, indicating there was little to no storm surge. The simulation ran from 3 days before landfall (October 26) to 5 days after landfall (November 3).
@@ -23,7 +31,8 @@ Magueyes Island, PR:
 https://tidesandcurrents.noaa.gov/inundationdb/inundation.html?id=9759110
 Mona Island, PR:
 https://tidesandcurrents.noaa.gov/inundationdb/inundation.html?id=9759938 
-The python file comparison_gauge_data.py was used to convert the csv files into data with dates relative to landfall and then converted into a text file.
+
+The python file comparison_gauge_data.py was used to convert the csv files into data with dates relative to landfall and then converted into a text file. Running the comparison_gauge_data.py will automatically download the data.
 
 For the Bahamas, there was no scientific water level data found, therefore the storm surge was compared to flooding heights taken from two different newspapers:
 https://bahamaspress.com/rum-cay-have-its-share-of-heavy-rains/
@@ -33,6 +42,10 @@ https://ufdc.ufl.edu/UF00084249/03028/1x
 The NOAA water level data for Florida and Puerto Rico were mostly consistent with the storm surge from GeoClaw.
 The flood height was extremely different from the storm surge in the Bahamas. This means the flooding was most likely not caused by storm surge. After looking at the NOAA report and NASA data (https://earthobservatory.nasa.gov/images/8185/rain-from-tropical-storm-noel), the amount of rain in the Bahamas was somewhere around 500 mm (20 in.), and in Long Island it was even recorded to be 29.43 in. Therefore, this explains the amount of flooding in the Bahamas.
 The lack of storm surge is consistent with what it’s stated in the NOAA report. The storm was likely traveling too fast to create any significant storm surge.
+
+
+
+
 
 
 
