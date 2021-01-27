@@ -12,10 +12,12 @@ The data from the storm was taken from NOAA’s storm data archive found here: h
 Topography/bathymetry data for the Atlantic ocean was taken from the NOAA Grid Extract website where you can extract Earth surface data (https://maps.ngdc.noaa.gov/viewers/grid-extract/index.html). An ETOPO1 (ice) area of  longitude around -89.83 W to -28.62 W, and latitude 12.96 N to 63.80 N was extracted, which is most of the Atlantic ocean, North America, and the Caribbean. The data from this website was of type .tif, so it was converted to NetCDF so it was compatible with GeoClaw through this website: https://mygeodata.cloud/converter/tif-to-netcdf. It was then converted to a .tt3 file with this code
 
 > #get NetCDF file and use the read_netcf function 
+
 topo_path_nc = os.path.join(DATA, 'noel_topo.nc')
 noel_topo = topotools.read_netcdf(topo_path_nc, coarsen=2, verbose=True)
 
 > #make netcdf file into .tt3 topography file
+
 noel_topo.write(os.path.join(DATA, 'topo_for_noel.tt3'), topo_type=3, header_style='geoclaw', Z_format='%15.7e')
 
 
