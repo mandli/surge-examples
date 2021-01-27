@@ -9,7 +9,10 @@ Topography data was accessed using Grid Extract NOAA website.
 Coastal Relief Model was selected as the dataset.
 Latitude was specified to be -90 to -30 and longitude of 10 to 65. 
 Data was downloaded. 
-An online converter was used to convert the file from TIF to NETCDF. 
+Use the following code to convert file to NETCDF:
+	topo_path=os.path.join(DATA,'IreneTopo2.nc')
+	irenetopo=topo.read_netcdf(topo_path, coarsen=2, verbose=True)
+	irenetopo.write(os.path.join(DATA,'irenetopo.tt3'), topo_type=3, Z_format='%15.7e')
 Topography file was uploaded to a folder in GeoClaw directory.
 
 A separate folder was created to hold setrun.py, setplot.py, and MAKE files. 
