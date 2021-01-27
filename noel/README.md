@@ -1,4 +1,4 @@
-## Hurricane Noel GeoClaw Storm Surge Report
+## Hurricane Noel Storm Surge Example
 
 
 # Hurricane Noel:
