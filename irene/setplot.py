@@ -182,16 +182,25 @@ def setplot(plotdata=None):
     plotaxes.ylimits = [0,1.5]
     plotaxes.title = 'Surface'
     #Gauge Data from NOAA
-    gauges = [np.loadtxt('gauge_data_1.txt'), np.loadtxt('gauge_data_2.txt'), np.loadtxt('gauge_data3.txt'),                                            np.loadtxt('gauge_data_4.txt'), np.loadtxt('gauge_data_5.txt'), np.loadtxt('gauge_data_6.txt')]
-    #Legend with Gauge Locations
-    data_names = ["Duke Marine Lab, NC Data from NOAA",
+    try:
+        gauges = [np.loadtxt('gauge_data_1.txt'), 
+	       np.loadtxt('gauge_data_2.txt'), 
+	       np.loadtxt('gauge_data3.txt'), 
+               np.loadtxt('gauge_data_4.txt'),
+               np.loadtxt('gauge_data_5.txt'),
+	       np.loadtxt('gauge_data_6.txt')]
+        #Legend with Gauge Locations
+        data_names = ["Duke Marine Lab, NC Data from NOAA",
                  "Kiptopeke Beach, NC Data from NOAA",
                  "Atlantic City, NJ Data from NOAA",
                  "Sandy Hook, NJ Data from NOAA",
                  "New London, CT Data from NOAA",
                  "Boston, MA Data from NOAA"]
+    except:
+        print("Add gauge files to directory")
+    
+
     def gauge_afteraxes(cd):
-        gauge_data=gauges[cd.gaugeno-1]
         axes = plt.gca()
         surgeplot.plot_landfall_gauge(cd.gaugesoln, axes)
 
@@ -206,9 +215,12 @@ def setplot(plotdata=None):
         axes.grid(True)
         
         
-        
+    try:
+        gauge_data=gauges[cd.gaugeno-1]
         axes.plot(gauge_data[:,0], gauge_data[:,1], label=data_names[cd.gaugeno-1])
         axes.legend()
+    except:
+            print('Gauge Data Unavailable')
     plotaxes.afteraxes = gauge_afteraxes
         
     

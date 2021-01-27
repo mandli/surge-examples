@@ -27,9 +27,10 @@ def days2seconds(days):
     return days * 60.0**2 * 24.0
 
 
-# Scratch directory for storing topo and dtopo files:
-scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
-datadir = os.path.join(os.environ["CLAW"],'geoclaw','ireneimage')
+# Setrun directory for storing topo and dtopo files:
+#setrundir = os.path.join(os.environ["CLAW"], 'geoclaw', 'setrun')
+#datadir = os.path.join(os.environ["CLAW"],'geoclaw','ireneimage')
+DATA= os.path.join(os.environ.get('datadir', os.getcwd()))
 
 # ------------------------------
 def setrun(claw_pkg='geoclaw'):
@@ -385,13 +386,9 @@ def setgeo(rundata):
     topo_data = rundata.topo_data
     topo_data.topofiles = []
     # for topography, append lines of the form
-    #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
-    topo_path = os.path.join(datadir, 'IreneTopo2.nc')
-    irenetopo = topo.read_netcdf(topo_path,coarsen=2, verbose=True)
-    irenetopo.write(os.path.join(datadir, 'irenetopo.tt3'), topo_type=3, Z_format='%15.7e')	    
-    irene_path=os.path.join(datadir, 'irenetopo.tt3')
+    irene_path=os.path.join(DATA, 'irenetopo.tt3')
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0,
                                 rundata.clawdata.tfinal,
                                 irene_path])
@@ -426,7 +423,7 @@ def setgeo(rundata):
     # Convert ATCF data to GeoClaw format
     clawutil.data.get_remote_file(
                    "http://ftp.nhc.noaa.gov/atcf/archive/2011/bal092011.dat.gz")
-    atcf_path = os.path.join(scratch_dir, "bal092011.dat")
+    atcf_path = os.path.join(DATA, "bal092011.dat")
     # Note that the get_remote_file function does not support gzip files which
     # are not also tar files.  The following code handles this
     with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \
