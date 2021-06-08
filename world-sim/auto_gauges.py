@@ -13,7 +13,7 @@ from clawpack.geoclaw import topotools
 ##### 
 # to automatically place your gauges, first add your topography
 # and storm files below. Then, in setrun, import this module ("import auto_gauges")
-# and call "auto_gauges.return_gauge_points(rundata)" where gauges are supposed to go
+# and call "auto_gauges.return_gauge_points(rundata)" to place gauges
 #####
 
 ## directory where your data is
@@ -25,72 +25,72 @@ DATA = os.path.join(os.environ.get('DATA_DIR', os.getcwd()))
 ####
 topofiles = []
 
-for n in [2,3,12,13,14]:
+for n in range(1,13):
     topo = topotools.Topography()
-    topo.read('../topo_files/world_' + str(n) + '.tt3', topo_type=3) # this is for world topo, put the path to your files
+    topo.read('../topofilesagain/world_' + str(n) + '.tt3', topo_type=3)
     topofiles.append(topo)
 
 ## replace with your storm
-atcf_path = os.path.join(DATA, "bal162007.dat")
-storm = Storm(path=atcf_path, file_format="ATCF")
+storm=Storm('./00009.storm', file_format='geoclaw')
 
 ## finds the nearest points to the storm on the shoreline by using topotools 
 ## makeshoreline method and finding the minimum distance from the eyelocation 
 ## of the storm and the shoreline
-def points_on_shoreline(storm):
-    
-    shoreline = []
-    
-    for n in topofiles:
-        for i in n.make_shoreline_xy():
-            shoreline.append(i)
-    
-    sub_sample_storm = storm.eye_location[::3] 
-    # this takes every third coordinate, for more gauges decrease steps,
-    # for less gauges increase steps
 
-    points = np.empty([len(sub_sample_storm), 2])
-    
-    count = 0
-    
-    for n in sub_sample_storm:
-    
-        nearest_shore = near_shoreline(n[0], n[1], shoreline)
-        
-        points[count] = (shoreline[nearest_shore])
-        count = count + 1
-        
-    
-    return points
-
-## if storm file is read in as geoclaw file, comment out previous method
-## and uncomment this method:
-
+## if read in storm as atcf file, use this method:
 # def points_on_shoreline(storm):
-    
-#     location_x = storm.eye_location[0]
-    
-#     location_y = storm.eye_location[1]
     
 #     shoreline = []
     
 #     for n in topofiles:
 #         for i in n.make_shoreline_xy():
 #             shoreline.append(i)
+    
+#     sub_sample_storm = storm.eye_location[::3] 
+#     # this takes every third coordinate, for more gauges decrease steps,
+#     # for less gauges increase steps
 
-#     points = np.empty([len(location_y), 2])
+#     points = np.empty([len(sub_sample_storm), 2])
     
 #     count = 0
     
-#     for n in range(0, len(points)):
+#     for n in sub_sample_storm:
     
-#         nearest_shore = near_shoreline(location_x[n], location_y[n], shoreline)
+#         nearest_shore = near_shoreline(n[0], n[1], shoreline)
         
 #         points[count] = (shoreline[nearest_shore])
 #         count = count + 1
         
     
 #     return points
+
+## if storm file is read in as geoclaw file, use this method:
+
+def points_on_shoreline(storm):
+    
+    location_x = storm.eye_location[0]
+    
+    location_y = storm.eye_location[1]
+    
+    shoreline = []
+    
+    for n in topofiles:
+        for i in n.make_shoreline_xy():
+            shoreline.append(i)
+
+    points = np.empty([len(location_y), 2])
+    
+    count = 0
+    
+    for n in range(0, len(points)):
+    
+        nearest_shore = near_shoreline(location_x[n], location_y[n], shoreline)
+        
+        points[count] = (shoreline[nearest_shore])
+        count = count + 1
+        
+    
+    return points
 
 
 ## returns shoreline closest to storm by calculating distance
@@ -144,7 +144,7 @@ def which_topo(topo_array, point):
             count += 1
 
 
-## using bilinear interpolation, finds 2 variable equation by finding coefficients
+## using bilinear interpolation, finds bilinear function by finding coefficients
 ## based on this wikipedia page: https://en.wikipedia.org/wiki/Bilinear_interpolation
 def equation_from_bilinear_interpolation(x, y, x_array, y_array, z_array, x_min, x_max, y_min, y_max):
     
@@ -209,7 +209,7 @@ def integrate_bilinear_function(coefficients_array, x_min, x_max, y_min, y_max):
     
 ## appends the gauge points
 ## to find the gauge points, first an array of points on the coast were found
-## then, the resolution of each point was increased
+## then, the resolution at each point was increased
 ## we then predict the z value, or the depth/height at that point by integrating
 ## and then dividing by the area (the grid cell size was made 0.008 since 
 ## 0.008 degrees approx = 1 km) 
