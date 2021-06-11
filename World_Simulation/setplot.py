@@ -116,7 +116,6 @@ def setplot(plotdata=None):
     plotaxes.title = "Manning's N Coefficient"
     plotaxes.afteraxes = friction_after_axes
     plotaxes.scaled = True
-    MappedGrid=0;
     surgeplot.add_friction(plotaxes, bounds=friction_bounds, shrink=0.9)
     plotaxes.plotitem_dict['friction'].amr_patchedges_show = [0] * 10
     plotaxes.plotitem_dict['friction'].colorbar_label = "$n$"
@@ -142,7 +141,6 @@ def setplot(plotdata=None):
     # Wind field
     plotfigure = plotdata.new_plotfigure(name='Wind Speed')
     plotfigure.show = surge_data.wind_forcing and True
-    MappedGrid=0;
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.xlimits = regions['World']['xlimits']
     plotaxes.ylimits = regions['World']['ylimits']
@@ -237,7 +235,7 @@ def setplot(plotdata=None):
     plotdata.printfigs = True                # print figures
     plotdata.print_format = 'png'            # file format
     plotdata.print_framenos = 'all'          # list of frames to print
-    plotdata.print_gaugenos = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]   # list of gauges to print
+    plotdata.print_gaugenos = 'all'          # list of gauges to print
     plotdata.print_fignos = 'all'            # list of figures to print
     plotdata.html = True                     # create html files of plots?
     plotdata.latex = True                    # create latex file of plots?
