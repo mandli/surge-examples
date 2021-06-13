@@ -33,7 +33,7 @@ Files were adjusted to have latitude from 0 to 360. Code for Adjusting Topograph
         print(topo.x)
         topo.plot()
 
-Sotrm file was uploaded in directory named 'Storm'. Ran multiple storms using the topography of the entire world.
+Storm file was uploaded in directory named 'Storm'. Ran multiple storms using the topography of the entire world.
 
 
 Storms we ran so far were near Australia and New Zealand.
