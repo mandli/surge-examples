@@ -4,16 +4,16 @@ from __future__ import print_function
 import os
 
 import numpy as np
-import math
 
 from clawpack.geoclaw.surge.storm import Storm
 import clawpack.clawutil as clawutil
 from clawpack.geoclaw import topotools
 
 ##### 
-# to automatically place your gauges, first add your topography
-# and storm files below. Then, in setrun, import this module ("import auto_gauges")
-# and call "auto_gauges.return_gauge_points(rundata)" where gauges are supposed to go
+# to automatically place your gauges, first add your topography below. 
+# Then, in setrun, import this module ("import auto_gauges")
+# and call "auto_gauges.return_gauge_points(rundata, storm file, type of storm file (eg ATCF, geoclaw))"
+# where gauges are supposed to go
 #####
 
 ## directory where your data is
@@ -30,14 +30,11 @@ for n in [2,3,12,13,14]:
     topo.read('../topo_files/world_' + str(n) + '.tt3', topo_type=3) # this is for world topo, put the path to your files
     topofiles.append(topo)
 
-## replace with your storm
-atcf_path = os.path.join(DATA, "bal162007.dat")
-storm = Storm(path=atcf_path, file_format="ATCF")
 
 ## finds the nearest points to the storm on the shoreline by using topotools 
 ## makeshoreline method and finding the minimum distance from the eyelocation 
 ## of the storm and the shoreline
-def points_on_shoreline(storm):
+def points_on_shoreline_atcf(storm):
     
     shoreline = []
     
@@ -63,34 +60,33 @@ def points_on_shoreline(storm):
     
     return points
 
-## if storm file is read in as geoclaw file, comment out previous method
-## and uncomment this method:
+## if storm file is read in as geoclaw file:
 
-# def points_on_shoreline(storm):
+def points_on_shoreline_geo(storm):
     
-#     location_x = storm.eye_location[0]
+    location_x = storm.eye_location[0]
     
-#     location_y = storm.eye_location[1]
+    location_y = storm.eye_location[1]
     
-#     shoreline = []
+    shoreline = []
     
-#     for n in topofiles:
-#         for i in n.make_shoreline_xy():
-#             shoreline.append(i)
+    for n in topofiles:
+        for i in n.make_shoreline_xy():
+            shoreline.append(i)
 
-#     points = np.empty([len(location_y), 2])
+    points = np.empty([len(location_y), 2])
     
-#     count = 0
+    count = 0
     
-#     for n in range(0, len(points)):
+    for n in range(0, len(points)):
     
-#         nearest_shore = near_shoreline(location_x[n], location_y[n], shoreline)
+        nearest_shore = near_shoreline(location_x[n], location_y[n], shoreline)
         
-#         points[count] = (shoreline[nearest_shore])
-#         count = count + 1
+        points[count] = (shoreline[nearest_shore])
+        count = count + 1
         
     
-#     return points
+    return points
 
 
 ## returns shoreline closest to storm by calculating distance
@@ -110,12 +106,12 @@ def near_shoreline(storm_x, storm_y, shoreline):
 def distance(x1, y1, x2, y2):
     
     # convert to radians
-    x1 = x1*math.pi/180
-    x2 = x2*math.pi/180
-    y1 = y1*math.pi/180
-    y2 = y2*math.pi/180
+    x1 = x1*np.pi/180
+    x2 = x2*np.pi/180
+    y1 = y1*np.pi/180
+    y2 = y2*np.pi/180
     
-    distance = 2*6378.137*np.arcsin(math.sqrt(math.sin((y2-y1)/2)**2 + math.cos(y1)*math.cos(y2)*(math.sin((x2-x1)/2)**2)))
+    distance = 2*6378.137*np.arcsin(np.sqrt(np.sin((y2-y1)/2)**2 + np.cos(y1)*np.cos(y2)*(np.sin((x2-x1)/2)**2)))
     
     return distance
 
@@ -124,7 +120,7 @@ def index(array, float_num):
     
     for n,k in enumerate(array):
         
-        if(math.isclose(k, float_num)):
+        if(np.isclose(k, float_num)):
             return n
         
         if(array[n-1] < float_num < array[n]):
@@ -215,11 +211,21 @@ def integrate_bilinear_function(coefficients_array, x_min, x_max, y_min, y_max):
 ## 0.008 degrees approx = 1 km) 
 ## if the predicted z < 0, which is sea level, this point is on the water and 
 ## a gauge is placed there
-def return_gauge_points(rundata):
+def return_gauge_points(rundata, storm_path, storm_file_format):
+    
+    ## replace with your storm
+    storm = Storm(path=storm_path, file_format=storm_file_format)
     
     points_gauges = []    
 
-    points_coast = points_on_shoreline(storm)
+    if(storm_file_format == "ATCF"):
+        points_coast = points_on_shoreline_atcf(storm)
+        
+    elif(storm_file_format == "geoclaw"):
+        points_coast = points_on_shoreline_geo(storm)
+        
+    else:
+        print("Unrecognizable storm file format. Please use ATCF or geoclaw format.")
     
     for n in points_coast:
         
