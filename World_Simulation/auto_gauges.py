@@ -7,6 +7,7 @@ import numpy as np
 
 from clawpack.geoclaw.surge.storm import Storm
 import clawpack.clawutil as clawutil
+import clawpack.geoclaw.util
 from clawpack.geoclaw import topotools
 
 ##### 
