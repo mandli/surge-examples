@@ -105,15 +105,7 @@ def near_shoreline(storm_x, storm_y, shoreline):
 ## find distance between two points by using haversine formula    
 def distance(x1, y1, x2, y2):
     
-    # convert to radians
-    x1 = x1*np.pi/180
-    x2 = x2*np.pi/180
-    y1 = y1*np.pi/180
-    y2 = y2*np.pi/180
-    
-    distance = 2*6378.137*np.arcsin(np.sqrt(np.sin((y2-y1)/2)**2 + np.cos(y1)*np.cos(y2)*(np.sin((x2-x1)/2)**2)))
-    
-    return distance
+    return clawpack.geoclaw.util.haversine(x1, y1, x2, y2)
 
 ## returns the index of the closest values in the topo arrays to the desired coordinate 
 def index(array, float_num):    
