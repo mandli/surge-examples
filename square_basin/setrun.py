@@ -11,10 +11,15 @@ from __future__ import absolute_import
 from __future__ import print_function
 import os
 import datetime
-
+import shutil
+import gzip
+import math
 import numpy as np
 
 import clawpack.clawutil.data as data
+from clawpack.geoclaw.surge.storm import Storm
+import clawpack.clawutil as clawutil
+
 
 #                           days   s/hour    hours/day            
 days2seconds = lambda days: days * 60.0**2 * 24.0
@@ -23,6 +28,9 @@ seconds2days = lambda seconds: seconds / (60.0**2 * 24.0)
 RAMP_UP_TIME = 0.5  # In days
 # In this case we simply use the default base_date in the surge.data module
 tracy_landfall = datetime.datetime(2008, 8, 1, 12) - datetime.datetime(2008,1,1,0)
+
+# Scratch directory for storing topo and storm files:
+scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
 
 #------------------------------
 def setrun(claw_pkg='geoclaw'):
@@ -70,15 +78,15 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_dim = ndim
 
     # Lower and upper edge of computational domain:
-    clawdata.lower[0] = -90.0
-    clawdata.upper[0] = -85.0
+    clawdata.lower[0] = -115.0
+    clawdata.upper[0] = -65.0
     
-    clawdata.lower[1] = 20.0
-    clawdata.upper[1] = 25.0
+    clawdata.lower[1] = 0.0
+    clawdata.upper[1] = 50.0
 
     # Number of grid cells:
-    clawdata.num_cells[0] = 64
-    clawdata.num_cells[1] = 64
+    clawdata.num_cells[0] = 200
+    clawdata.num_cells[1] = 200
     # ---------------
     # Size of system:
     # ---------------
@@ -98,7 +106,7 @@ def setrun(claw_pkg='geoclaw'):
     # Initial time:
     # -------------
 
-    clawdata.t0 = days2seconds(tracy_landfall.days - RAMP_UP_TIME) + tracy_landfall.seconds
+    clawdata.t0 = 0 #-days2seconds(3)
 
     # Restart from checkpoint file of a previous run?
     # Note: If restarting, you must also change the Makefile to set:
@@ -119,13 +127,13 @@ def setrun(claw_pkg='geoclaw'):
     # Note that the time integration stops after the final output time.
     # The solution at initial time t0 is always written in addition.
 
-    clawdata.output_style = 2
+    clawdata.output_style = 1 # previously 2
 
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(tracy_landfall.days + 2) + tracy_landfall.seconds
-        recurrence = 24
+        clawdata.tfinal = days2seconds(4)
+        recurrence = 4 # previously 24
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
                                             * recurrence / (60**2 * 24))
 
@@ -157,7 +165,8 @@ def setrun(claw_pkg='geoclaw'):
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
     #   (E.g. verbosity == 2 means print only on levels 1 and 2.)
-    clawdata.verbosity = 1
+    clawdata.verbosity = 0 # previously 1
+
 
 
 
@@ -241,11 +250,11 @@ def setrun(claw_pkg='geoclaw'):
     #   2 => periodic (must specify this at both boundaries)
     #   3 => solid wall for systems where q(2) is normal velocity
 
-    clawdata.bc_lower[0] = 'wall'
-    clawdata.bc_upper[0] = 'wall'
+    clawdata.bc_lower[0] = 'extrap'
+    clawdata.bc_upper[0] = 'extrap'
 
-    clawdata.bc_lower[1] = 'wall'
-    clawdata.bc_upper[1] = 'wall'
+    clawdata.bc_lower[1] = 'extrap'
+    clawdata.bc_upper[1] = 'extrap'
 
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
@@ -276,7 +285,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 5
+    amrdata.amr_levels_max = 1
 
     # List of refinement ratios at each level (length at least mxnest-1)
     # Run resolution.py 2 2 4 8 16 to see approximate resolutions
@@ -331,7 +340,7 @@ def setrun(claw_pkg='geoclaw'):
     gauges = rundata.gaugedata.gauges
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
     N_gauges = 21
-    for i in xrange(0,N_gauges):
+    for i in range(0,N_gauges):
         x = clawdata.lower[0] + 4.55 # This is right where the shelf turns into beach, 100 meter of water
         y = clawdata.lower[1] + 5.0 / (N_gauges + 1) * (i+1)       # Start 25 km inside domain
         gauges.append([i, x, y, 0.0, 1e10])
@@ -367,6 +376,10 @@ def setgeo(rundata):
     geo_data.gravity = 9.81
     geo_data.coordinate_system = 2
     geo_data.earth_radius = 6367.5e3
+    # added
+    geo_data.rho = 1025.0
+    geo_data.rho_air = 1.15
+    geo_data.ambient_pressure = 101.3e3
 
     # == Forcing Options
     geo_data.coriolis_forcing = True
@@ -420,8 +433,8 @@ def setgeo(rundata):
     data = rundata.surge_data
 
    # Physics parameters
-    data.rho_air = 1.15             # Density of air (rho is not implemented above)
-    data.ambient_pressure = 101.5e3 # Nominal atmos pressure
+    # data.rho_air = 1.15             # Density of air (rho is not implemented above)
+    # data.ambient_pressure = 101.5e3 # Nominal atmos pressure
 
     # Source term controls
     data.wind_forcing = True
@@ -432,24 +445,113 @@ def setgeo(rundata):
     data.wind_refine = [20.0,40.0,60.0]
     data.R_refine = [60.0e3,40e3,20e3]
     
-    # Storm parameters
-    data.storm_type = 1 # Type of storm
-    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'tracy.storm'))
-    data.landfall = days2seconds(tracy_landfall.days) + tracy_landfall.seconds
+    # Storm parameters 
+    data.storm_specification_type = "holland80" #previously 0
+    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
+                                         'my_storm.storm'))  
+    # 16 time steps, because 6 hour steps in 4 days
+    forecasts = 16
+    my_storm = Storm(file_format="geoclaw")
+    my_storm.time_offset = datetime.datetime(2008, 9 , 13, 7) # Year, Month, Day
+    my_storm.t = np.array([my_storm.time_offset + i * datetime.timedelta(hours=6)
+                  for i in range(forecasts)]) #over 4 days
+    
+    '''
+    # A Boring Storm
+    my_storm.eye_location = np.array([[-88.0, 22.0]]*forecasts) #[-88.5,22.5]*16
+    my_storm.max_wind_speed = np.array([40.0]*forecasts)
+    my_storm.max_wind_radius = np.array([80000.0]*forecasts) # 100km
+    my_storm.central_pressure = np.array([950.0 * 1e2]*forecasts)
+    my_storm.storm_radius = np.array([300000.0]*forecasts)
+    # end
+    
+    # Linearly ramping up storm
+    eye_loc = []
+    eye_x0 = -110.
+    eye_y0 = 45.0
+    mws = []
+
+    for idx in range(forecasts):
+        eye_x0 += 2.0
+        eye_y0 -= 2.0 
+        eye_pos = [eye_x0, eye_y0]
+        eye_loc.append(eye_pos)
+
+
+
+    my_storm.eye_location = np.array(eye_loc) #[-88.5,22.5]*16
+    my_storm.max_wind_speed = np.linspace(0.0, 40.0, num=16)
+    my_storm.max_wind_radius = np.linspace(0.0, 80000.0, num=16)
+    my_storm.central_pressure = np.linspace(0.0, 950.0 * 1e2, num=16)
+    my_storm.storm_radius = np.array([300000.0]*forecasts)
+
+    # end of block
+    
+    '''
+    
+    # general smooth function
+    def f(t):
+        return 100*math.exp(-(t**2)/2) # implementing a guassian curve
+        
+    ## define an interval of the function in which the storm will use
+    a = -3.0 # start of interval, usually 0
+    b = 3.0 # end of interval, can be changed
+
+    t_series = np.linspace(a,b, num=16)
+
+    my_storm.eye_location = np.array([[-88.0, 22.0]]*forecasts) 
+    max_wind_speed = np.array([f(t) for t in t_series])
+    
+    my_storm.max_wind_speed = max_wind_speed
+
+    # Max Wind Radius
+    C0 = 218.3784 * np.ones(max_wind_speed.shape[0])
+    # print(storm.eye_location[:, 1].shape, storm.max_wind_speed.shape[0])
+    my_storm.max_wind_radius = ( C0 - 1.2014 * max_wind_speed 
+    + (max_wind_speed / 10.9884)**2 
+    - (max_wind_speed / 35.3052)**3 
+    - 145.5090 * np.cos(my_storm.eye_location[:, 1] * 0.0174533) )*1000
+
+    # Add central pressure - From Kossin, J. P. WAF 2015
+    a = -0.0025
+    b = -0.36
+    c = 1021.36
+    my_storm.central_pressure = ( a * max_wind_speed**2
+    + b * max_wind_speed
+    + c)
+
+    # Extent of storm set to 300 km 
+    my_storm.storm_radius = 300000 * np.ones(my_storm.t.shape)
+    
+    # end of block
+    
+    
+    
+    
+
+    my_storm.write("my_storm.storm", file_format='geoclaw')
+
+    
+
+
+    
+    # data.landfall = days2seconds(tracy_landfall.days) + tracy_landfall.seconds
+    
+
     data.display_landfall_time = True
 
     # Storm parameters, not written out but used to write the tracy.data file
-    data.ramp_up_t = days2seconds(RAMP_UP_TIME)
+    #data.ramp_up_t = days2seconds(RAMP_UP_TIME)
     # Convert from 5.0 m/s to degrees/s at lat 25N
-    data.velocity = [4.9603e-05, 0.0]
+    #data.velocity = [4.9603e-05, 0.0]
     # Assume domain (-90, 20) to (-85, 25) (W and N respectively)
-    data.R_eye_init = [-89, 22.5]
-    data.A = 23.0
-    data.B = 1.5
-    data.Pc = 950.0 * 1e2 # Have to convert this to Pa instead of millibars
+    #data.R_eye_init = [-89, 22.5]
+    #data.A = 23.0
+    #data.B = 1.5
+    #data.Pc = 950.0 * 1e2 # Have to convert this to Pa instead of millibars
 
     # surge.data.write_idealized_holland_storm_data(data.storm_file, data)
-
+    
     # =======================
     #  Set Variable Friction
     # =======================
@@ -464,6 +566,11 @@ def setgeo(rundata):
                                   rundata.clawdata.upper,
                                   [np.infty,0.0,-np.infty],
                                   [0.030, 0.022]])
+
+    # La-Tex Shelf
+    data.friction_regions.append([(-98, 25.25), (-90, 30),
+                                  [np.infty, -10.0, -200.0, -np.infty],
+                                  [0.030, 0.012, 0.022]])
 
     return rundata
     # end of function setgeo
