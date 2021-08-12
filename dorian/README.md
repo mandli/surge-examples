@@ -82,4 +82,28 @@ for station_id in station_ids:
 
 ## Conclusion
 
-Simulations performed at lower refinement levels (3-4) for gauges 1, 2, and 5-8 predict storm surge heights to within a foot of actual data and times to within a few hours of actual data. Results from gauges 3 and 4 are harder to gather as they are located further inland. For these, refinement levels must be higher to register water and not land.
+Simulations performed at lower refinement levels (3-4) for gauges 1, 2, and 5-8 predict storm surge heights to within 0.4 meters of actual data and times to within a few hours of actual data. Results from gauges 3 and 4 are harder to gather as they are located further inland. For these, refinement levels must be higher to register water and not land. Here is a summary of the results from each gauge:
+1. Trident Pier, Port Canaveral, FL (Station ID: 8721604)
+    - NOAA: Slight rise in water level
+    - Geoclaw: No surge
+2. Lake Worth Pier, Atlantic Ocean, FL (Station ID: 8722670)
+    - NOAA: Slight rise in water level
+    - Geoclaw: No surge
+3. Mayport (Bar Pilots Dock), FL (Station ID: 8720218)
+    - NOAA: Surges to 1.0 meters
+    - Geoclaw: Higher refinement levels needed
+4. Fernandina Beach, FL (Station ID: 8720030)
+    - NOAA: Surges to 1.3 meters
+    - Geoclaw: Higher refinement levels needed
+5. Fort Pulaski, GA (Station ID: 8670870)
+    - NOAA: Surges to 1.2 meters
+    - Geoclaw: Surges to 0.8 meters
+6. Charleston, Cooper River Entrance, SC (Station ID: 8665530)
+    - NOAA: Surges to 1.0 meters
+    - Geoclaw: Surges to 1.0 meters
+7. Springmaid Pier, SC (Station ID: 8661070)
+    - NOAA: Surges to 1.0 meters
+    - Geoclaw: Surges to 1.1 meters
+8. Beaufort, Duke Marine Lab, NC (Station ID: 8656483)
+    - NOAA: Surges to 0.6 meters
+    - Geoclaw: Surges to 1.0 meters
