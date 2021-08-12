@@ -2,6 +2,8 @@
 
 Tropical storm Dorian formed in the Atlantic on 24 August 2019 and made landfall in Barbados on 27 August 2019. Dorian then moved through the U.S. Virgin Islands and Puerto Rico, finding a region of "warm ocean" and "abundant atmospheric moisture," which encouraged the storm's escalation to a category 5 hurricane. Dorian made landfall in the Bahamas on 1 September 2019, inflicting historic damage, before weakening and making its way up the eastern coast of Florida. Dorian gained stength past Florida, moved to Georgia, South Carolina, North Carolina, and then further north, eventually dissapating in the Atlantic on 8 September 2019.
 
+Running `make all` will compile the necessary code for the simulation.
+
 Source: <https://www.nhc.noaa.gov/data/tcr/AL052019_Dorian.pdf>
 
 ## Storm Data
@@ -107,3 +109,5 @@ Simulations performed at lower refinement levels (3-4) for gauges 1, 2, and 5-8 
 8. Beaufort, Duke Marine Lab, NC (Station ID: 8656483)
     - NOAA: Surges to 0.6 meters
     - Geoclaw: Surges to 1.0 meters
+
+For questions, contact Elias Finkelstein at wef2105@columbia.edu
