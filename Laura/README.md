@@ -67,19 +67,21 @@ Make all
 ```
 will run the whole simulation from start to finish. Run this to see the result for the first time
 
-One can also specify only running output and plots by running
+One can also specify only running data, output, or plots by running
 ```
+Make data
 Make output
 Make plots
 ```
 This is mostly used to changes only plots without running the output (which takes the longest)
 
-Adding dot in front of make argument will automatically run required command if previous step is missing
+Adding dot in front of make argument will automatically run required command if previous step is missing, like:
 ```
+Make .data
 Make .output
 Make .plots
 ```
-This is highly recommanded to ensure all required data are generated
+This is recommanded to ensure all required data are generated
 
 
 ## GeoClaw results:
