@@ -308,8 +308,11 @@ def setrun(claw_pkg='geoclaw'):
     
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
+
+    # region for entire domain
     regions.append([1, 2, rundata.clawdata.t0, rundata.clawdata.tfinal, -90.0, -60.0, 15.0, 35.0])
 
+    # regions of higher refinement around gauges
     regions.append([5, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, -81.2, -80.9, 24.6, 24.8])
     regions.append([6, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, -81.9, -81.65, 24.4, 24.7])
     regions.append([3, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, -81.9, -81.5, 25.75, 26.25])
@@ -317,6 +320,7 @@ def setrun(claw_pkg='geoclaw'):
     regions.append([2, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, -83.5, -82.5, 27.5, 28.5])
     regions.append([5, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, -66.5, -65.5, 18.0, 19.0])
 
+    # regions of lower refinement
     regions.append([1, 1, rundata.clawdata.t0, rundata.clawdata.tfinal, -75.0, -60.0, 25.0, 35.0])
     regions.append([1, 1, rundata.clawdata.t0, rundata.clawdata.tfinal, -90.0, -85.0, 17.5, 25.0])
     regions.append([1, 1, rundata.clawdata.t0, rundata.clawdata.tfinal, -90.0, -60.0, 15.0, 17.5])
