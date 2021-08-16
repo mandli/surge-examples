@@ -72,11 +72,10 @@ Storm surges obtained from GeoClaw were consistent with the observed data. Compa
 
 ----------------------------------------------------------------------------------------
 
-Final remarks:
 _setrun.py_ may be modified to have higher levels of refinement as in this example:
 ```sh
 # max number of refinement levels:
-amrdata.amr_levels_max = 6  
+amrdata.amr_levels_max = 7  
 ```
 Higher refinement levels tend to increase surge accuracy. Refinement ratios may be specified in _setrun.py_ too as in this example:
 ```sh
