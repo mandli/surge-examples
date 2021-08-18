@@ -26,7 +26,7 @@ def days2seconds(days):
     return days * 60.0**2 * 24.0
 
 
-# Scratch directory for storing topo and dtopo files:
+# Scratch directory for storing topo and storm files:
 scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
 
 
@@ -71,7 +71,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.lower[0] = -99.0      # west longitude
     clawdata.upper[0] = -70.0      # east longitude
 
-    clawdata.lower[1] = 8.0      # south latitude
+    clawdata.lower[1] = 8.0       # south latitude
     clawdata.upper[1] = 32.0      # north latitude
 
     # Number of grid cells:
@@ -180,7 +180,7 @@ def setrun(claw_pkg='geoclaw'):
     # ------------------
 
     # Order of accuracy:  1 => Godunov,  2 => Lax-Wendroff plus limiters
-    clawdata.order = 1
+    clawdata.order = 2
 
     # Use dimensional splitting? (not yet available for AMR)
     clawdata.dimensional_split = 'unsplit'
@@ -189,7 +189,7 @@ def setrun(claw_pkg='geoclaw'):
     #  0 or 'none'      ==> donor cell (only normal solver used)
     #  1 or 'increment' ==> corner transport of waves
     #  2 or 'all'       ==> corner transport of 2nd order corrections too
-    clawdata.transverse_waves = 1
+    clawdata.transverse_waves = 2
 
     # Number of waves in the Riemann solution:
     clawdata.num_waves = 3
@@ -264,10 +264,12 @@ def setrun(claw_pkg='geoclaw'):
     # max number of refinement levels:
     amrdata.amr_levels_max = 2
 
-    # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [1,2,10]
-    amrdata.refinement_ratios_y = [1,2,10]
-    amrdata.refinement_ratios_t = [1,2,10]
+
+    # List of refinement ratios at each level (length at least mxnest
+    # )
+    amrdata.refinement_ratios_x = [2, 2, 2, 6, 10]
+    amrdata.refinement_ratios_y = [2, 2, 2, 6, 10]
+    amrdata.refinement_ratios_t = [2, 2, 2, 6, 10]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length maux, each element of which is one of:
@@ -313,28 +315,30 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    # Gauges from Ike AWR paper (2011 Dawson et al)
     
-    #Apalachicola
-    rundata.gaugedata.gauges.append([1, -84.980, 29.724,
+    # Apalcachiola
+    rundata.gaugedata.gauges.append([1, -84.980504, 29.724510,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
+    regions.append([12,12,rundata.clawdata.t0, rundata.clawdata.tfinal, -84.00, -85.48, 29.34, 30.24]) # Gauge 1
 
-    #Panama City Beach
-    rundata.gaugedata.gauges.append([2, -85.880, 30.213,
+    #Panama City
+    rundata.gaugedata.gauges.append([2, -85.52, 30.08,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
+    regions.append([12,12,rundata.clawdata.t0, rundata.clawdata.tfinal, -84.02, -87.02, 28.63, 31.63]) # Gauge 2                                
 
-    
-    #Penascola
-    rundata.gaugedata.gauges.append([3, -87.2169, 30.4213,
+    #Pensacola
+    rundata.gaugedata.gauges.append([3, -87.13, 30.24,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    
-    #Fort Morgan
-    rundata.gaugedata.gauges.append([4, -88.024, 30.228,
+    regions.append([12,12,rundata.clawdata.t0, rundata.clawdata.tfinal, -85.63, -88.63, 28.74, 31.74]) # Gauge 3
+
+    #Dauphin Island                        
+    rundata.gaugedata.gauges.append([4, -88.45, 30.15,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
+    regions.append([12,12,rundata.clawdata.t0, rundata.clawdata.tfinal, -86.95, -89.95, 28.65, 31.65]) # Gauge 3
 
     # Force the gauges to also record the wind and pressure fields
     rundata.gaugedata.aux_out_fields = [4, 5, 6]
@@ -372,32 +376,39 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    # Due to seasonal swelling of gulf we set sea level higher
-    #geo_data.sea_level = 0.28
-    geo_data.sea_level = 0.28
+    # Note that in the original paper due to gulf summer swelling this was set
+    # to 0.28
+    geo_data.sea_level = 0.0
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
     refine_data = rundata.refinement_data
     refine_data.wave_tolerance = 1.0
     refine_data.speed_tolerance = [1.0, 2.0, 3.0, 4.0]
-    refine_data.deep_depth = 300.0
-    refine_data.max_level_deep = 4
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
     topo_data = rundata.topo_data
     topo_data.topofiles = []
     # for topography, append lines of the form
-    #   [topotype, minlevel, maxlevel, t1, t2, fname]
+    #   [topotype, fname]
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
     clawutil.data.get_remote_file(
            "http://www.columbia.edu/~ktm2132/bathy/gulf_caribbean.tt3.tar.bz2")
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
+    topo_data.topofiles.append([3, topo_path])
+
+clawutil.data.get_remote_file(
+           "https://www.jumbomail.me/l/en/gallery/6C697261515A333163756E464B3342347436653838673D3D/715049578")
+    topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
+    topo_data.topofiles.append([3, topo_path])
+
+
+    topo_path = os.path.join(scratch_dir, 'gulf_carribean.tt3')
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0,
-                                rundata.clawdata.tfinal,
-                                topo_path])
+                                     rundata.clawdata.tfinal,
+                                     topo_path])
 
     # == setfixedgrids.data values ==
     rundata.fixed_grid_data.fixedgrids = []
@@ -428,20 +439,21 @@ def setgeo(rundata):
 
     # Convert ATCF data to GeoClaw format
     clawutil.data.get_remote_file(
-                   "http://ftp.nhc.noaa.gov/atcf/archive/2005/bal042005.dat.gz")
+                   "https://ftp.nhc.noaa.gov/atcf/archive/2005/bal042005.dat.gz")
     atcf_path = os.path.join(scratch_dir, "bal042005.dat")
-    # Note that the get_remote_fil e function does not support gzip files which
+    # Note that the get_remote_file function does not support gzip files which
     # are not also tar files.  The following code handles this
     with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \
             open(atcf_path, 'w') as atcf_unzipped_file:
         atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
 
     # Uncomment/comment out to use the old version of the Ike storm file
+    # dennis = Storm(path="old_dennis.storm", file_format="ATCF")
     dennis = Storm(path=atcf_path, file_format="ATCF")
 
     # Calculate landfall time - Need to specify as the file above does not
-    # include this info (9/13/2008 ~ 7 UTC)
-    dennis.time_offset = datetime.datetime(2005, 7, 10, 16)
+    # include this info (7/10/2005 ~ 8 UTC)
+    dennis.time_offset = datetime.datetime(2005, 7, 10, 8)
 
     dennis.write(data.storm_file, file_format='geoclaw')
 
