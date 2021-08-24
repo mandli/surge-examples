@@ -1,13 +1,13 @@
 # Hurricane Isaias Storm Report
 This example provides the data and python code to run a GeoClaw storm surge simulation of Hurricane Isaias.
 
-##Hurricane Isaias (AL092020) Information:
+## Hurricane Isaias (AL092020) Information:
 July 30, 2020 - August 4, 2020
 Hurricane Isaias was a Category 1 hurricane and tropical storm that caused damage across the Caribbean and the East Coast of the United States. It made landfall in the Dominican Republic, southern Bahamas, and Andros Island before reaching the US. It made landfall with the US near Ocean Isle Beach, North Carolina, on 0310 UTC 04 August.
 
 NOAA Report: https://www.nhc.noaa.gov/data/tcr/AL092020_Isaias.pdf
 
-##Storm Data
+## Storm Data
 The storm data is located in https://ftp.nhc.noaa.gov/atcf/archive/2020/, file name _bal092020.dat.gz_
 
 In _setrun.py_, this data can be retrieved with the following code:
@@ -18,7 +18,7 @@ clawutil.data.get_remote_file(
 atcf_path = os.path.join(scratch_dir, "bal092020.dat")
 ```
 
-##Topography and Bathymetry Data
+## Topography and Bathymetry Data
 The topography file was taken from GEBCO Gridded Bathymetry Data Download, https://download.gebco.net/
 
 Latitude: S 12, N 47
@@ -32,7 +32,7 @@ For example, if you named the topography file "isaias.asc":
 topo_path = os.path.join("/name_of_path_to_folder", "isaias.asc")
 ```
 
-##GeoClaw Simulation Parameters
+## GeoClaw Simulation Parameters
 In _setrun.py_:
 Landfall was set to 0000 UTC 31 July, and the simulation was ran from 1 day before landfall (0000 UTC July 30) to 5 days after landfall (0000 UTC 05 August).
 
@@ -51,7 +51,7 @@ I gave each gauge a separate topography plot around its location so we can see w
 
 Along with plotting the simulation's produced gauge data, I also plotted the NOAA confirmed gauge data. I used the _fetch_noaa_tide_data()_ method to pull tide data from the gauges and compare it to the simulated output. Tide data from gauges were calculated by _(recorded water level - predicted water level)_. GMT time zone and metric units were used as default.
 
-##Comparing Results with Real Life
+## Comparing Results with Real Life
 1. __Magueyes Island, Puerto Rico 9759110__: Real surge of about 0.40m.
 GeoClaw predicts a smaller storm surge of about 0.15m. The time of surge aligns.
 
@@ -70,14 +70,14 @@ GeoClaw predicts a negative surge of about -0.15m, very different from the real 
 6. __Marcus Hook, Pennsylvania 8540433__: Real surge of about 0.85m.
 GeoClaw predicts a smaller storm surge of about 0.63m. The time of surge aligns.
 
-##Notes on the Results
+## Notes on the Results
 Even with a very high level of refinement, I ran into problems with gauges in narrow rivers surrounded with a lot of land. The topography file taken from GEBCO may think those gauges are landlocked when they are really not, resulting in no simulated surge reaching the gauge and no simulated gauge data. My fifth gauge in Wilmington, NC, had the largest recorded surge at roughly 1.70m, but it is almost fully landlocked in the GeoClaw simulation, leading to weird results.
 
 GeoClaw generally did a very good job at getting the time of storm surge correct. I noticed it will mostly underestimate the surge height though. This difference between simulated data and the gauge data may be due to inadequate refinement levels of the simulation. The topography/bathymetry data taken from GEBCO may also have too low of a resolution, or today's topography/bathymetry may be different from how it was in 2020, when Isaias occured.
 
 If I ran the simulation at higher refinement levels on a more powerful machine, I may have gotten better results. The NOAA gauge predicted levels may have been inaccurate, which would alter the recorded gauge data.
 
-##Conclusion
+## Conclusion
 Storm surges obtained from GeoClaw generally underestimated the observed data, but their timing was accurate. More analysis and higher refinement may lead to more accurate results.
 See this file for the visual representation of gauge plots: https://www.dropbox.com/s/ioz7anvoggosa0y/Gauge%20Data%20Plots.png?dl=0
 
