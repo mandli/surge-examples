@@ -34,9 +34,9 @@ http://www.columbia.edu/~ktm2132/bathy/gulf_caribbean.tt3.tar.bz2
 
 setrun.py:
 
-line 408
+line 408:
     
-topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
+    topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
 
 
 ## Simulation:
