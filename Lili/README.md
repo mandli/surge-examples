@@ -20,8 +20,9 @@ Hurricane Lili storm data was located in bal132002.dat.gz
 
 In setrun.py, one can retrieve data directly from source by writing a code similar to this:
 
-setrun.py:
-line 441
+setrun.py
+
+line 441:
 
     # Convert ATCF data to GeoClaw format
     clawutil.data.get_remote_file("https://ftp.nhc.noaa.gov/atcf/archive/2002/bal132002.dat.gz")
