@@ -13,8 +13,8 @@ The data for Hurricane Maria was found within the file "bal152017.dat.gz" (bal15
 
 In order to simulate the storm, there must be code added to your setrun.py file that extracts a .dat file from the given .dat.gz file. See below:
 
-`clawutil.data.get_remote_file("https://ftp.nhc.noaa.gov/atcf/archive/2002/bal152017.dat.gz")
-atcf_path = os.path.join(scratch_dir, "bal152017.dat")`
+`clawutil.data.get_remote_file("https://ftp.nhc.noaa.gov/atcf/archive/2002/bal152017.dat.gz")`
+`atcf_path = os.path.join(scratch_dir, "bal152017.dat")`
 
 <h2>Topography Data</h2>
 After finding the storm data, the next step was to locate and download topography data for the Atlantic basin. There are several sites where this can be done, but topography for the Maria simulation was downloaded from the GEBCO site: https://download.gebco.net
@@ -24,8 +24,8 @@ From setrun.py:
 
 lines 399-400:
 
-`topo_path = os.path.join(scratch_dir, 'maria-atlantic17.asc')
- topo_data.topofiles.append([3, topo_path])`
+`topo_path = os.path.join(scratch_dir, 'maria-atlantic17.asc')`
+ `topo_data.topofiles.append([3, topo_path])`
  
  <h2>File Organization</h2>
  The unique files necessary to run the simulation are as follows: setrun.py, setplot.py, Makefile, name_of_storm_data_file, name_of_topography_file
