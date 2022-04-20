@@ -36,19 +36,21 @@ The observed gauge data for sea level at each location was de-tided using the `f
 
 ## Data Results:
 In this example,
-Freeport Harbor, TX (ID: 8772471) experienced a storm surge of approximately 1 meter. GeoClaw predicted approximately 0.3 meters. Time of surge does not align.
-San Luis Pass, TX (ID: 8771972) experienced a storm surge of 1.1 meters. GeoClaw predicted approximately .4 meters. Time of surge does not align.
-Galveston Railroad, TX (ID: 8771486) experienced a storm surge of .9 meters. GeoClaw predicted approximately 1.3 meters. Time of surge does not align.
-Galveston Pier 21, TX (ID: 8771450) experienced a storm surge of .8 meters. GeoClaw predicted approximately .3 meters. Time of surge does not align.
-Galveston Bay Entrance, TX (ID: 8771341) experienced a storm surge of .8 meters. GeoClaw predicted approximately .4 meters. Time of surge does not align.
-Rollover Pass, TX (ID: 8770971) experienced a storm surge of 1.2 meters. GeoClaw predicted approximately .8 meters. Time of surge does not align. (Do I take global max, or max after 0?)
+Freeport Harbor, TX (ID: 8772471) experienced a storm surge of approximately 1 meter. GeoClaw predicted approximately 0.3 meters. 
+San Luis Pass, TX (ID: 8771972) experienced a storm surge of 1.1 meters. GeoClaw predicted approximately .4 meters. 
+Galveston Railroad, TX (ID: 8771486) experienced a storm surge of .9 meters. GeoClaw predicted approximately 1.3 meters. 
+Galveston Pier 21, TX (ID: 8771450) experienced a storm surge of .8 meters. GeoClaw predicted approximately .3 meters. 
+Galveston Bay Entrance, TX (ID: 8771341) experienced a storm surge of .8 meters. GeoClaw predicted approximately .4 meters. 
+Rollover Pass, TX (ID: 8770971) experienced a storm surge of 1.2 meters. GeoClaw predicted approximately .8 meters.  (Do I take global max, or max after 0?)
 High Island, TX (ID: 8770808) experienced a storm surge of 1.6 meters. GeoClaw predicted approximately 2.2 meters. Time of surge aligns. (Do I ignore clearly anomalous values?)
-Morgans Point, TX (ID: 8770613) experienced a storm surge of 1.3 meters. GeoClaw predicted approximately 2.2 meters. Time of surge does not align.
-Manchester, TX (ID: 8770777) experienced a storm surge of 3.2 meters. This value was singled out in the NOAA report as being significantly affected by rainfall runoff. GeoClaw predicted 0 meters. Time of surge does not align.
-Calcasieu Lake, LA (ID: 8768094) experienced a storm surge of 1 meter. GeoClaw predicted approximately .5 meters. Time of surge does not align.
-Sabine Pass, LA (ID: 8770822) experienced a storm surge of 1 meter. GeoClaw predicted approximately .5 meters. Time of surge does not align.
+Morgans Point, TX (ID: 8770613) experienced a storm surge of 1.3 meters. GeoClaw predicted approximately 2.2 meters. 
+Manchester, TX (ID: 8770777) experienced a storm surge of 3.2 meters. This value was singled out in the NOAA report as being significantly affected by rainfall runoff. GeoClaw predicted 0 meters. 
+Calcasieu Lake, LA (ID: 8768094) experienced a storm surge of 1 meter. GeoClaw predicted approximately .5 meters. 
+Sabine Pass, LA (ID: 8770822) experienced a storm surge of 1 meter. GeoClaw predicted approximately .5 meters. 
 
-Significant discrepancies in results may stem from the gauges being located in “dry cells” in the simulation. Adjustments to grid refinement may resolve this issue.
+Significant discrepancies in results may stem from the gauges being located in “dry cells” in the simulation. Harvey’s historic rains and the resulting flooding are other significant contributors to the measured storm surge; these factors are not accounted for in the GeoClaw simulation.
 
 ## Conclusion:
 Storm surges obtained from GeoClaw were generally inconsistent with the observed data. In most cases, the observed storm surge greatly exceeded the amount predicted by the GeoClaw model. The reason for this likely comes from Harvey’s historic rains, which caused significant flooding but are not accounted for in the model. Adjustments to the GeoClaw package to incorporate rainfall may lead to more accurate results.
+
+This project was begun by Reuben Solnick.
