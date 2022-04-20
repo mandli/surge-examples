@@ -1,20 +1,54 @@
-# Example of Storm Surge from Hurricane Harvey
+# Hurricane Harvey Storm Report
+This example contains the data and Python code to run a storm surge simulation for Hurricane Harvey.
 
-This example provides the data and Python code to run a simulation of Hurricane Harvey. Harvey initially passed over the Yucatan Peninsula as a Tropical Wave before strengthening into a category 4 hurricane and making landfall over the gulf coast of Texas in late August of 2017. The simulation models 4 days of the storm, beginning the day before landfall over Texas.
+## Hurricane Harvey:
+Hurricane Harvey was a category 4 hurricane that was the eighth named and first major hurricane of the 2017 Atlantic Hurricane season. Harvey began as a weak tropical storm which affected the Lesser Antilles before dissipating over the central Caribbean Sea. It reformed over the Bay of Campeche, quickly intensifying to a category 4 hurricane before making landfall over San Jose island, near Rockport, Texas, at 0300 UTC, August 26 2017. It is estimated that at this landfall, sustained winds reached 115 kt and minimum central pressure was 937 mb. Harvey made a second landfall 3 hours later, this time over the Texas mainland. Hurricane Harvey then stalled over the Texas coast for four days, dropping over 60 inches of rain on southeastern Texas, causing historic flooding. Harvey made a final landfall over southwestern Louisiana at 0800 UTC 30 August. Sustained winds during this landfall were 40 kt.
 
-Running `make all` will compile all the necessary code for running the simulation
+If running this example, download setrun.py, setplot.py, and Makefile to the appropriate directory. Execute `$ make all` to compile the code, run the simulation, and plot the results.
 
-## Topography
+*Source: National Hurricane Center Tropical Cyclone Report*
+(https://www.nhc.noaa.gov/data/tcr/AL092017_Harvey.pdf)
 
-Topography data is automatically downloaded from the Columbia databases at: http://www.columbia.edu/~ktm2132/bathy/gulf_caribbean.tt3.tar.bz2
-
-## Storm Data
-
-Storm data is automatically downloaded from the NOAA atcf archive at: 
+## Storm Data:
+Data to run the simulation was retrieved from NOAA’s storm data archive:
 http://ftp.nhc.noaa.gov/atcf/archive/2017/bal092017.dat.gz
 
-## Gauges
+In setrun.py, data can be directly retrieved from the source by writing code similar to this:
+```python
+# Convert ATCF data to GeoClaw format
+clawutil.data.get_remote_file(“http://ftp.nhc.noaa.gov/atcf/archive/2017/bal092017.dat.gz”)
+atcf_path = os.path.join(data_dir, “bal092017.dat”)
+```
 
-Gauges 1-5 in the example correspond to five NOAA gauges which lie along the Texas gulf coast. `fetch_noaa_tide_data()` is used to pull tide data from the gauges and compare it to the simulated output in setplot.py. Normal tidal behaviors are factored out so that only storm-surge is compared, and for consistency, water level data is referenced to vertical datum NAVD88 in both the simulated and actual data.
+For this example, Hurricane Harvey storm data should be placed in the same directory that the simulation is run in.
 
-For questions, contact Reuben Solnick at rfs2146@columbia.edu
+## Topography/Bathymetry Data:
+Topography data is automatically downloaded from the Columbia databases at:
+http://www.columbia.edu/~ktm2132/bathy/gulf_caribbean.tt3.tar.bz2
+
+## GeoClaw Parameters:
+Time of landfall was set in the simulation to be 26 August, 0400 UTC. Simulation ran from 4 days before landfall to 5 days after.
+
+Gauges were selected in the NOAA Inundations dashboard:
+https://tidesandcurrents.noaa.gov/map/index.html
+
+The observed gauge data for sea level at each location was de-tided using the `fetch_noaa_tide_data()` method and plotted against the predicted storm surge by GeoClaw.
+
+## Data Results:
+In this example,
+Freeport Harbor, TX (ID: 8772471) experienced a storm surge of approximately 1 meter. GeoClaw predicted approximately 0.3 meters. Time of surge does not align.
+San Luis Pass, TX (ID: 8771972) experienced a storm surge of 1.1 meters. GeoClaw predicted approximately .4 meters. Time of surge does not align.
+Galveston Railroad, TX (ID: 8771486) experienced a storm surge of .9 meters. GeoClaw predicted approximately 1.3 meters. Time of surge does not align.
+Galveston Pier 21, TX (ID: 8771450) experienced a storm surge of .8 meters. GeoClaw predicted approximately .3 meters. Time of surge does not align.
+Galveston Bay Entrance, TX (ID: 8771341) experienced a storm surge of .8 meters. GeoClaw predicted approximately .4 meters. Time of surge does not align.
+Rollover Pass, TX (ID: 8770971) experienced a storm surge of 1.2 meters. GeoClaw predicted approximately .8 meters. Time of surge does not align. (Do I take global max, or max after 0?)
+High Island, TX (ID: 8770808) experienced a storm surge of 1.6 meters. GeoClaw predicted approximately 2.2 meters. Time of surge aligns. (Do I ignore clearly anomalous values?)
+Morgans Point, TX (ID: 8770613) experienced a storm surge of 1.3 meters. GeoClaw predicted approximately 2.2 meters. Time of surge does not align.
+Manchester, TX (ID: 8770777) experienced a storm surge of 3.2 meters. This value was singled out in the NOAA report as being significantly affected by rainfall runoff. GeoClaw predicted 0 meters. Time of surge does not align.
+Calcasieu Lake, LA (ID: 8768094) experienced a storm surge of 1 meter. GeoClaw predicted approximately .5 meters. Time of surge does not align.
+Sabine Pass, LA (ID: 8770822) experienced a storm surge of 1 meter. GeoClaw predicted approximately .5 meters. Time of surge does not align.
+
+Significant discrepancies in results may stem from the gauges being located in “dry cells” in the simulation. Adjustments to grid refinement may resolve this issue.
+
+## Conclusion:
+Storm surges obtained from GeoClaw were generally inconsistent with the observed data. In most cases, the observed storm surge greatly exceeded the amount predicted by the GeoClaw model. The reason for this likely comes from Harvey’s historic rains, which caused significant flooding but are not accounted for in the model. Adjustments to the GeoClaw package to incorporate rainfall may lead to more accurate results.
