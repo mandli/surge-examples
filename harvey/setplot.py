@@ -4,9 +4,9 @@ from __future__ import print_function
 
 import os
 
-import numpy as np
+import numpy
 import matplotlib.pyplot as plt
-import pandas as pd
+import pandas
 import datetime
 
 import clawpack.visclaw.colormaps as colormap
@@ -55,7 +55,7 @@ def setplot(plotdata=None):
 
     # Color limits
     surface_limits = [-2, 2]
-    speed_limits = [0.0, 6]
+    speed_limits = [0.0, 3.0]
     wind_limits = [0, 64]
     pressure_limits = [935, 1013]
     friction_bounds = [0.01, 0.04]
@@ -176,7 +176,7 @@ def setplot(plotdata=None):
         surgeplot.plot_landfall_gauge(cd.gaugesoln, axes)
 
         date_time = date_time.astype('O')
-        t = np.empty(date_time.shape[0])
+        t = numpy.empty(date_time.shape[0])
         for j, dt in enumerate(date_time):
             t[j] = (dt - t_offset).total_seconds() / 86400
         axes.plot(t, water_level - prediction)
