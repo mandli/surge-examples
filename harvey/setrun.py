@@ -14,8 +14,9 @@ import os
 import datetime
 import shutil
 import gzip
-from pylab import *
-import numpy as np
+import matplotlib.pyplot as plt
+import numpy
+from numpy import ma # masked arrays
 
 from clawpack.geoclaw.surge.storm import Storm
 import clawpack.clawutil as clawutil
@@ -244,15 +245,15 @@ def setrun(claw_pkg='geoclaw'):
         # Do not checkpoint at all
         pass
 
-    elif np.abs(clawdata.checkpt_style) == 1:
+    elif numpy.abs(clawdata.checkpt_style) == 1:
         # Checkpoint only at tfinal.
         pass
 
-    elif np.abs(clawdata.checkpt_style) == 2:
+    elif numpy.abs(clawdata.checkpt_style) == 2:
         # Specify a list of checkpoint times.
         clawdata.checkpt_times = [0.1, 0.15]
 
-    elif np.abs(clawdata.checkpt_style) == 3:
+    elif numpy.abs(clawdata.checkpt_style) == 3:
         # Checkpoint every checkpt_interval timesteps (on Level 1)
         # and at the final time.
         clawdata.checkpt_interval = 5
@@ -331,7 +332,6 @@ def setrun(claw_pkg='geoclaw'):
     flagregion.spatial_region_type = 2 # Ruled Rectangle
     
 
-    from numpy import ma # masked arrays
     from clawpack.visclaw import colormaps, plottools
     from clawpack.geoclaw import topotools, marching_front
     from clawpack.amrclaw import region_tools
@@ -356,8 +356,9 @@ def setrun(claw_pkg='geoclaw'):
                                         data_limits=(zmin,zmax),
                                         data_break=0.)
 
+    topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
     topo_file = topo.Topography()
-    topo_file.read('../../../scratch/gulf_caribbean.tt3', topo_type=3)
+    topo_file.read(topo_path, topo_type=3)
     topo_file = topo_file.crop((-98, -90, 26.5, 32.5))
 
     pts_chosen = marching_front.select_by_flooding(topo_file.Z, Z1=0, Z2=1e6, max_iters=20)
@@ -365,10 +366,10 @@ def setrun(claw_pkg='geoclaw'):
     max_iters=None)
 
     pts_chosen_shallow = marching_front.select_by_flooding(topo_file.Z, Z1=0, Z2=-25., max_iters=None)
-    Zshallow = ma.masked_array(topo_file.Z, logical_not(pts_chosen_shallow))
+    Zshallow = ma.masked_array(topo_file.Z, numpy.logical_not(pts_chosen_shallow))
 
-    pts_chosen_nearshore = logical_and(pts_chosen, pts_chosen_shallow)
-    Znearshore = ma.masked_array(topo_file.Z, logical_not(pts_chosen_nearshore))
+    pts_chosen_nearshore = numpy.logical_and(pts_chosen, pts_chosen_shallow)
+    Znearshore = ma.masked_array(topo_file.Z, numpy.logical_not(pts_chosen_nearshore))
 
     rr = region_tools.ruledrectangle_covering_selected_points(topo_file.X, topo_file.Y, pts_chosen_nearshore, 
                                                             ixy='x', method=0,
@@ -538,13 +539,18 @@ def setgeo(rundata):
     # Entire domain
     data.friction_regions.append([rundata.clawdata.lower,
                                   rundata.clawdata.upper,
-                                  [np.infty, 0.0, -np.infty],
+                                  [numpy.infty, 0.0, -numpy.infty],
                                   [0.030, 0.022]])
 
+    # Texas gulf coast
+    data.friction_regions.append([(-99.2, 26.4), (-94.2, 30.4),
+                                  [numpy.infty, -10.0, -200.0, -numpy.infty],
+                                  [0.030, 0.012, 0.022]])    
+    
     # La-Tex Shelf
-    data.friction_regions.append([(-98, 25.25), (-90, 30),
-                                  [np.infty, -10.0, -200.0, -np.infty],
-                                  [0.030, 0.012, 0.022]])
+    # data.friction_regions.append([(-98, 25.25), (-90, 30),
+    #                              [numpy.infty, -10.0, -200.0, -numpy.infty],
+    #                              [0.030, 0.012, 0.022]])
 
     return rundata
     # end of function setgeo
