@@ -19,9 +19,11 @@ import numpy
 from numpy import ma # masked arrays
 
 from clawpack.geoclaw.surge.storm import Storm
+from clawpack.geoclaw import topotools, marching_front
+from clawpack.amrclaw import region_tools
+from clawpack.amrclaw.data import FlagRegion
+import clawpack.geoclaw.topotools as topo
 import clawpack.clawutil as clawutil
-
-
 # Time Conversions
 def days2seconds(days):
     return days * 60.0**2 * 24.0
@@ -322,7 +324,6 @@ def setrun(claw_pkg='geoclaw'):
 
 
 	# Ruled rectangles -allows more custom definition of refinement regions
-    from clawpack.amrclaw.data import FlagRegion
     flagregion = FlagRegion(num_dim=2)
     flagregion.name = 'Region_LatexShelf'
     flagregion.minlevel = 2
@@ -330,31 +331,7 @@ def setrun(claw_pkg='geoclaw'):
     flagregion.t1 = 0.
     flagregion.t2 = 1e9
     flagregion.spatial_region_type = 2 # Ruled Rectangle
-    
-
-    from clawpack.visclaw import colormaps, plottools
-    from clawpack.geoclaw import topotools, marching_front
-    from clawpack.amrclaw import region_tools
-    import clawpack.geoclaw.topotools as topo
-
-    zmin = -60.
-    zmax = 40.
-
-    land_cmap = colormaps.make_colormap({ 0.0:[0.1,0.4,0.0],
-                                        0.25:[0.0,1.0,0.0],
-                                        0.5:[0.8,1.0,0.5],
-                                        1.0:[0.8,0.5,0.2]})
-
-    sea_cmap = colormaps.make_colormap({ 0.0:[0,0,1], 1.:[.8,.8,1]})
-
-    cmap, norm = colormaps.add_colormaps((land_cmap, sea_cmap),
-                                        data_limits=(zmin,zmax),
-                                        data_break=0.)
-                                        
-    sea_cmap_dry = colormaps.make_colormap({ 0.0:[1.0,0.7,0.7], 1.:[1.0,0.7,0.7]})
-    cmap_dry, norm_dry = colormaps.add_colormaps((land_cmap, sea_cmap_dry),
-                                        data_limits=(zmin,zmax),
-                                        data_break=0.)
+      
 
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
     topo_file = topo.Topography()
