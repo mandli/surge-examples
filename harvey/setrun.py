@@ -177,7 +177,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.cfl_max = 1.0
 
     # Maximum number of time steps to allow between output times:
-    clawdata.steps_max = 10000
+    clawdata.steps_max = 15000
 
     # ------------------
     # Method to be used:
