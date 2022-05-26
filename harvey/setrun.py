@@ -14,22 +14,22 @@ import os
 import datetime
 import shutil
 import gzip
-
-import numpy as np
+import matplotlib.pyplot as plt
+import numpy
+from numpy import ma # masked arrays
 
 from clawpack.geoclaw.surge.storm import Storm
-import clawpack.clawutil as clawutil
-from numpy import ma # masked arrays
-from clawpack.visclaw import colormaps, plottools
 from clawpack.geoclaw import topotools, marching_front
 from clawpack.amrclaw import region_tools
-
+from clawpack.amrclaw.data import FlagRegion
+import clawpack.geoclaw.topotools as topo
+import clawpack.clawutil as clawutil
 # Time Conversions
 def days2seconds(days):
     return days * 60.0**2 * 24.0
 
 
-# Scratch directory for storing topo and dtopo files:
+# Scratch directory for storing topo and storm files:
 scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
 
 
@@ -77,6 +77,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.lower[1] = 8.0       # south latitude
     clawdata.upper[1] = 32.0      # north latitude
 
+
     # Number of grid cells:
     degree_factor = 4  # (0.25º,0.25º) ~ (25237.5 m, 27693.2 m) resolution
     clawdata.num_cells[0] = int(clawdata.upper[0] - clawdata.lower[0]) \
@@ -102,7 +103,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
     # Initial time:
     # -------------
-    clawdata.t0 = -days2seconds(1)
+    clawdata.t0 = -days2seconds(4)
 
     # Restart from checkpoint file of a previous run?
     # If restarting, t0 above should be from original run, and the
@@ -124,7 +125,7 @@ def setrun(claw_pkg='geoclaw'):
 
     if clawdata.output_style == 1:
         # Output nout frames at equally spaced times up to tfinal:
-        clawdata.tfinal = days2seconds(3)
+        clawdata.tfinal = days2seconds(5)
         recurrence = 4
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) *
                                         recurrence / (60**2 * 24))
@@ -176,14 +177,14 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.cfl_max = 1.0
 
     # Maximum number of time steps to allow between output times:
-    clawdata.steps_max = 5000
+    clawdata.steps_max = 15000
 
     # ------------------
     # Method to be used:
     # ------------------
 
     # Order of accuracy:  1 => Godunov,  2 => Lax-Wendroff plus limiters
-    clawdata.order = 1
+    clawdata.order = 2
 
     # Use dimensional splitting? (not yet available for AMR)
     clawdata.dimensional_split = 'unsplit'
@@ -192,7 +193,7 @@ def setrun(claw_pkg='geoclaw'):
     #  0 or 'none'      ==> donor cell (only normal solver used)
     #  1 or 'increment' ==> corner transport of waves
     #  2 or 'all'       ==> corner transport of 2nd order corrections too
-    clawdata.transverse_waves = 1
+    clawdata.transverse_waves = 2
 
     # Number of waves in the Riemann solution:
     clawdata.num_waves = 3
@@ -246,15 +247,15 @@ def setrun(claw_pkg='geoclaw'):
         # Do not checkpoint at all
         pass
 
-    elif np.abs(clawdata.checkpt_style) == 1:
+    elif numpy.abs(clawdata.checkpt_style) == 1:
         # Checkpoint only at tfinal.
         pass
 
-    elif np.abs(clawdata.checkpt_style) == 2:
+    elif numpy.abs(clawdata.checkpt_style) == 2:
         # Specify a list of checkpoint times.
         clawdata.checkpt_times = [0.1, 0.15]
 
-    elif np.abs(clawdata.checkpt_style) == 3:
+    elif numpy.abs(clawdata.checkpt_style) == 3:
         # Checkpoint every checkpt_interval timesteps (on Level 1)
         # and at the final time.
         clawdata.checkpt_interval = 5
@@ -265,7 +266,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 3
+    amrdata.amr_levels_max = 5
 
     # List of refinement ratios at each level (length at least mxnest-1)
     amrdata.refinement_ratios_x = [2, 2, 2, 6, 16]
@@ -314,50 +315,91 @@ def setrun(claw_pkg='geoclaw'):
 
     # == setregions.data values ==
     regions = rundata.regiondata.regions
+
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    #Seadrift
-    rundata.gaugedata.gauges.append([1, -96.73, 28.38,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
+    regions.append([1, 3, clawdata.t0, clawdata.tfinal, clawdata.lower[0], clawdata.upper[0], clawdata.lower[1], clawdata.upper[1]])
+    regions.append([1, 5, clawdata.t0, clawdata.tfinal, -99, -91, 26.5, 32]) # More specific domain f/ LaTex domain, minlevel = 1, maxlevel > 3, e.g. Can custommize based on time domain
 
-    #Port O'Connor
-    rundata.gaugedata.gauges.append([2, -96.38, 28.45,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
 
-    #Aransas Wildlife Refuge
-    rundata.gaugedata.gauges.append([3, -96.75, 28.22,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
 
-    #Port Aransas
-    rundata.gaugedata.gauges.append([4, -97.05, 27.84,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
+	# Ruled rectangles -allows more custom definition of refinement regions
+    flagregion = FlagRegion(num_dim=2)
+    flagregion.name = 'Region_LatexShelf'
+    flagregion.minlevel = 2
+    flagregion.maxlevel = 5
+    flagregion.t1 = 0.
+    flagregion.t2 = 1e9
+    flagregion.spatial_region_type = 2 # Ruled Rectangle
+      
 
-    #USS Lexington
-    rundata.gaugedata.gauges.append([5, -97.38, 27.80,
+    topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
+    topo_file = topo.Topography()
+    topo_file.read(topo_path, topo_type=3)
+    topo_file = topo_file.crop((-98, -90, 26.5, 32.5))
+
+    pts_chosen = marching_front.select_by_flooding(topo_file.Z, Z1=0, Z2=1e6, max_iters=20)
+    pts_chosen = marching_front.select_by_flooding(topo_file.Z, Z1=0, Z2=15., prev_pts_chosen=pts_chosen,
+    max_iters=None)
+
+    pts_chosen_shallow = marching_front.select_by_flooding(topo_file.Z, Z1=0, Z2=-25., max_iters=None)
+    Zshallow = ma.masked_array(topo_file.Z, numpy.logical_not(pts_chosen_shallow))
+
+    pts_chosen_nearshore = numpy.logical_and(pts_chosen, pts_chosen_shallow)
+    Znearshore = ma.masked_array(topo_file.Z, numpy.logical_not(pts_chosen_nearshore))
+
+    rr = region_tools.ruledrectangle_covering_selected_points(topo_file.X, topo_file.Y, pts_chosen_nearshore, 
+                                                            ixy='x', method=0,
+                                                            padding=0, verbose=True)
+
+    rr_name = 'RuledRectangle_LatexShelf.data'
+    
+    rr.write(rr_name)
+
+    flagregion.spatial_region_file = \
+        os.path.abspath('RuledRectangle_LatexShelf.data')
+
+
+    rundata.flagregiondata.flagregions.append(flagregion)
+
+    # Gauges from NOAA website - Houston and Cameron LA
+
+    rundata.gaugedata.gauges.append([1, -95.294, 28.936, 
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # Freeport Harbor, wet, 8772471
+    rundata.gaugedata.gauges.append([2, -95.113, 29.095,
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # San Luis Pass, wet (unable to locate on Google Maps), 8771972
+    rundata.gaugedata.gauges.append([3, -94.897, 29.302, 
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # Galveston Railroad, sometimes dry, 8771486
+    rundata.gaugedata.gauges.append([4, -94.792, 29.311,
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # Galveston Pier 21, wet, 8771450
+    rundata.gaugedata.gauges.append([5, -94.725, 29.357,
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # Galveston Bay Entrance, wet, 8771341
+    rundata.gaugedata.gauges.append([6, -94.511, 29.516,
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # Rollover Pass, sometimes dry, 8770971
+    rundata.gaugedata.gauges.append([7, -94.390, 29.595,
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # High Island, sometimes dry, 8770808
+    rundata.gaugedata.gauges.append([8, -94.985, 29.682, 
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # Morgans Point, wet, 8770613
+    rundata.gaugedata.gauges.append([9, -95.266, 29.726,
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # Manchester, always dry, 8770777
+    rundata.gaugedata.gauges.append([10, -93.343, 29.768,
+ 				     rundata.clawdata.t0,
+				     rundata.clawdata.tfinal]) # Calcasieu Lake, Louisiana, sometimes dry, 8768094
+    rundata.gaugedata.gauges.append([11, -93.842, 29.689, 
 				     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
+				     rundata.clawdata.tfinal]) #  Sabine Pass, Louisiana, wet, 8770822
 
     # Force the gauges to also record the wind and pressure fields
     rundata.gaugedata.aux_out_fields = [4, 5, 6]
-
-
-    #setting a ruled rectangle along the coast and flagging it for high resolution
-    from clawpack.amrclaw.data import FlagRegion
-    flagregion = FlagRegion(num_dim=2)
-    flagregion.name = 'Texas Gulf Coast'
-    flagregion.minlevel = 5
-    flagregion.maxlevel = 5
-    flagregion.t1 = rundata.clawdata.t0
-    flagregion.t2 = rundata.clawdata.tfinal
-    flagregion.spatial_region_type = 2  # Ruled Rectangle
-    flagregion.spatial_region_file = \
-        os.path.abspath('texcoastrr.data')
-    rundata.flagregiondata.flagregions.append(flagregion)
-
 
     # ------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -392,76 +434,29 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    # Due to seasonal swelling of gulf we set sea level higher
-    geo_data.sea_level = 0.28
+    # Note that in the original paper due to gulf summer swelling this was set
+    # to 0.28
+    geo_data.sea_level = 0.0
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
     refine_data = rundata.refinement_data
     refine_data.wave_tolerance = 1.0
     refine_data.speed_tolerance = [1.0, 2.0, 3.0, 4.0]
-    refine_data.deep_depth = 300.0
-    refine_data.max_level_deep = 4
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
     topo_data = rundata.topo_data
     topo_data.topofiles = []
     # for topography, append lines of the form
-    #   [topotype, minlevel, maxlevel, t1, t2, fname]
+    #   [topotype, fname]
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
     clawutil.data.get_remote_file(
            "http://www.columbia.edu/~ktm2132/bathy/gulf_caribbean.tt3.tar.bz2")
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
-    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0,
-                                rundata.clawdata.tfinal,
-                                topo_path])
-    topo = topotools.Topography()
-    topo.read(topo_path, topo_type = 2)
+    topo_data.topofiles.append([3, topo_path])
 
-    # Create the Flag Region data file
-    filter_region = (-100, -92, 25, 30)
-    topotex = topo.crop(filter_region)
-    
-    pts_chosen = marching_front.select_by_flooding(topotex.Z, Z1=0, Z2=15., max_iters=None)
-
-    Zmasked = ma.masked_array(topotex.Z, np.logical_not(pts_chosen))
-
-    pts_chosen = marching_front.select_by_flooding(topotex.Z, Z1=0, Z2=1e6, max_iters=20) 
-
-    Zmasked = ma.masked_array(topotex.Z, np.logical_not(pts_chosen))
-
-    pts_chosen = marching_front.select_by_flooding(topotex.Z, Z1=0, Z2=15., 
-                                               prev_pts_chosen=pts_chosen,
-                                               max_iters=None)  
-   
-    Zmasked = ma.masked_array(topotex.Z, np.logical_not(pts_chosen))
-
-    pts_chosen_shallow = marching_front.select_by_flooding(topotex.Z, Z1=0, Z2=-15., max_iters=None)
-
-    Zshallow = ma.masked_array(topotex.Z, np.logical_not(pts_chosen_shallow))
-
-    pts_chosen_nearshore = np.logical_and(pts_chosen, pts_chosen_shallow)
-    Znearshore = ma.masked_array(topotex.Z, np.logical_not(pts_chosen_nearshore))
-
-    fname_fgmax_mask = 'fgmax_pts_topostyle.data'
-    topo_fgmax_mask = topotools.Topography()
-    topo_fgmax_mask._x = topotex.x
-    topo_fgmax_mask._y = topotex.y     
-    topo_fgmax_mask._Z = np.where(pts_chosen_nearshore, 1, 0)  # change boolean to 1/0
-    topo_fgmax_mask.generate_2d_coordinates()
-
-    topo_fgmax_mask.write(fname_fgmax_mask, topo_type=3, Z_format='%1i')
-        
-    
-    rr = region_tools.ruledrectangle_covering_selected_points(topotex.X, topotex.Y, pts_chosen_nearshore, 
-                                                            ixy='y', method=0,
-                                                            padding=0, verbose=True)
-    xv,yv = rr.vertices()
-    rr.write('texcoastrr.data')
-
-    
     # == setfixedgrids.data values ==
     rundata.fixed_grid_data.fixedgrids = []
     # for fixed grids append lines of the form
@@ -504,8 +499,8 @@ def setgeo(rundata):
     harvey = Storm(path=atcf_path, file_format="ATCF")
 
     # Calculate landfall time - Need to specify as the file above does not
-    # include this info (9/13/2008 ~ 7 UTC)
-    harvey.time_offset = datetime.datetime(2017, 8, 25, 10)
+    # include this info (8/26/2017 ~4am UTC)
+    harvey.time_offset = datetime.datetime(2017, 8, 26, 4)
 
     harvey.write(data.storm_file, file_format='geoclaw')
 
@@ -521,13 +516,18 @@ def setgeo(rundata):
     # Entire domain
     data.friction_regions.append([rundata.clawdata.lower,
                                   rundata.clawdata.upper,
-                                  [np.infty, 0.0, -np.infty],
+                                  [numpy.infty, 0.0, -numpy.infty],
                                   [0.030, 0.022]])
 
     # Texas gulf coast
     data.friction_regions.append([(-99.2, 26.4), (-94.2, 30.4),
-                                  [np.infty, -10.0, -200.0, -np.infty],
-                                  [0.030, 0.012, 0.022]])
+                                  [numpy.infty, -10.0, -200.0, -numpy.infty],
+                                  [0.030, 0.012, 0.022]])    
+    
+    # La-Tex Shelf
+    # data.friction_regions.append([(-98, 25.25), (-90, 30),
+    #                              [numpy.infty, -10.0, -200.0, -numpy.infty],
+    #                              [0.030, 0.012, 0.022]])
 
     return rundata
     # end of function setgeo
