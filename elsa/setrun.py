@@ -71,10 +71,10 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_dim = num_dim
 
     # Lower and upper edge of computational domain:
-    clawdata.lower[0] = -95.0      # west longitude 90
+    clawdata.lower[0] = -95.0      # west longitude 95
     clawdata.upper[0] = -70.0      # east longitude 70
 
-    clawdata.lower[1] = 12.0       # south latitude 18
+    clawdata.lower[1] = 12.0       # south latitude 12
     clawdata.upper[1] = 32.0      # north latitude  32
 
 
