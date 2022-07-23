@@ -41,7 +41,6 @@ If running this example, download setrun.py, setplot.py, and Makefile to the app
 ## Topography & Bathymetry Data
 Topography data was obtained from:
 https://www.gebco.net/data_and_products/gridded_bathymetry_data/
-Regions of topography data used was a rectangle region (West 90°, East 65°, North 45°, South 15°)
 
 It can be fetched in setrun.py by modifying codes in topography section similar to this:
 ```python
