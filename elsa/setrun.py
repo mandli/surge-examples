@@ -450,7 +450,7 @@ def setgeo(rundata):
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
     clawutil.data.get_remote_file(
-           "https://drive.google.com/uc?export=download&id=1e8M_4m_y6yFJk9nOhwkPv9IJj8FotmQK")
+           "http://www.columbia.edu/~ktm2132/bathy/gulf_caribbean.tt3.tar.bz2")
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
     topo_data.topofiles.append([3, topo_path])
 
