@@ -169,6 +169,8 @@ def setplot(plotdata=None):
 
     import datetime
     my_dict = {1: '8760922', 2: '8761724', 3: '8764314', 4: '8747437', 5: '8760721'}
+    # Mean water level in meters obtained from NOAA Tides & Currents 
+    mean = [0.347472, 0.316992, 0.405384, 0.460248, 0.356616]
     def gauge_afteraxes(cd): 
         t0 = datetime.datetime(2021, 8, 27, 17)
         t_offset = datetime.datetime(2021, 8, 29, 17)
@@ -181,7 +183,7 @@ def setplot(plotdata=None):
         t = numpy.empty(date_time.shape[0])
         for j, dt in enumerate(date_time):
             t[j] = (dt - t_offset).total_seconds() / 86400
-        axes.plot(t, water_level - prediction)
+        axes.plot(t, water_level - prediction - mean[cd.gaugeno-1])
        
         # Fix up plot - in particular fix time labels
         axes.set_title('Station %s' % cd.gaugeno)

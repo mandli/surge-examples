@@ -39,7 +39,7 @@ Generally speaking, Ida produced widespread rainfall along its path. Ida produce
 (https://www.nhc.noaa.gov/data/tcr/AL092021_Ida.pdf)
 
 ## General Code Execution Guide
-If running this example, download setrun.py, setplot.py, and Makefile to the appropriate directory. Execute `$ make all` or `$ make .plots` to compile the code, run the simulation, and plot the results. If problems will be encountered, please refer to <a href="http://www.clawpack.org/quick_surge.html" target="_blank">Storm Surge Guide</a> for possible solutions. (Approximate runtime for this example on Monterey quad-Core intel core: 1 hour 10 min)
+If running this example, download setrun.py, setplot.py, and Makefile to the appropriate directory. Execute `$ make all` or `$ make .plots` to compile the code, run the simulation, and plot the results. If problems will be encountered, please refer to <a href="http://www.clawpack.org/quick_surge.html" target="_blank">Storm Surge Guide</a> for possible solutions. 
 
 ## Topography & Bathymetry Data
 Topography data can be obtained from:
@@ -78,39 +78,39 @@ rundata = clawdata.ClawRunData(claw_pkg, num_dim)
 One may also want to modify AMR parameters like `amr_levels_max` and `refinement_ratios` in a more customized way. In this example, `amr_levels_max` was set to be `6` and `refinement_ratios` was set to be `[2, 2, 2, 3, 4, 4]`. Note that for this specific example, Mississippi River Delta region was very hard to refine due to its extremely complicated and detailed topography. Therefore, high refinement levels are not recommended because run time may increase exponentially without making much progress. More information regarding refinement parameter can be found in the documentation here: <a href="https://www.clawpack.org/setrun_amrclaw.html#setrun-amrclaw" target="_blank">AMRClaw Information</a>.
 
 ## Observed Surge Data
-To compare simulation surge data by GeoClaw, we introduced the observed surge data using `clawpack.geoclaw.util.fetch_noaa_tide_data` along with each guage's station ID. When plotting the observed surge data, we explicitly deduct the tide amount from sea level at each location to make the data solely representing storm surge.
+To compare simulation surge data by GeoClaw, we introduced the observed surge data using `clawpack.geoclaw.util.fetch_noaa_tide_data` along with each guage's station ID. When plotting the observed surge data, we explicitly deduct the tide amount from sea level at each location to make the data solely representing storm surge. Also, given the significant initial differences between observed data and simulation data at all gauges, the mean of water level at each gauges was subtracted from the observed data.
 
 ## Validation Result
 ### Station 1-Pilots Station East, LA
-Pilots Station East, LA `ID: 8760922` experienced a storm surge of approximately 1.40 meter. GeoClaw predicted approximately 0.45 meters. 
+Pilots Station East, LA `ID: 8760922` experienced a storm surge of approximately 1.00 meter. GeoClaw predicted approximately 0.45 meters. 
 
 ![Station1](./images/station1.png)
 
 ### Station 2-Grand Isle, LA
-Grand Isle, LA `ID: 8761724` experienced a storm surge of approximately 1.65 meter. GeoClaw predicted approximately 2.80 meters. 
+Grand Isle, LA `ID: 8761724` experienced a storm surge of approximately 1.40 meter. GeoClaw predicted approximately 2.80 meters. 
 
 ![Station2](./images/station2.png)
 
 ### Station 3-Eugene Island, LA
-Eugene Island, LA `ID: 8764314` experienced a storm surge of approximately -0.40 meter. GeoClaw predicted approximately -0.45 meters. 
+Eugene Island, LA `ID: 8764314` experienced a storm surge of approximately -0.75 meter. GeoClaw predicted approximately -0.45 meters. 
 
 ![Station3](./images/station3.png)
 
 ### Station 4-Bay Waveland Yacht Club, LA
-Bay Waveland Yacht Club, LA `ID: 8747437` experienced a storm surge of approximately 2.25 meter. GeoClaw predicted approximately 0.75 meters. 
+Bay Waveland Yacht Club, LA `ID: 8747437` experienced a storm surge of approximately 1.75 meter. GeoClaw predicted approximately 0.75 meters. 
 
 ![Station4](./images/station4.png)
 
 ### Station 5-Port Fourchon, LA
-Port Fourchon, LA `ID: 8762075` experienced a storm surge of approximately 1.45 meter. GeoClaw predicted approximately 1.10 meters. 
+Port Fourchon, LA `ID: 8762075` experienced a storm surge of approximately 1.00 meter. GeoClaw predicted approximately 1.10 meters. 
 
 ![Station5](./images/station5.png)
 
 ### Result Interpretation
-Among all gauge locations, station 1, 2, 4, and 5 are to the right of the hurricane eye when Ida passed the Mississippi River Delta region, and we expected and observed positive surges in water level. For station 3, since it's to the left of the hurricane eye, a negative surge was observed and expected. Timing and pattern of storm surges obtained from GeoClaw were generally consistent with the observed data. Since hurricane Ida was a category 4 hurricane which generated severe rainfall and freshwater flooding, differences between observed data and simulation data are reasonable and acceptable. More elaboration is needed for station 2 because it's the only station that surge from simulation is higher than observed ones. The reason for that is the gauge location at Grand Isle is in a small pier surrounded by land. So it's nearly impossible to refine the region as specific as we need. Consequently, the location of station 2 for simulation was set in the nearest open water, and the abnormality can be explained because the land prevented the water from getting inside. Also, surge pattern of station 4 is not as good as other gauges because station 4 is located at a narrow pass of the mississippi river which cannot be refined in a reasonable time given author's current hardware setup.
+Among all gauge locations, station 1, 2, 4, and 5 are to the right of the hurricane eye when Ida passed the Mississippi River Delta region, and we expected and observed positive surges in water level. For station 3, since it's to the left of the hurricane eye, a negative surge was observed and expected. Timing and pattern of storm surges obtained from GeoClaw were generally consistent with the observed data. Since hurricane Ida was a category 4 hurricane which generated severe rainfall and freshwater flooding, differences between observed data and simulation data are reasonable and acceptable. More elaboration is needed for station 2 because it's the only station that surge from simulation is significantly higher than observed ones. The reason for that is the gauge location at Grand Isle is in a small pier surrounded by land. So it's nearly impossible to refine the region as specific as we need. Consequently, the location of station 2 for simulation was set in the nearest open water, and the abnormality can be explained because the land prevented the water from getting inside. Also, surge pattern of station 4 is not as good as other gauges because station 4 is located at a narrow pass of the mississippi river which cannot be refined in a reasonable time given author's current hardware setup.
 
 ## Conclusion
-Generally speaking, observed data and simulation data share large amount of similarty in timing and pattern of surges. Two major reasons for the differences between the two data or abnormality are highly likely to be rainfall & freshwater flooding caused by the hurricane which was not taken into account by GeoClaw, and low/bad refinement of topography. Note that for this specific example, Mississippi River Delta region has lots of tiny islands and narrow waterways, making it very hard to refine. For future executions of this example, user may need to fully consider the pros (possibility of better refined regions) and cons (low efficiency in terms of run time) when adding more refinement levels.
+Generally speaking, observed data and simulation data share large amount of similarty in timing and pattern of surges. Two major reasons for the differences between the two data or abnormality are highly likely rainfall & freshwater flooding caused by the hurricane which was not taken into account by GeoClaw, and low/bad refinement of topography. Note that for this specific example, Mississippi River Delta region has lots of tiny islands and narrow waterways, making it very hard to refine. For future executions of this example, user may need to fully consider the pros (possibility of better refined regions) and cons (low efficiency in terms of run time) when adding more refinement levels.
 
 
 Author: Jinpai (Max) Zhao
