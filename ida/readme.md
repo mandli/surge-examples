@@ -39,7 +39,7 @@ Generally speaking, Ida produced widespread rainfall along its path. Ida produce
 (https://www.nhc.noaa.gov/data/tcr/AL092021_Ida.pdf)
 
 ## General Code Execution Guide
-If running this example, download setrun.py, setplot.py, and Makefile to the appropriate directory. Execute `$ make all` or `$ make .plots` to compile the code, run the simulation, and plot the results. If problems will be encountered, please refer to <a href="http://www.clawpack.org/quick_surge.html" target="_blank">Storm Surge Guide</a> for possible solutions. 
+If running this example, download setrun.py, setplot.py, and Makefile to the appropriate directory. Execute `$ make all` or `$ make .plots` to compile the code, run the simulation, and plot the results. If problems will be encountered, please refer to <a href="http://www.clawpack.org/quick_surge.html" target="_blank">Storm Surge Guide</a> for possible solutions. (Approximate runtime for this example on Monterey quad-Core intel core: 1 hour 10 min)
 
 ## Topography & Bathymetry Data
 Topography data can be obtained from:
