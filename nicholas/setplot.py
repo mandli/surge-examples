@@ -1,4 +1,4 @@
-# Validation for Hurricane Nicholas by Max Zhao
+# Validation for Hurricane Nicholas by Max Zhao 
 from __future__ import absolute_import
 from __future__ import print_function
 
@@ -166,6 +166,8 @@ def setplot(plotdata=None):
 
     import datetime
     my_dict = {1: '8773767', 2: '8772471', 3: '8775241', 4: '8771341', 5: '8779749', 6: '8770822'}
+    # Mean water level in meters obtained from NOAA Tides & Currents 
+    mean = [0.33528, 0.381, 0.338328, 0.356616, 0.377952, 0.405384]
     def gauge_afteraxes(cd): 
         t0 = datetime.datetime(2021, 9, 13, 5, 30)
         t_offset = datetime.datetime(2021, 9, 14, 5, 30)
@@ -178,8 +180,9 @@ def setplot(plotdata=None):
         t = numpy.empty(date_time.shape[0])
         for j, dt in enumerate(date_time):
             t[j] = (dt - t_offset).total_seconds() / 86400
-        axes.plot(t, water_level - prediction)
-       
+        axes.plot(t, water_level - prediction - mean[cd.gaugeno-1])
+
+        
         # Fix up plot - in particular fix time labels
         axes.set_title('Station %s' % cd.gaugeno)
         axes.set_xlabel('Days relative to landfall')

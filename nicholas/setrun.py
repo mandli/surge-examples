@@ -30,7 +30,7 @@ def days2seconds(days):
 
 
 # Scratch directory for storing topo and storm files:
-scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
+scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch') 
 
 
 # ------------------------------
