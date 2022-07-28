@@ -39,7 +39,7 @@ Generally speaking, Ida produced widespread rainfall along its path. Ida produce
 (https://www.nhc.noaa.gov/data/tcr/AL092021_Ida.pdf)
 
 ## General Code Execution Guide
-If running this example, download setrun.py, setplot.py, and Makefile to the appropriate directory. Execute `$ make all` or `$ make .plots` to compile the code, run the simulation, and plot the results. If problems will be encountered, please refer to <a href="http://www.clawpack.org/quick_surge.html" target="_blank">Storm Surge Guide</a> for possible solutions. (Approximate runtime for this example on Monterey quad-Core intel core: 1 hour 10 min)
+If running this example, download setrun.py, setplot.py, and Makefile to the appropriate directory. Execute `$ make all` or `$ make .plots` to compile the code, run the simulation, and plot the results. If problems will be encountered, please refer to <a href="http://www.clawpack.org/quick_surge.html" target="_blank">Storm Surge Guide</a> for possible solutions. 
 
 ## Topography & Bathymetry Data
 Topography data can be obtained from:
@@ -82,12 +82,12 @@ To compare simulation surge data by GeoClaw, we introduced the observed surge da
 
 ## Validation Result
 ### Station 1-Pilots Station East, LA
-Pilots Station East, LA `ID: 8760922` experienced a storm surge of approximately 1.00 meter. GeoClaw predicted approximately 0.45 meters. 
+Pilots Station East, LA `ID: 8760922` experienced a storm surge of approximately 0.90 meter. GeoClaw predicted approximately 0.45 meters. 
 
 ![Station1](./images/station1.png)
 
 ### Station 2-Grand Isle, LA
-Grand Isle, LA `ID: 8761724` experienced a storm surge of approximately 1.40 meter. GeoClaw predicted approximately 2.80 meters. 
+Grand Isle, LA `ID: 8761724` experienced a storm surge of approximately 1.50 meter. GeoClaw predicted approximately 2.80 meters. 
 
 ![Station2](./images/station2.png)
 
@@ -97,12 +97,12 @@ Eugene Island, LA `ID: 8764314` experienced a storm surge of approximately -0.75
 ![Station3](./images/station3.png)
 
 ### Station 4-Bay Waveland Yacht Club, LA
-Bay Waveland Yacht Club, LA `ID: 8747437` experienced a storm surge of approximately 1.75 meter. GeoClaw predicted approximately 0.75 meters. 
+Bay Waveland Yacht Club, LA `ID: 8747437` experienced a storm surge of approximately 1.80 meter. GeoClaw predicted approximately 0.75 meters. 
 
 ![Station4](./images/station4.png)
 
 ### Station 5-Port Fourchon, LA
-Port Fourchon, LA `ID: 8762075` experienced a storm surge of approximately 1.00 meter. GeoClaw predicted approximately 1.10 meters. 
+Port Fourchon, LA `ID: 8762075` experienced a storm surge of approximately 1.25 meter. GeoClaw predicted approximately 1.10 meters. 
 
 ![Station5](./images/station5.png)
 
@@ -113,7 +113,7 @@ Among all gauge locations, station 1, 2, 4, and 5 are to the right of the hurric
 Generally speaking, observed data and simulation data share large amount of similarty in timing and pattern of surges. Two major reasons for the differences between the two data or abnormality are highly likely rainfall & freshwater flooding caused by the hurricane which was not taken into account by GeoClaw, and low/bad refinement of topography. Note that for this specific example, Mississippi River Delta region has lots of tiny islands and narrow waterways, making it very hard to refine. For future executions of this example, user may need to fully consider the pros (possibility of better refined regions) and cons (low efficiency in terms of run time) when adding more refinement levels.
 
 
-Author: Jinpai (Max) Zhao
+Author: Jinpai (Max) Zhao 
 ```
 jz3445@columbia.edu
 ```

@@ -170,7 +170,10 @@ def setplot(plotdata=None):
     import datetime
     my_dict = {1: '8760922', 2: '8761724', 3: '8764314', 4: '8747437', 5: '8760721'}
     # Mean water level in meters obtained from NOAA Tides & Currents 
-    mean = [0.347472, 0.316992, 0.405384, 0.460248, 0.356616]
+    # mean = [0.347472, 0.316992, 0.405384, 0.460248, 0.356616]
+
+    # Percentage of detided data before surge
+    before = [1/2, 1/2, 3/5, 1/2, 1/3]
     def gauge_afteraxes(cd): 
         t0 = datetime.datetime(2021, 8, 27, 17)
         t_offset = datetime.datetime(2021, 8, 29, 17)
@@ -183,7 +186,15 @@ def setplot(plotdata=None):
         t = numpy.empty(date_time.shape[0])
         for j, dt in enumerate(date_time):
             t[j] = (dt - t_offset).total_seconds() / 86400
-        axes.plot(t, water_level - prediction - mean[cd.gaugeno-1])
+
+        ## Plot detided data with mean of each gauge before surge window subtracted
+        raw = water_level - prediction
+        # print(raw.shape)
+        # numpy array shape: (721, )
+        # excluding initial value, 720 data in total
+        index = int((raw.shape[0]-1)*before[cd.gaugeno-1]+2)
+        mean = numpy.mean(raw[:index])
+        axes.plot(t, water_level - prediction - mean)
        
         # Fix up plot - in particular fix time labels
         axes.set_title('Station %s' % cd.gaugeno)
@@ -241,7 +252,7 @@ def setplot(plotdata=None):
     plotdata.latex_makepdf = False           # also run pdflatex?
     plotdata.parallel = True                 # parallel plotting
 
-    return plotdata
+    return plotdata 
 
 
 
