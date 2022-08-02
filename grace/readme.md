@@ -79,7 +79,7 @@ rundata = clawdata.ClawRunData(claw_pkg, num_dim)
 One may also want to modify AMR parameters like `amr_levels_max` and `refinement_ratios` in a more customized way. In this example, `amr_levels_max` was set to be `4` and `refinement_ratios` was set to be `[2, 2, 3, 4]`. More information regarding refinement parameter can be found in the documentation here: <a href="https://www.clawpack.org/setrun_amrclaw.html#setrun-amrclaw" target="_blank">AMRClaw Information</a>.
 
 ## Observed Surge Data
-To compare simulation surge data by GeoClaw, we introduced the observed surge data using `clawpack.geoclaw.util.fetch_noaa_tide_data` along with each gauge's station ID. When plotting the observed surge data, we explicitly deduct the tide amount from sea level at each location to make the data solely representing storm surge. Also, given the significant initial differences between observed data and simulation data at all gauges, the mean of water level at each gauge was subtracted from the observed data.
+To compare simulation surge data by GeoClaw, we introduced the observed surge data using `clawpack.geoclaw.util.fetch_noaa_tide_data` along with each gauge's station ID. When plotting the observed surge data, we explicitly deduct the tide amount from sea level at each location to make the data solely representing storm surge. Also, given the recognizable initial differences between observed data and simulation data at all gauges, the mean of water level at each gauge was subtracted from the observed data.
 
 ## Validation Result
 ### Station 1-Aransas Pass, TX
