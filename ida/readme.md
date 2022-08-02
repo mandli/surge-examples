@@ -66,7 +66,7 @@ atcf_path = os.path.join(data_dir, “bal092021.dat”)
 ## GeoClaw Parameters
 ### Landfall & Time Range
 Time of landfall was set in the simulation to be 29 August, 1700 UTC. Time range of simulation was set to be 2 days (48 hours) before landfall and 1 day (24 hours) after landfall.
-### Guages
+### Gauges
 Gauges were selected in the NOAA Inundations dashboard:
 https://tidesandcurrents.noaa.gov/map/index.html
 ### AMRClaw
@@ -78,7 +78,7 @@ rundata = clawdata.ClawRunData(claw_pkg, num_dim)
 One may also want to modify AMR parameters like `amr_levels_max` and `refinement_ratios` in a more customized way. In this example, `amr_levels_max` was set to be `6` and `refinement_ratios` was set to be `[2, 2, 2, 3, 4, 4]`. Note that for this specific example, Mississippi River Delta region was very hard to refine due to its extremely complicated and detailed topography. Therefore, high refinement levels are not recommended because run time may increase exponentially without making much progress. More information regarding refinement parameter can be found in the documentation here: <a href="https://www.clawpack.org/setrun_amrclaw.html#setrun-amrclaw" target="_blank">AMRClaw Information</a>.
 
 ## Observed Surge Data
-To compare simulation surge data by GeoClaw, we introduced the observed surge data using `clawpack.geoclaw.util.fetch_noaa_tide_data` along with each guage's station ID. When plotting the observed surge data, we explicitly deduct the tide amount from sea level at each location to make the data solely representing storm surge. Also, given the significant initial differences between observed data and simulation data at all gauges, the mean of water level at each gauges was subtracted from the observed data.
+To compare simulation surge data by GeoClaw, we introduced the observed surge data using `clawpack.geoclaw.util.fetch_noaa_tide_data` along with each gauge's station ID. When plotting the observed surge data, we explicitly deduct the tide amount from sea level at each location to make the data solely representing storm surge. Also, given the significant initial differences between observed data and simulation data at all gauges, the mean of water level at each gauges was subtracted from the observed data.
 
 ## Validation Result
 ### Station 1-Pilots Station East, LA
