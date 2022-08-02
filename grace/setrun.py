@@ -75,7 +75,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.upper[0] = -80.0      # east longitude 80
 
     clawdata.lower[1] = 16.0       # south latitude 16
-    clawdata.upper[1] = 31.0      # north latitude  30
+    clawdata.upper[1] = 31.0       # north latitude 31
 
 
     # Number of grid cells:
