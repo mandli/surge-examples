@@ -31,4 +31,4 @@
 # Executables
 *.exe
 *.out
-*.app
+*.app.DS_Store
