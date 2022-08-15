@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://ftp.nhc.noaa.gov/atcf/archive/2020/
+HostUrl=https://ftp.nhc.noaa.gov/atcf/archive/2020/bal312020.dat.gz
