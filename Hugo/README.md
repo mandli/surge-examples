@@ -10,11 +10,9 @@ Source: https://www.weather.gov/chs/HurricaneHugo-Sep1989
 
 Data to run the simulation was retrieved from NOAA’s storm data archive: http://ftp.nhc.noaa.gov/atcf/archive/2017/bal111989.dat.gz
 
-As this hurricane occurred in 1989, there are missing pieces of data necessary for this simulation that were not recorded in the storm data file. This missing data was extracted using a separate Python script containing functions that relate known data to these unknowns. The updated file is included in this folder, along with the script used to extract the missing data.
+As this hurricane occurred in 1989, there are missing pieces of data necessary for this simulation that were not recorded in the storm data file. This missing data was extracted using a separate Python script containing functions that relate known data to these unknowns. The updated file is included in this repository.
 
 Updated Storm Data File: BAL111989.dat
-
-Python Script: **
 
 ## Topography/Bathymetry Data
 
@@ -66,4 +64,4 @@ The model ran using estimations of missing data without significant loss of accu
 
 Next steps include running the simulation with higher refinement levels and modifying the model to account for river topography. The estimation of missing storm data can be extended to create fully synthetic storms. We can use these storms to model effects due to climate change by running them through this software.
 
-This study was completed by Riley Fisher as a part of the Columbia-Amazon Summer Undergraduate Research Experience (2021).
+This study was completed by Riley Fisher as a part of the Columbia-Amazon Summer Undergraduate Research Experience (2022).
