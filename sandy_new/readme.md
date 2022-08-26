@@ -1,5 +1,5 @@
 # Hurricane Sandy Storm Report (AL182012)
-The folder contains an updated version of the code that simulates Hurricane Sandy in late October 2012.
+The folder contains an updated version of the code that simulates Hurricane Sandy.
 
 ## General Information About Hurricane Sandy
 Hurricane Sandy was a Category 3 hurricane that started out in the southwestern Carribean Sea. The origin of this hurricane is associated with a tropical wave from the west coast of Africa on October 11, 2012. As it traveled north from the Carribean Sea, it made several landfalls on locations like Jamaica and Cuba, where it weakened to a Category 1 hurricane. As it traveled further north, however, it significantly grew in size as it traveled across the Bahamas. It made landfall on 29th of October 2012 at about 23:30 UTC. At the time of landfall, the intensity and the minimum pressure were measured to be 70 kt and 945 mb, respectively. The hurricane gradually weakened as it made its way through New Jersey, Delaware, and Pennsylvania before it finally merged with a low pressure area over eastern Canada. 
@@ -77,3 +77,6 @@ Actual coordinates: 41.37166 N, 72.095 W
 Simulation coordinates: 41.37166 N, 72.09 W
 
 ## Conclusion
+The storm surge data from the GeoClaw simulation were mostly consistent with the actual data from NOAA. Notably, however, the Kings Point gauge had a storm surge that is about a meter higher than what was simulated, and this may most likely have been due to the rainfall/flooding, which was not accounted in the simulation. Moreover, while the blue plot for Battery gauge generally seems to follow the same trend as the green plot, there is a significant difference in the surface level compared to other gauge plots. The Battery gauge is located right under Manhattan, where the waterway is relatively very narrow and the topography is not very easy to refine to a high degree of accuracy. This is the likely reason for the inconsistency in the Battery gauge plot.
+
+Written and simulated by Woosuk Lee
