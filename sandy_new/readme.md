@@ -33,10 +33,47 @@ Gauges:
  *All gauge locations are based on NOAA Tides and Currents Dashboard* (https://tidesandcurrents.noaa.gov/map/index.html)
 
 ## Results
-Results of the simulation is shown below as plots in blue. The horizontal axis shows the days relative to landfall, and the simulation runs from a day before to a day after the landfall indicated in the above section. The vertical axis shows the water surface level in meters. The simulation data can directly be compared with the actual data plotted in green, which was retrieved using ```fetch_noaa_tide_data()``` function. Each of the green plots were shifted down by the mean values of the actual surface levels of the respective gauges in order to account for the mean water levels. The coordinates of some of the gauge locations have been slightly modified to take into account the limitation of topography refinements.
+Results of the simulation is shown below as plots in blue. The horizontal axis shows the days relative to landfall, and the simulation runs from a day before to a day after the landfall indicated in the above section. The vertical axis shows the water surface level in meters. The simulation data can directly be compared with the actual data plotted in green, which was retrieved using ```fetch_noaa_tide_data()``` function. Each of the green plots were shifted down by the mean values of the actual surface levels of the respective gauges in order to account for the mean water levels. The coordinates of some of the gauge locations have been slightly modified to take into account the limitation of topography refinements. The coordinates are indicated in each gauge.
 ### Gauge 1: Battery, NY (8518750)
+![Gauge 1](gauge_plots/gauge0001fig300.png)
+
+Actual coordinates: 40.7 N, 74.015 W
+
+Simulation coordinates: 40.7 N, 74.013 W
+
 ### Gauge 2: Kings Point, NY (8516945)
+![Gauge 2](gauge_plots/gauge0002fig300.png)
+
+Actual coordinates: 40.81 N, 73.765 W
+
+Simulation coordinates: 40.81 N, 73.77 W
+
 ### Gauge 3: Montauk, NY (8510560)
+![Gauge 3](gauge_plots/gauge0003fig300.png)
+
+Actual coordinates: 41.04833 N, 71.96 W
+
+Simulation coordinates: 41.04833 N, 71.96 W
+
 ### Gauge 4: Bridgeport, CT (8467150)
+![Gauge 4](gauge_plots/gauge0004fig300.png)
+
+Actual coordinates: 41.1733 N, 73.18166 W
+
+Simulation coordinates: 41.1733 N, 73.18166 W
+
 ### Gauge 5: New Haven, CT (8465705)
+![Gauge 5](gauge_plots/gauge0005fig300.png)
+
+Actual coordinates: 41.2833 N, 72.90833 W
+
+Simulation coordinates: 41.2235 N, 72.915152 W
+
 ### Gauge 6: New London, CT (8461490)
+![Gauge 6](gauge_plots/gauge0006fig300.png)
+
+Actual coordinates: 41.37166 N, 72.095 W
+
+Simulation coordinates: 41.37166 N, 72.09 W
+
+## Conclusion
