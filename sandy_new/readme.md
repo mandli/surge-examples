@@ -14,10 +14,10 @@ The following code from ```setrun.py``` will automatically retrieve the file:
 clawutil.data.get_remote_file("http://ftp.nhc.noaa.gov/atcf/archive/2012/bal182012.dat.gz")
 atcf_path = os.path.join(scratch_dir, "bal182012.dat")
 ```
-As it is implemented now, the storm data file will be placed in the scratch directory ```$CLAW/geoclaw/scrach```
+As it is implemented now, the storm data file will be placed in the scratch directory ```$CLAW/geoclaw/scratch```
 
 ## Topography & Bathymetry Data
-The two topography data files of interest are ```atlantic_1min.tt3``` and ```newyork_3s.tt3```. The files should be placed in the scratch directory ```$CLAW/geoclaw/scrach```
+The two topography data files of interest are ```atlantic_1min.tt3``` and ```newyork_3s.tt3```. The files should be placed in the scratch directory ```$CLAW/geoclaw/scratch```
 
 ## Geoclaw Parameters
 Landfall time: 29 October 2012 23:30 UTC
