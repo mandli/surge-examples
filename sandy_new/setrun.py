@@ -27,7 +27,7 @@ def days2seconds(days):
 
 
 # Scratch directory for storing topo and storm files:
-# scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
+scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
 
 
 # ------------------------------
@@ -262,7 +262,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 9
+    amrdata.amr_levels_max = 8
 
     # new test
 #    amrdata.refinement_ratios_x = [2, 2, 2, 3, 3, 4, 4, 2]
@@ -319,11 +319,10 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    
     regions.append([1,2,clawdata.t0,clawdata.tfinal,-90,-55,15,45]) # full domain
     regions.append([5,6,clawdata.t0,clawdata.tfinal,-74.25,-73.5,40.5,41]) # refine gauge 1,2,3
-    regions.append([5,6,clawdata.t0,clawdata.tfinal,-73.25,-72.75,41,41.5]) # refine gauge 5,6
-    regions.append([6,7,clawdata.t0,clawdata.tfinal,-72.25,-72,41,41.5]) # refine gauge 7
+    regions.append([5,6,clawdata.t0,clawdata.tfinal,-73.25,-72.75,41,41.5]) # refine gauge 4,5
+    regions.append([6,7,clawdata.t0,clawdata.tfinal,-72.25,-72,41,41.5]) # refine gauge 6
 
 
     # =============================================================================================================== #
@@ -337,11 +336,9 @@ def setrun(claw_pkg='geoclaw'):
     # 8467150 Bridgeport, CT
     rundata.gaugedata.gauges.append([4,-73.1816666667,41.1733333333,clawdata.t0,clawdata.tfinal])
     # 8465705 New Haven, CT
-    rundata.gaugedata.gauges.append([5,-72.915152,41.2235,clawdata.t0,clawdata.tfinal]) #-72.914488,41.262016, location moved quite a bit due to horizontal line issue
+    rundata.gaugedata.gauges.append([5,-72.915152,41.2235,clawdata.t0,clawdata.tfinal])
     # 8461490 New London, CT
     rundata.gaugedata.gauges.append([6,-72.09,41.3716666667,clawdata.t0,clawdata.tfinal])
-
-#    rundata.gaugedata.gauges.append([5,-75,30,clawdata.t0,clawdata.tfinal])
     
     # Force the gauges to also record the wind and pressure fields
     # rundata.gaugedata.aux_out_fields = [4, 5, 6]
@@ -399,9 +396,9 @@ def setgeo(rundata):
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
 
-    topo_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'sandy','bathy')
-    topo_atlantic = os.path.join(topo_dir,'atlantic_1min.tt3')
-    topo_ny = os.path.join(topo_dir,'newyork_3s.tt3')
+    # topo_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'sandy','bathy')
+    topo_atlantic = os.path.join(scratch_dir,'atlantic_1min.tt3')
+    topo_ny = os.path.join(scratch_dir,'newyork_3s.tt3')
     topo_data.topofiles.append([3,topo_atlantic])
     topo_data.topofiles.append([3,topo_ny])
     
@@ -434,11 +431,8 @@ def setgeo(rundata):
                                          'sandy.storm'))
 
     # Convert ATCF data to GeoClaw format
-    clawutil.data.get_remote_file(
-                   "http://ftp.nhc.noaa.gov/atcf/archive/2012/bal182012.dat.gz",
-                   output_dir=os.path.join(os.environ["CLAW"],"geoclaw",'sandy',"atcf"))
-    
-    atcf_path = os.path.join(os.environ["CLAW"], 'geoclaw', 'sandy','atcf', "bal182012.dat")
+    clawutil.data.get_remote_file("http://ftp.nhc.noaa.gov/atcf/archive/2012/bal182012.dat.gz")
+    atcf_path = os.path.join(scratch_dir, "bal182012.dat")
     # Note that the get_remote_file function does not support gzip files which
     # are not also tar files.  The following code handles this
     with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \
@@ -448,7 +442,7 @@ def setgeo(rundata):
     sandy = Storm(path=atcf_path, file_format="ATCF")
 
     # Calculate landfall time - Need to specify as the file above does not
-    sandy.time_offset = datetime.datetime(2012, 10, 30, 0,0)
+    sandy.time_offset = datetime.datetime(2012, 10, 29, 23, 30)
 
     sandy.write(data.storm_file, file_format='geoclaw')
 
