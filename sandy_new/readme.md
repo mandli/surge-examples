@@ -31,3 +31,12 @@ Gauges:
   6. New London, CT (8461490)
   
  *All gauge locations are based on NOAA Tides and Currents Dashboard* (https://tidesandcurrents.noaa.gov/map/index.html)
+
+## Results
+Results of the simulation is shown below as plots in blue. The horizontal axis shows the days relative to landfall, and the simulation runs from a day before to a day after the landfall indicated in the above section. The vertical axis shows the water surface level in meters. The simulation data can directly be compared with the actual data plotted in green, which was retrieved using ```fetch_noaa_tide_data()``` function. Each of the green plots were shifted down by the mean values of the actual surface levels of the respective gauges in order to account for the mean water levels. The coordinates of some of the gauge locations have been slightly modified to take into account the limitation of topography refinements.
+### Gauge 1: Battery, NY (8518750)
+### Gauge 2: Kings Point, NY (8516945)
+### Gauge 3: Montauk, NY (8510560)
+### Gauge 4: Bridgeport, CT (8467150)
+### Gauge 5: New Haven, CT (8465705)
+### Gauge 6: New London, CT (8461490)
