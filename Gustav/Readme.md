@@ -42,6 +42,7 @@ Note: some gauge coordinates were shifted slightly to allow for better modelling
 #### Gauge 1: Grand Isle, LA
 
 Coordinates: 89.7567 W, 29.2733 N
+
 <img width="322" alt="Screen Shot 2022-08-27 at 11 10 53 PM" src="https://user-images.githubusercontent.com/98766868/187055798-aa1b4af3-ad8d-4bda-8676-7096c20c96b9.png">
 
 Actual Surge: 1.22 meters
@@ -50,6 +51,7 @@ Predicted Surge: 2.38 meters
 #### Gauge 2:
 
 Coordinates: 89.4067 W, 28.9317 N
+
 <img width="321" alt="Screen Shot 2022-08-27 at 11 11 06 PM" src="https://user-images.githubusercontent.com/98766868/187055800-150117bb-f6f3-44fd-9c26-a0d306944c47.png">
 
 Actual Surge: 0.82 meters
@@ -58,6 +60,7 @@ Predicted Surge: 1.01 meters
 #### Gauge 3:
 
 Coordinates: 88.0750 W, 30.2500 N
+
 <img width="322" alt="Screen Shot 2022-08-27 at 11 11 24 PM" src="https://user-images.githubusercontent.com/98766868/187055801-4c0b5fcc-988f-4d9f-865a-969493e05f24.png">
 
 Actual Surge: 1.00 meters
@@ -68,6 +71,7 @@ Predicted Surge: 0.55 meters
 note: left of landfall — clockwise spin and thus negative surge
 
 Coordinates: 92.3050 W, 29.4717 N
+
 <img width="321" alt="Screen Shot 2022-08-27 at 11 11 35 PM" src="https://user-images.githubusercontent.com/98766868/187055813-65aa222a-bb6f-4d72-acaf-4ad81f3587fb.png">
 
 Actual Surge: -1.23 meters
@@ -76,6 +80,7 @@ Predicted Surge: -0.49 meters
 #### Gauge 5:
 
 Coordinates: 88.9633 W, 30.3683 N
+
 <img width="323" alt="Screen Shot 2022-08-27 at 11 11 58 PM" src="https://user-images.githubusercontent.com/98766868/187055820-9ec65af0-a796-434b-b28a-7f52fc293cfd.png">
 
 Actual Surge: 1.55 meters
@@ -84,6 +89,7 @@ Predicted Surge: 1.41 meters
 #### Gauge 6:
 
 Coordinates: 89.6733 W, 29.9683 N
+
 <img width="321" alt="Screen Shot 2022-08-27 at 11 12 13 PM" src="https://user-images.githubusercontent.com/98766868/187055821-a4494d06-4877-47d0-a5b8-e41417fa71ee.png">
 
 Actual Surge: 2.86 meters
