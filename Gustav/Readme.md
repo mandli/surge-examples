@@ -1,7 +1,9 @@
 # Hurricane Gustav (aal072008)
 
 ### Instructions to Run
-
+1. Download setrun.py, setplot.py, and Makefile
+2. Navigate to the directory of interest
+3. Run `make all`, or `make .plots` if setrun has already been run 
 
 ## Storm Info
 Hurricane Gustav was a category 4 hurricane that officially became so at UTC 18:00 on August 30th, 2008. Gustav made several landfalls along its path, including on Haiti, Cuba, and Louisiana. Prior to then, Gustav had originated as a tropical wave off the coast of Africa on August 13th, moving westward until it became classified as a tropical depression on August 25th about 350 miles south of Puerto Rico. It quickly developed into a tropical storm at UTC 12:00 on August 25th and a hurricane shortly thereafter. Gustav then weakened into a tropical storm on August 27th and remained so as it passed through Jamaica. The storm intensified on August 29th, and regained hurricane status as a category 2 hurricane as it traveled over Cayman Islands on August 30th. It grew into a category 4 hurricane just before making landfall in Cuba, thus officially acquiring the title of a major hurricane. Although Gustav weakened over the Gulf of Mexico, Gustav made landfall on Louisiana at UTC 15:00 on September 1st as a category 2 hurricane. The hurricane then further weakened into a tropical storm midway through Louisiana, and became a tropical depression as it passed into Arkansas. Gustav reduced to being extratropical as it moved north into Missouri. 
