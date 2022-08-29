@@ -16,6 +16,8 @@ For topological purposes, we focus on the latter half of hurricane Gustav as it 
 
 http://www.columbia.edu/~ktm2132/bathy/gulf_caribbean.tt3.tar.bz2
 
+https://www.gebco.net/data_and_products/gridded_bathymetry_data/#area (with boundaries North: 31, South:28, West: -92.5, East: -87.5)
+
 ---
 ## Geoclaw Parameters 
 **Storm Data:** http://ftp.nhc.noaa.gov/atcf/archive/2008/aal072008.dat.gz
