@@ -42,7 +42,9 @@ atcf_path = os.path.join(scratch_dir, "bal072018.dat")
 For this example, Gordon storm data should be placed in the same directory that the simulation is ran in.
 
 ## Topography & Bathymetry Data
-Topography data is provided in this folder as well in the name of North45_South0_West-105._East-35.tt3. The file should be downloaded and placed in the scratch directory as the Storm Data.
+Topography data is provided with the name of North45_South0_West-105._East-35.tt3. The file should be downloaded and placed in the scratch directory as the Storm Data.
+
+The topography file can be downloaded from https://www.gebco.net/data_and_products/gridded_bathymetry_data/ with coordinates North 45, South 0, West -105, and East -35.
 
 ## Geoclaw Parameters
 Time of landfall was set in the simulation to be 5 September, 1200 UTC. Simulation ran from 2 days before landfall to 2 days after.
