@@ -1,4 +1,3 @@
-
 from __future__ import absolute_import
 from __future__ import print_function
 
@@ -160,9 +159,10 @@ def setplot(plotdata=None):
 
     stations = [('8764314', 'Eugene Island, North of, Atchafalaya Bay'),
                 ('8764227', 'LAWMA, Amerada Pass, LA'),
-                ('8764044', 'Berwick, Atchafalaya River, LA'),
                 ('8766072', 'Freshwater Canal Locks, LA'),
-                ('8768094', 'Calcasieu Pass, LA')]
+                ('8768094', 'Calcasieu Pass, LA'),
+                ('8770822', 'Texas Point, Sabine Pass, TX,'),
+                ('8770808', 'High Island, TX')]
 
     landfall_time = np.datetime64('2019-07-13T15:00')
     begin_date = datetime.datetime(2019, 7, 11, 15, 0)
@@ -243,7 +243,7 @@ def setplot(plotdata=None):
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Gauge Locations'
     plotaxes.scaled = True
-    plotaxes.xlimits = [-93.9, -91]
+    plotaxes.xlimits = [-95.0, -91.0]
     plotaxes.ylimits = [29, 30.7]
     plotaxes.afteraxes = gauge_location_afteraxes
     surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
@@ -273,3 +273,4 @@ def setplot(plotdata=None):
     plotdata.parallel = True                 # parallel plotting
 
     return plotdata
+
