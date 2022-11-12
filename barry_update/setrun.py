@@ -81,8 +81,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.upper[1] = 32.0       # north latitude
 
     # Number of grid cells:
-    num_deg = 4
-    degree_factor = num_deg  # (0.25º,0.25º) ~ (25237.5 m, 27693.2 m) resolution
+    degree_factor = 4  # (0.25º,0.25º) ~ (25237.5 m, 27693.2 m) resolution
     clawdata.num_cells[0] = int(clawdata.upper[0] - clawdata.lower[0]) \
         * degree_factor
     clawdata.num_cells[1] = int(clawdata.upper[1] - clawdata.lower[1]) \
@@ -269,13 +268,13 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 7
+    amrdata.amr_levels_max = 6
 
     
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [2,2,4,4,6,6,6]
-    amrdata.refinement_ratios_y = [2,2,4,4,6,6,6]
-    amrdata.refinement_ratios_t = [2,2,4,4,6,6,6]
+    amrdata.refinement_ratios_x = [2,2,2,6,6,16]
+    amrdata.refinement_ratios_y = [2,2,2,6,6,16]
+    amrdata.refinement_ratios_t = [2,2,2,6,6,16]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length maux, each element of which is one of:
@@ -323,21 +322,17 @@ def setrun(claw_pkg='geoclaw'):
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
     # full region
     regions.append([1, 3, clawdata.t0, clawdata.tfinal, clawdata.lower[0], clawdata.upper[0], clawdata.lower[1], clawdata.upper[1]])
-    regions.append([1, 5, clawdata.t0, clawdata.tfinal, -94, -90, 29.2, 30.0])
+    regions.append([1, 5, clawdata.t0, clawdata.tfinal, -95, -90, 29.2, 30.0])
     
-    #regions.append([4, 5, clawdata.t0, clawdata.tfinal, -91.5, -91.2, 29.3, 29.7])    # Gauge 1,2,3
     
     regions.append([4, 5, clawdata.t0, clawdata.tfinal, -91.5, -91.2, 29.3, 29.5])  # Gauge 1,2
-    regions.append([6, 7, clawdata.t0, clawdata.tfinal, -91.3, -91.2, 29.6, 29.7])  # Gauge 3
-    regions.append([3, 4, clawdata.t0, clawdata.tfinal, -92.32, -92.28, 29.5, 29.6])  # Gauge 4
-    regions.append([6, 7, clawdata.t0, clawdata.tfinal, -93.4, -93.3, 29.7, 29.8])  # Gauge 5
+    regions.append([7, 8, clawdata.t0, clawdata.tfinal, -92.8, -91.8, 29.2, 29.8])  
+    regions.append([6, 7, clawdata.t0, clawdata.tfinal, -93.6, -93.2, 29.5, 29.9])  
+    regions.append([6, 7, clawdata.t0, clawdata.tfinal, -94.0, -93.5, 29.5, 29.9]) 
+    regions.append([3, 5, clawdata.t0, clawdata.tfinal, -94.6, -94.2, 29.3, 29.7])  
 
-       
-##    regions.append([4, 5, clawdata.t0, clawdata.tfinal, -91.383333-0.2, -91.383333+0.2, 29.36667-0.2,  29.36667+0.2])    # Gauge 1 
-##    regions.append([4, 5, clawdata.t0, clawdata.tfinal, -91.338333-0.2, -91.338333+0.2, 29.45-0.2,     29.45+0.2])       # Gauge 2  
-##    regions.append([6, 6, clawdata.t0, clawdata.tfinal, -91.238333-0.2, -91.238333+0.2, 29.668333-0.2, 29.668333+0.2])   # Gauge 3
-##    regions.append([2, 3, clawdata.t0, clawdata.tfinal, -92.305-0.2,    -92.305+0.2,    29.551667-0.2, 29.551667+0.2])   # Gauge 4
-##    regions.append([6, 6, clawdata.t0, clawdata.tfinal, -93.34333-0.2,  -93.34333+0.2,  29.768333-0.2, 29.768333+0.2])   # Gauge 5
+    #regions.append([4, 5, clawdata.t0, clawdata.tfinal, -94.0, -93.6, 29.5, 29.8])  
+    #regions.append([3, 5, clawdata.t0, clawdata.tfinal, -94.7, -94.2, 29.45, 29.7]) 
 
     # == set gauges ==
     rundata.gaugedata.gauges.append([1, -91.383333, 29.36667,
@@ -346,15 +341,13 @@ def setrun(claw_pkg='geoclaw'):
     rundata.gaugedata.gauges.append([2, -91.338333, 29.45,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal]) # LAWMA, Amerada Pass, LA, 8764227
-    rundata.gaugedata.gauges.append([3, -91.238333, 29.668333,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal]) # Berwick, Atchafalaya River, LA, 8764044
-    rundata.gaugedata.gauges.append([4, -92.305, 29.551667,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal]) # Freshwater Canal Locks, LA, 8766072
-    rundata.gaugedata.gauges.append([5, -93.34333, 29.768333,
+    rundata.gaugedata.gauges.append([3, -93.34, 29.75,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal]) # Calcasieu Pass, LA, 8768094
+    rundata.gaugedata.gauges.append([4, -93.82, 29.67,
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal]) # Texas Point, Sabine Pass, TX, 8770822
+    
 
 
 
