@@ -159,10 +159,8 @@ def setplot(plotdata=None):
 
     stations = [('8764314', 'Eugene Island, North of, Atchafalaya Bay'),
                 ('8764227', 'LAWMA, Amerada Pass, LA'),
-                ('8766072', 'Freshwater Canal Locks, LA'),
                 ('8768094', 'Calcasieu Pass, LA'),
-                ('8770822', 'Texas Point, Sabine Pass, TX,'),
-                ('8770808', 'High Island, TX')]
+                ('8770822', 'Texas Point, Sabine Pass, TX,')]
 
     landfall_time = np.datetime64('2019-07-13T15:00')
     begin_date = datetime.datetime(2019, 7, 11, 15, 0)
