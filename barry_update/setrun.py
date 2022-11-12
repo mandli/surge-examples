@@ -322,14 +322,11 @@ def setrun(claw_pkg='geoclaw'):
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
     # full region
     regions.append([1, 3, clawdata.t0, clawdata.tfinal, clawdata.lower[0], clawdata.upper[0], clawdata.lower[1], clawdata.upper[1]])
-    regions.append([1, 5, clawdata.t0, clawdata.tfinal, -95, -90, 29.2, 30.0])
+    regions.append([1, 5, clawdata.t0, clawdata.tfinal, -95, -90, 29.2, 30.0])   
     
-    
-    regions.append([4, 5, clawdata.t0, clawdata.tfinal, -91.5, -91.2, 29.3, 29.5])  # Gauge 1,2
-    regions.append([7, 8, clawdata.t0, clawdata.tfinal, -92.8, -91.8, 29.2, 29.8])  
+    regions.append([4, 5, clawdata.t0, clawdata.tfinal, -91.5, -91.2, 29.3, 29.5])  # Gauge 1,2 
     regions.append([6, 7, clawdata.t0, clawdata.tfinal, -93.6, -93.2, 29.5, 29.9])  
     regions.append([6, 7, clawdata.t0, clawdata.tfinal, -94.0, -93.5, 29.5, 29.9]) 
-    regions.append([3, 5, clawdata.t0, clawdata.tfinal, -94.6, -94.2, 29.3, 29.7])  
 
     #regions.append([4, 5, clawdata.t0, clawdata.tfinal, -94.0, -93.6, 29.5, 29.8])  
     #regions.append([3, 5, clawdata.t0, clawdata.tfinal, -94.7, -94.2, 29.45, 29.7]) 
@@ -347,8 +344,6 @@ def setrun(claw_pkg='geoclaw'):
     rundata.gaugedata.gauges.append([4, -93.82, 29.67,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal]) # Texas Point, Sabine Pass, TX, 8770822
-    
-
 
 
     # Force the gauges to also record the wind and pressure fields
@@ -411,7 +406,7 @@ def setgeo(rundata):
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
     topo_data.topofiles.append([3, topo_path])
 
-##    
+ 
 ##    topo_path = os.path.join(scratch_dir, "North45_South0_West-105._East-35.tt3")
 ##    topo_data.topofiles.append([3, topo_path])
 
