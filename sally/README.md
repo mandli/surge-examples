@@ -17,16 +17,16 @@ The three files in this folder (setrun.py, setplot.py, and Makefile) are necessa
 - [Observed Surge Data](#observed-surge-data)
 - [Validation Result](#validation-result)
   * [Map](#map)
-  * [Station 1 - Pensacola, FL](#station-1-pensacola-fl)
-  * [Station 2 - Dauphin Island, AL](#station-2-dauphin-island-al)
-  * [Station 3 - Bayou La Batre Bridge, AL](#station-3-bayou-la-batre-bridge-al)
-  * [Station 4 - East Fowl River Bridge, AL](#station-4-east-fowl-river-bridge-al)
-  * [Station 5 - Dog River Bridge, AL](#station-5-dog-river-bridge-al)
-  * [Station 6 - Coast Guard Sector Mobile, AL](#station-6-coast-guard-sector-mobile-al)
-  * [Station 7 - West Fowl River Bridge, AL](#station-7-west-fowl-river-bridge-al)
-  * [Station 8 - Pascagoula NOAA Lab, MS](#station-8-pascagoula-noaa-lab-ms)
-  * [Station 9 - Bay Waveland Yacht Club, MS](#station-9-bay-waveland-yacht-club-ms)
-  * [Station 10 - Shell Beach, LA](#station-10-shell-beach-la)
+  * [Station 1-Pensacola, FL](#station-1-pensacola-fl)
+  * [Station 2-Dauphin Island, AL](#station-2-dauphin-island-al)
+  * [Station 3-Bayou La Batre Bridge, AL](#station-3-bayou-la-batre-bridge-al)
+  * [Station 4-East Fowl River Bridge, AL](#station-4-east-fowl-river-bridge-al)
+  * [Station 5-Dog River Bridge, AL](#station-5-dog-river-bridge-al)
+  * [Station 6-Coast Guard Sector Mobile, AL](#station-6-coast-guard-sector-mobile-al)
+  * [Station 7-West Fowl River Bridge, AL](#station-7-west-fowl-river-bridge-al)
+  * [Station 8-Pascagoula NOAA Lab, MS](#station-8-pascagoula-noaa-lab-ms)
+  * [Station 9-Bay Waveland Yacht Club, MS](#station-9-bay-waveland-yacht-club-ms)
+  * [Station 10-Shell Beach, LA](#station-10-shell-beach-la)
   * [Result Interpretation](#result-interpretation)
   * [Comparison of Simulation to Gauge Station Data](#comparison-of-simulation-to-gauge-station-data)
 - [Conclusion](#conclusion)
@@ -39,7 +39,7 @@ All information and analysis was acquired from The National Hurricane Center (NH
 
 Hurricane Sally was a category 2 hurricane that made landfall along the coast of Alabama and the western Florida Panhandle around 0945 UTC (0545 EST) on September 16, 2020. (While it also intersected with the Floridian peninsula, there was on significant coastal flooding there as the storm was a tropical depression and was transitioning to a tropical storm at that time.) Hurricane Sally created a complex pattern of storm surge flooding along much of the central and northeastern US Gulf coast, and record river flooding resulting from heavy rainfall. The storm continued across Alabama and Georgia and dissipated in South Carolina.
 
-![path](./images/path.png)
+<img src="images/path.png" width="700">
 
 Image Source: https://www.nytimes.com/interactive/2020/09/14/us/hurricane-sally-map.html
 
@@ -192,67 +192,67 @@ To compare the simulation surge data by GeoClaw to the actual data, we collected
 
 A map of gauges located on the simulation just before the storm reaches landfall:
 
-![Map](./images/map.png)
+<img src="images/map.png" width="700">
 
 ### Station 1 - Pensacola, FL
 
 Pensacola, FL (ID: 8729840) experienced a storm surge of approximately 1.50 meters. GeoClaw predicted approximately 1.20 meters.
 
-![Station1](./images/station1.png)
+<img src="images/station1.png" width="700">
 
 ### Station 2 - Dauphin Island, AL
 
 Dauphin Island, AL (ID: 8735180) experienced a storm surge of approximately 0.75 meters, and a reverse storm surge of approximately -0.25 meters. GeoClaw predicted approximately 0.70 meters and -0.80 meters.
 
-![Station2](./images/station2.png)
+<img src="images/station2.png" width="700">
 
 ### Station 3 - Bayou La Batre Bridge, AL
 
 Bayou La Batre Bridge, AL (ID: 8739803) experienced a storm surge of approximately -1.05 meters. GeoClaw predicted approximately -1.80 meters.
 
-![Station3](./images/station3.png)
+<img src="images/station3.png" width="700">
 
 ### Station 4 - East Fowl River Bridge, AL
 
 East Fowl River Bridge, AL (ID: 8735523) experienced a storm surge of approximately 0.55 meters and a reverse surge of approximately -1.00 meter. GeoClaw predicted approximately 0.80 meters and -1.30 meters.
 
-![Station4](./images/station4.png)
+<img src="images/station4.png" width="700">
 
 ### Station 5 - Dog River Bridge, AL
 
 Dog River Bridge, AL (ID: 8735391) experienced a storm surge of approximately -1.80 meters. GeoClaw predicted approximately -1.65 meters.
 
-![Station5](./images/station5.png)
+<img src="images/station5.png" width="700">
 
 ### Station 6 - Coast Guard Sector Mobile, AL
 
 Coast Guard Sector Mobile, AL (ID: 8736897) experienced a storm surge of approximately -2.65 meters. GeoClaw predicted approximately -1.65 meters.
 
-![Station6](./images/station6.png)
+<img src="images/station6.png" width="700">
 
 ### Station 7 - West Fowl River Bridge, AL
 
 West Fowl River Bridge, AL (ID: 8738043) experienced a storm surge of approximately -0.75 meters. GeoClaw predicted approximately -1.20 meters.
 
-![Station7](./images/station7.png)
+<img src="images/station7.png" width="700">
 
 ### Station 8 - Pascagoula NOAA Lab, MS
 
 Pascagoula NOAA Lab, MS (ID: 8741533) experienced a storm surge of approximately 0.75 meters and a reverse storm surge of approximately -0.25 meters. GeoClaw predicted approximately 0.50 meters, and -1.75 meters for reverse storm surge.
 
-![Station8](./images/station8.png)
+<img src="images/station8.png" width="700">
 
 ### Station 9 - Bay Waveland Yacht Club, MS
 
 Bay Waveland Yacht Club, MS (ID: 8747437) experienced a storm surge of approximately 0.80 meters, and a reverse storm surge of approximately -0.35 meters. GeoClaw predicted approximately 0.65 meters and -0.60 meters.
 
-![Station9](./images/station9.png)
+<img src="images/station9.png" width="700">
 
 ### Station 10 - Shell Beach, LA
 
 Shell Beach, LA (ID: 8761305) experienced a storm surge of approximately 1.25 meters. GeoClaw predicted approximately 1.00 meters.
 
-![Station10](./images/station10.png)
+<img src="images/station10.png" width="700">
 
 ### Result Interpretation
 
