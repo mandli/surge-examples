@@ -121,7 +121,7 @@ if clawdata.output_style == 1:
 Eleven gauges were selected near the coasts of Louisiana, Alabama and Mississippi using the NOAA Inundations dashboard: https://tidesandcurrents.noaa.gov/map/index.html.
 
 
-Both setrun.py and setplot.py read in gauges from a file called “gauges_final.csv” placed in the scratch directory. The columns prefaced with “Original” refer to the coordinates of the tide gauges written on the NOAA website. The columns “Latitude Decimal” and “Longitude Decimal” have been modified from the original locations slightly because the original locations were often too close to the coast to be recognized as being in the water at low refinement levels. The only columns necessary to run the code are Number, Latitude Decimal, and Longitude Decimal, located in their respective columns. 
+Both setrun.py and setplot.py read in gauges from a file called “gauges_final.csv” placed in the scratch directory. The columns prefaced with “Original” refer to the coordinates of the tide gauges written on the NOAA website. The columns “Latitude Decimal” and “Longitude Decimal” have been modified from the original locations slightly because the original locations were often too close to the coast to be recognized as being in the water at low refinement levels. The only columns necessary to run the code are Number, Latitude Decimal, and Longitude Decimal, located in their respective columns in the provided gauges_final.csv file (which does not include a gauge number column). 
 
 Gauge Number | Full Name | ID | Location | Original Latitude (Degrees) | Original Latitude (Minutes) | Latitude (Decimal) | Original Longitude (Degrees) | Original Longitude (Minutes) | Longitude (Decimal)
 --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
