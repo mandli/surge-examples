@@ -1,6 +1,6 @@
 # Storm Report: Hurricane Sally AL192020
 
-The three files in this folder (setrun.py, setplot.py, and Makefile) are necessary to run Clawpack simulations of Hurricane Sally in September 2020.
+The three files in this folder (setrun.py, setplot.py, and Makefile) are necessary to run Clawpack simulations of Hurricane Sally, which made landfall in September 2020.
 
 ## Table of Contents
 - [Hurricane Sally Information](#hurricane-sally-information)
@@ -33,11 +33,11 @@ The three files in this folder (setrun.py, setplot.py, and Makefile) are necessa
 
 ## Hurricane Sally Information
 
-All information and analysis was acquired from The National Hurricane Center (NHC) Tropical Cyclone Report under the National Oceanic and Atmospheric Administration (NOAA), which can be found here: https://www.nhc.noaa.gov/data/tcr/AL192020_Sally.pdf
+All information and analysis was acquired from The National Hurricane Center (NHC) Tropical Cyclone Report under the National Oceanic and Atmospheric Administration (NOAA), which can be found here: https://www.nhc.noaa.gov/data/tcr/AL192020_Sally.pdf.
 
 ## Path & Landfall
 
-Hurricane Sally was a category 2 hurricane that made landfall along the coast of Alabama and the western Florida Panhandle around 0945 UTC (0545 EST) on September 16, 2020. (While it also intersected with the Floridian peninsula, there was on significant coastal flooding there as the storm was a tropical depression and was transitioning to a tropical storm at that time.) Hurricane Sally created a complex pattern of storm surge flooding along much of the central and northeastern US Gulf coast, and record river flooding resulting from heavy rainfall. The storm continued across Alabama and Georgia and dissipated in South Carolina.
+Hurricane Sally was a category 2 hurricane that made landfall along the coast of Alabama and the western Florida Panhandle around 0945 UTC on September 16, 2020. (While it also intersected with the Floridian peninsula, there was no significant coastal flooding there as the storm was a tropical depression and was transitioning to a tropical storm at that time.) Hurricane Sally created a complex pattern of storm surge flooding along much of the central and northeastern US Gulf coast, along with record river flooding resulting from heavy rainfall. The storm continued across Alabama and Georgia and dissipated in South Carolina.
 
 <img src="images/path.png" width="700">
 
@@ -93,7 +93,7 @@ Parameters for the Hurricane Sally simulation were set in setrun.py.
 
 ### Landfall & Time Range
 
-The time of landfall was set in the simulation to be 16 September, 900 UTC. The time range of the simulation was set to be -4.5 days before landfall and 2 days after landfall.
+The time of landfall was set in the simulation to be 16 September, 0900 UTC. The time range of the simulation was set to be -4.5 days before landfall and 2 days after landfall.
 
 Date and time of landfall is set in the following code segment in setrun.py:
 ```
@@ -180,7 +180,7 @@ regions.append([1, 2, clawdata.t0, clawdata.tfinal, -95, -71, 21, 24]) # Bottom
 
 Caution: higher refinement levels may increase the run time exponentially without making much progress. If you are running the program on a more powerful machine, a higher refinement level can be used. 
 
-More information can be found at: https://www.clawpack.org/setrun_amrclaw.html#setrun-amrclaw.
+More information can be found at: https://www.clawpack.org/setrun_amrclaw.html#setrun-amrclaw
 
 ## Observed Surge Data
 
