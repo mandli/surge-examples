@@ -517,13 +517,12 @@ def setgeo(rundata):
                                   [numpy.infty, 0.0, -numpy.infty],
                                   [0.030, 0.022]])
 
-    # Texas gulf coast
-    data.friction_regions.append([(-99.2, 26.4), (-94.2, 30.4),
-                                  [numpy.infty, -10.0, -200.0, -numpy.infty],
-                                  [0.030, 0.012, 0.022]])    
+    # Texas gulf coast (unused)
+    # data.friction_regions.append([(-99.2, 26.4), (-94.2, 30.4),
+    #                               [numpy.infty, -10.0, -200.0, -numpy.infty],
+    #                               [0.030, 0.012, 0.022]])    
     
-    # Unused:
-    # La-Tex Shelf
+    # La-Tex Shelf (unused)
     # data.friction_regions.append([(-98, 25.25), (-90, 30),
     #                              [numpy.infty, -10.0, -200.0, -numpy.infty],
     #                              [0.030, 0.012, 0.022]])

@@ -24,6 +24,7 @@ try:
 except:
     setplotfg = None
 
+i = 0 # Used as global variable to iterate through gauges and plot each one's location 
 
 def setplot(plotdata=None):
     """"""
@@ -70,9 +71,9 @@ def setplot(plotdata=None):
     regions = {"Gulf": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
                         "ylimits": (clawdata.lower[1], clawdata.upper[1]),
                         "figsize": (6.4, 4.8)},
-               "LaTex Shelf": {"xlimits": (-90, -86),
+               "Coast": {"xlimits": (-90, -86),
                                "ylimits": (28, 31.5),
-                               "figsize": (8, 4)}} # Expand domain of LaTex shelf: wider and larger
+                               "figsize": (8, 4)}}
 
     for (name, region_dict) in regions.items():
 
@@ -321,5 +322,3 @@ def setplot(plotdata=None):
 
     print(type(plotdata))
     return plotdata
-
-i = 0 # Used in loop function
