@@ -75,14 +75,14 @@ scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
 
 Hurricane Zeta storm data was obtained from NOAA’s storm data archive: https://ftp.nhc.noaa.gov/atcf/archive/2020/bal282020.dat.gz 
 
-Data can be fetched by modifying the following code in setrun.py: 
+Data is fetched by modifying the following code in setrun.py: 
 
 ```
 # Convert ATCF data to GeoClaw format
 clawutil.data.get_remote_file("https://ftp.nhc.noaa.gov/atcf/archive/2020/bal282020.dat.gz ")
 atcf_path = os.path.join(scratch_dir, "bal282020.dat")
 ```
-This places the storm data in the same scratch directory defined for the topography data.
+This automatically places the storm data in the same scratch directory defined for the topography data.
 
 
 ## GeoClaw Parameters
