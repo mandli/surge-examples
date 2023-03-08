@@ -63,7 +63,7 @@ From the NOAA Hurricane Report:
 
 Topography data was obtained from: https://download.gebco.net/
 
-For the topography file used in this example, the latitude range was 20 to 37, and the longitude range was from -96 to -70. An ASCII Grid file was used.
+For the topography file used in this example, the latitude range was 20 to 37, and the longitude range was from -96 to -70. An ASCII Grid file was used (15 arc-second interval grid).
 
 The topography file was placed in a ‘scratch’ directory defined in the beginning of the setrun.py:
 ```
