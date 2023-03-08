@@ -84,7 +84,7 @@ Data is fetched from the following code segment in setrun.py:
 clawutil.data.get_remote_file("https://ftp.nhc.noaa.gov/atcf/archive/2020/bal192020.dat.gz")
 atcf_path = os.path.join(scratch_dir, "bal192020.dat")
 ```
-This places the storm data in the same scratch directory defined for the topography data.
+This automatically places the storm data in the same scratch directory defined for the topography data.
 
 
 ## GeoClaw Parameters
