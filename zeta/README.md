@@ -60,7 +60,7 @@ From the NOAA Hurricane Report:
 
 Topography data can be obtained from https://download.gebco.net/. 
 
-The topography file used for this example covers the area between 42 degrees to the north, 12 degrees to the south, -100 degrees to the west and -70 degrees to the east. An ASCII, Grid/TID Grid file was used.
+The topography file used for this example covers the area between 42 degrees to the north, 12 degrees to the south, -100 degrees to the west and -70 degrees to the east. An ASCII, Grid/TID Grid file was used. (15 arc-second interval grid).
 
 The topography file was placed in the ‘scratch’ directory. 
 
