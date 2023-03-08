@@ -56,15 +56,4 @@ SOURCES = \
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
 
-.PHONY: topo all
-
-# Construct the topography data
-topo:
-	../bathy/get_bathy.py ../bathy/
-
--all: 
-	$(MAKE) topo
-	$(MAKE) .plots
-
-
 ### DO NOT remove this line - make depends on it ###
