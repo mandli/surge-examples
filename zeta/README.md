@@ -40,7 +40,7 @@ All information and analysis was acquired from The National Hurricane Center (NH
 
 Hurricane Zeta started off as a Category 1 Hurricane when it hit the Yucatan Peninsula, weakened to a tropical storm, but then quickly evolved into a Category 3 Hurricane that made landfall in southeastern Louisiana. Hurricane Zeta’s fast forward motion brough strong winds inland into certain parts of the southeastern United States. The hurricane resulted in 5 fatalities and $4.4 billion in damage in the United States.
 
-<img src="images/path.png" width="700">
+<img src="images/path.png" width="650">
 
 Image Source: https://weather.com/storms/hurricane/news/2020-10-29-hurricane-zeta-tropical-storm-forecast-south-east
 
@@ -195,73 +195,73 @@ The storm surge data was plotted by subtracting the predicted tide level from th
 
 A map of gauges located on the simulation just as the storm reaches landfall:
 
-<img src="images/map.png" width="700">
+<img src="images/map.png" width="650">
 
 ### Station 1 - Bay Waveland Yacht Club, MS
 
 Bay Waveland Yacht Club, MS (ID: 8748437) experienced a storm surge of approximately 2.40 meters. GeoClaw predicted approximately 1.10 meters. 
 
-<img src="images/station1.png" width="700">
+<img src="images/station1.png" width="650">
 
 ### Station 2 – Pascagoula NOAA Lab, MS
 
 Pascagoula NOAA Lab, MS (ID: 8741533) experienced a storm surge of approximately 2.00 meters. GeoClaw predicted approximately 1.25 meters.
 
-<img src="images/station2.png" width="700">
+<img src="images/station2.png" width="650">
 
 ### Station 3 – Bayou La Batre Bridge, AL
 
 Bayou La Batre Bridge, AL (ID: 8739803) experienced a storm surge of approximately 1.95 meters. GeoClaw predicted approximately 0.85 meters. 
 
-<img src="images/station3.png" width="700">
+<img src="images/station3.png" width="650">
 
 ### Station 4 – Coast Guard Sector Mobile, AL
 
 Coast Guard Sector Mobile, AL (ID: 8736897) experienced a storm surge of approximately 1.50 meters. GeoClaw predicted 1.25 approximately meters. 
 
-<img src="images/station4.png" width="700">
+<img src="images/station4.png" width="650">
 
 ### Station 5 – Shell Beach, LA
 
 Shell Beach, LA (ID: 8761305) experienced a storm surge of approximately -1.60 meters. GeoClaw predicted approximately -1.95 meters. 
 
-<img src="images/station5.png" width="700">
+<img src="images/station5.png" width="650">
 
 ### Station 6 – Grand Isle, LA
 
 Grand Isle, LA (ID: 8761724) experienced a storm surge of approximately 0.80 meters. GeoClaw predicted approximately 1.70 meters. 
 
-<img src="images/station6.png" width="700">
+<img src="images/station6.png" width="650">
 
 ### Station 7 – Pilots Station East, S.W. Pass, LA
 
 Pilots Station East, S.W. Pass, LA (ID: 8760922) experienced a storm surge of approximately 0.50 meters. GeoClaw predicted approximately 0.50 meters. 
 
-<img src="images/station7.png" width="700">
+<img src="images/station7.png" width="650">
 
 ### Station 8 – Weeks Bay, Mobile Bay
 
 Weeks Bay, Mobile Bay (ID: 8732828) experienced a storm surge of approximately 1.15 meters. GeoClaw predicted approximately 0.50 meters. 
 
-<img src="images/station8.png" width="700">
+<img src="images/station8.png" width="650">
 
 ### Station 9 – New Canal Station, LA
 
 New Canal Station, LA (ID: 8761927) experienced a storm surge of approximately 1.10 meters. GeoClaw predicted approximately 0.30 meters. 
 
-<img src="images/station9.png" width="700">
+<img src="images/station9.png" width="650">
 
 ### Station 10 – Mobile State Docks, AL 
 
 Mobile State Docks, AL (ID: 8737048) experienced a storm surge of approximately 1.40 meters. GeoClaw predicted approximately 1.25 meters. 
 
-<img src="images/station10.png" width="700">
+<img src="images/station10.png" width="650">
 
 ### Station 11 – Dog River Bridge, AL
 
 Dog River Bridge, AL (ID: 8735391) experienced a storm surge of approximately 1.15 meters. GeoClaw predicted 1.10 meters. 
 
-<img src="images/station11.png" width="700">
+<img src="images/station11.png" width="650">
 
 ### Result Interpretation
 
