@@ -455,6 +455,7 @@ def setgeo(rundata):
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
 
+    topo_path = os.path.join(scratch_dir, "gebco_2022_n37.0_s20.0_w-96.0_e-70.0.asc")
     topo_data.topofiles.append([3, topo_path])
 
     # == setfixedgrids.data values ==
