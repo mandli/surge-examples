@@ -363,13 +363,24 @@ def setrun(claw_pkg='geoclaw'):
     # == setregions.data values ==
     regions = rundata.regiondata.regions
 
-    # to specify regions of refinement append lines of the form
-    # User input refinement regions
+    # The program has already added reagions around auto-generated gauges and landfall area(s) as refinements
+    # User can modify refinement levels of these automatic refinement regions
+    # User can also add self-defined refinement regions 
     #============================================================================================================================
     #============================================================================================================================
+    meta = auto_analysis.generate_station_data()
+    gauge = auto_analysis.generate_gauge(meta, storm)
+    copy = gauge.copy()
+    for i in copy:
+        if copy[i][1]>clawdata.upper[1] or copy[i][1]<clawdata.lower[1] or copy[i][2]<clawdata.lower[0] or copy[i][2]>clawdata.upper[0]:
+            gauge.pop(i)
     regions.append([1, 3, clawdata.t0, clawdata.tfinal, clawdata.lower[0], clawdata.upper[0], clawdata.lower[1], clawdata.upper[1]])
-    
-    
+    # Refinement region(s) for gauge(s)
+    for item in gauge:
+        regions.append([3, 4, clawdata.t0, clawdata.tfinal, gauge[item][2]-1.5, gauge[item][2]+1.5, gauge[item][1]-1.2, gauge[item][1]+1.2])
+    # Refinement region(s) for landfall(s)
+    for item in auto_analysis.generate_refinement(storm):
+        regions.append([4, 5, clawdata.t0, clawdata.tfinal, item[0]-2.0, item[0]+2.0, item[1]-1.5, item[1]+1.5])
     
     #============================================================================================================================
     #============================================================================================================================
@@ -414,19 +425,10 @@ def setrun(claw_pkg='geoclaw'):
     rundata.flagregiondata.flagregions.append(flagregion)
 
     # Gauges from NOAA website 
-
-    
-    meta = auto_analysis.generate_station_data()
-    gauge = auto_analysis.generate_gauge(meta, storm)
-    copy = gauge.copy()
-    for i in copy:
-        if copy[i][1]>clawdata.upper[1] or copy[i][1]<clawdata.lower[1] or copy[i][2]<clawdata.lower[0] or copy[i][2]>clawdata.upper[0]:
-            gauge.pop(i)
-
-    a = []
+    counter = []
     for item in gauge:
-        a.append(item)
-        rundata.gaugedata.gauges.append([len(a), gauge[item][2], gauge[item][1],
+        counter.append(item)
+        rundata.gaugedata.gauges.append([len(counter), gauge[item][2], gauge[item][1],
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])                             
     

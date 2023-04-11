@@ -8,6 +8,13 @@ from math import sin, cos, sqrt, atan2, radians
 import re
 import logging
 import os
+import requests
+import zipfile
+import io
+import tempfile
+import geopandas as gpd
+from shapely.geometry import LineString, Point, MultiPoint
+from shapely import wkt
 
 def generate_time(storm, user_in):
     """
@@ -115,6 +122,65 @@ def generate_significance(gauge, t0, tf):
     return data
  
 
+
+def generate_refinement(storm):
+    """
+    @param: storm data
+    @return: array of coordinates of intersection between shoreline geometry and storm path
+    """ 
+    ## get the shoreline data in geopandas format
+    url = "https://coast.noaa.gov/htdata/Shoreline/us_medium_shoreline.zip"
+    response = requests.get(url)
+    temp_dir = tempfile.mkdtemp()
+    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+        z.extractall(temp_dir)
+    shp_file = next(file for file in z.namelist() if file.endswith(".shp"))
+    df = gpd.read_file(f"{temp_dir}/{shp_file}")
+    
+    ## process storm data into LineString as its geometry
+    location = []
+    for i in range(len(storm)):
+        lat_raw = re.findall(r'\d+',storm[i][6])
+        lon_raw = re.findall(r'\d+',storm[i][7])
+        lat = float(int(lat_raw[0])/10)
+        lon = float(int(lon_raw[0])/10)
+        location.append((-lon, lat))
+
+    linestring = LineString(location)
+    gdf2 = gpd.GeoDataFrame({"id": [1]}, geometry=[linestring])
+    its = []
+    for i in range(len(df['geometry'])):
+        linestring_wkt = str(df['geometry'][i])
+        linestring = wkt.loads(linestring_wkt)
+        # Create a GeoDataFrame with the linestring
+        gdf = gpd.GeoDataFrame({"id": [1]}, geometry=[linestring])
+        # Extract the geometries from the GeoDataFrames
+        geometry1 = gdf.loc[0, 'geometry']
+        geometry2 = gdf2.loc[0, 'geometry']
+        # Check if the geometries intersect
+        if geometry1.intersects(geometry2):
+            # Calculate the intersection
+            intersection = geometry1.intersection(geometry2)
+            # If the intersection is a single point
+            if isinstance(intersection, Point):
+                its.append(intersection.coords[:])
+            # If the intersection is a MultiPoint (multiple intersection points)
+            elif intersection.geom_type == 'MultiPoint':
+                for point in intersection.geoms:
+                    its.append(point.coords[:])
+    rounded_coords = [(round(lat, 2), round(lon, 2)) for lat, lon in its[0]]
+    filtered_coords = []
+    for coord in rounded_coords:
+        close = False
+        for f_coord in filtered_coords:
+            if abs(coord[0] - f_coord[0]) <= 1e-2 and abs(coord[1] - f_coord[1]) <= 1e-2:
+                close = True
+                break
+        if not close:
+            filtered_coords.append(coord)
+    return filtered_coords
+
+
 def generate_storm_data(number):
     """
     @param: storm number
@@ -196,4 +262,5 @@ if __name__ == "__main__":
         logging.info('\n \n ===========================Report Storm Significance===========================')
         logging.info(f'\n \n \n {data.head()}')
         logging.info('\n \n ===============================================================================')
+
     
