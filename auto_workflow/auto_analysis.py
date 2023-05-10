@@ -13,6 +13,7 @@ import zipfile
 import io
 import tempfile
 import geopandas as gpd
+from geopandas.tools import sjoin
 from shapely.geometry import LineString, Point, MultiPoint
 from shapely import wkt
 
@@ -127,7 +128,7 @@ def generate_refinement(storm):
     """
     @param: storm data
     @return: array of coordinates of intersection between shoreline geometry and storm path
-    """ 
+    """
     ## get the shoreline data in geopandas format
     url = "https://coast.noaa.gov/htdata/Shoreline/us_medium_shoreline.zip"
     response = requests.get(url)
@@ -135,8 +136,8 @@ def generate_refinement(storm):
     with zipfile.ZipFile(io.BytesIO(response.content)) as z:
         z.extractall(temp_dir)
     shp_file = next(file for file in z.namelist() if file.endswith(".shp"))
-    df = gpd.read_file(f"{temp_dir}/{shp_file}")
-    
+    df = geopandas.read_file(f"{temp_dir}/{shp_file}")
+
     ## process storm data into LineString as its geometry
     location = []
     for i in range(len(storm)):
@@ -147,27 +148,23 @@ def generate_refinement(storm):
         location.append((-lon, lat))
 
     linestring = LineString(location)
-    gdf2 = gpd.GeoDataFrame({"id": [1]}, geometry=[linestring])
+    gdf2 = geopandas.GeoDataFrame({"id": [1]}, geometry=[linestring], crs=df.crs)
+
+    # put these two data together in a spacial format and only keep intersection geometry
+    joined = sjoin(df, gdf2, predicate='intersects')
+
+    # Calculate intersections of the intersecting geometries
     its = []
-    for i in range(len(df['geometry'])):
-        linestring_wkt = str(df['geometry'][i])
-        linestring = wkt.loads(linestring_wkt)
-        # Create a GeoDataFrame with the linestring
-        gdf = gpd.GeoDataFrame({"id": [1]}, geometry=[linestring])
-        # Extract the geometries from the GeoDataFrames
-        geometry1 = gdf.loc[0, 'geometry']
-        geometry2 = gdf2.loc[0, 'geometry']
-        # Check if the geometries intersect
-        if geometry1.intersects(geometry2):
-            # Calculate the intersection
-            intersection = geometry1.intersection(geometry2)
-            # If the intersection is a single point
-            if isinstance(intersection, Point):
-                its.append(intersection.coords[:])
-            # If the intersection is a MultiPoint (multiple intersection points)
-            elif intersection.geom_type == 'MultiPoint':
-                for point in intersection.geoms:
-                    its.append(point.coords[:])
+    for geometry in joined.geometry:
+        intersection = linestring.intersection(geometry)
+        # If the intersection is a single point
+        if isinstance(intersection, Point):
+            its.append(intersection.coords[:])
+        # If the intersection is a MultiPoint (multiple intersection points)
+        elif intersection.geom_type == 'MultiPoint':
+            for point in intersection.geoms:
+                its.append(point.coords[:])
+
     rounded_coords = [(round(lat, 2), round(lon, 2)) for lat, lon in its[0]]
     filtered_coords = []
     for coord in rounded_coords:
