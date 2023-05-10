@@ -12,7 +12,7 @@ import requests
 import zipfile
 import io
 import tempfile
-import geopandas as gpd
+import geopandas 
 from geopandas.tools import sjoin
 from shapely.geometry import LineString, Point, MultiPoint
 from shapely import wkt
