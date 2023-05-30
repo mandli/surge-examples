@@ -23,7 +23,7 @@ try:
 except:
     setplotfg = None
 
-
+i = 0 # Used as global variable to iterate through gauges and plot each one's location
 def setplot(plotdata=None):
     """"""
 
@@ -69,9 +69,70 @@ def setplot(plotdata=None):
     regions = {"Gulf": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
                         "ylimits": (clawdata.lower[1], clawdata.upper[1]),
                         "figsize": (6.4, 4.8)},
-               "LaTex Shelf": {"xlimits": (-95, -85),
+               "Coast": {"xlimits": (-95, -85),
                                "ylimits": (20, 35),
                                "figsize": (4, 2.7)}} # Expand domain of LaTex shelf: wider and larger
+    
+
+
+    import gzip
+    from clawpack.geoclaw.surge.storm import Storm
+    from clawpack.clawutil import data
+
+
+
+    # Scratch directory for storing topo and storm files:
+    scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
+
+    # Convert ATCF data to GeoClaw format
+    data.get_remote_file("https://ftp.nhc.noaa.gov/atcf/archive/2020/bal282020.dat.gz")
+    atcf_path = os.path.join(scratch_dir, "bal282020.dat")
+    # Note that the get_remote_file function does not support gzip files which
+    # are not also tar files.  The following code handles this
+    with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \
+            open(atcf_path, 'w') as atcf_unzipped_file:
+        atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
+
+
+    zeta = Storm(path=atcf_path, file_format="ATCF")
+
+    # Time of landfall - Need to specify as the file above does not
+    # include this info (9/16/2020 ~9am UTC)
+    zeta.time_offset = datetime.datetime(2020, 10, 28, 21)
+
+
+    def test_afteraxes(cd):
+        axes = plt.gca()
+        # sally.plot(intensity = True, axes=axes, category_color = {5: 'red',
+        #                                                         4: 'yellow',
+        #                                                         3: 'orange',
+        #                                                         2: 'purple',
+        #                                                         1: 'blue',
+        #                                                         0: 'black',
+        #                                                         -1: 'gray'})
+        surgeplot.add_track(zeta, axes, intensity=True)
+        surge_afteraxes(cd)
+
+
+    plotfigure = plotdata.new_plotfigure(name="Path with Category")
+    plotfigure.show = True
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = regions['Gulf']['xlimits']
+    plotaxes.ylimits = regions['Gulf']['ylimits']
+
+    plotaxes.afteraxes = surge_afteraxes
+    
+    plotaxes.title = "Path with Category"
+    plotaxes.afteraxes = test_afteraxes
+    plotaxes.scaled = False
+
+
+    # surgeplot.add_track(sally, plotaxes, intensity=True)
+
+    surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
+    surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
+    plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
+    plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
 
     for (name, region_dict) in regions.items():
 
@@ -86,6 +147,7 @@ def setplot(plotdata=None):
 
         surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
         surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
+        # surgeplot.add_track(zeta, plotaxes) # HELP HELP HELP HELP 
         plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
         plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
 
@@ -218,7 +280,6 @@ def setplot(plotdata=None):
     num_gauges = len(all_gauges.iloc[:,5]) # Number of gauges
 
     
-
     # Loops across all gauges to print individual gauge location plots
     def loop():
         global i
@@ -295,6 +356,8 @@ def setplot(plotdata=None):
     
 
 
+    
+
     # -----------------------------------------
     # Parameters used only when creating html and/or latex hardcopy
     # e.g., via pyclaw.plotters.frametools.printframes:
@@ -314,4 +377,4 @@ def setplot(plotdata=None):
     print(type(plotdata))
     return plotdata
 
-i = 0 # Used in loop function
+# i = 0 # Used in loop function
