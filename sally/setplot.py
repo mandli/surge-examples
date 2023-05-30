@@ -75,6 +75,54 @@ def setplot(plotdata=None):
                                "ylimits": (28, 31.5),
                                "figsize": (8, 4)}}
 
+    
+    import gzip
+    from clawpack.geoclaw.surge.storm import Storm
+    from clawpack.clawutil import data
+
+    # Scratch directory for storing topo and storm files:
+    scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
+
+    # Convert ATCF data to GeoClaw format
+    data.get_remote_file("https://ftp.nhc.noaa.gov/atcf/archive/2020/bal192020.dat.gz")
+    atcf_path = os.path.join(scratch_dir, "bal192020.dat")
+    # Note that the get_remote_file function does not support gzip files which
+    # are not also tar files.  The following code handles this
+    with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \
+            open(atcf_path, 'w') as atcf_unzipped_file:
+        atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
+
+
+    sally = Storm(path=atcf_path, file_format="ATCF")
+
+    # Time of landfall - Need to specify as the file above does not
+    # include this info (9/16/2020 ~9am UTC)
+    sally.time_offset = datetime.datetime(2020, 9, 16, 9)
+
+
+    def category_afteraxes(cd):
+        axes = plt.gca()
+        surgeplot.add_track(sally, axes, intensity=True)
+        surge_afteraxes(cd)
+
+
+    plotfigure = plotdata.new_plotfigure(name="Path with Category")
+    plotfigure.show = True
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = regions['Gulf']['xlimits']
+    plotaxes.ylimits = regions['Gulf']['ylimits']
+
+    plotaxes.afteraxes = surge_afteraxes
+    
+    plotaxes.title = "Path with Category"
+    plotaxes.afteraxes = category_afteraxes
+    plotaxes.scaled = False
+
+    surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
+    surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
+    plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
+    plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10    
+    
     for (name, region_dict) in regions.items():
 
         # Surface Figure
