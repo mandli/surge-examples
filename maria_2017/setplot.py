@@ -1,4 +1,3 @@
-
 from __future__ import absolute_import
 from __future__ import print_function
 
@@ -6,7 +5,6 @@ import os
 
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 import datetime
 
 import clawpack.visclaw.colormaps as colormap
@@ -59,22 +57,23 @@ def setplot(plotdata=None):
     wind_limits = [0, 64]
     pressure_limits = [935, 1013]
     friction_bounds = [0.01, 0.04]
-    color_limits=[0,50]
+
     def friction_after_axes(cd):
         plt.title(r"Manning's $n$ Coefficient")
 
     # ==========================================================================
     #   Plot specifications
     # ==========================================================================
-    regions = {
-		"World": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
+    regions = {"Atlantic": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
                         "ylimits": (clawdata.lower[1], clawdata.upper[1]),
-                        "figsize": (90, 30)},
-		"New Zealand": {"xlimits": (160,180),
-				"ylimits":(-50,-30),
-				"figsize": (50,50)}}
-
-
+                        "figsize": (6.4, 4.8)},
+                "Puerto Rico": {"xlimits": (-69, -64),
+                                "ylimits": (17, 19),
+                                "figsize": (5, 6)}}
+               #"LaTex Shelf": {"xlimits": (-97.5, -88.5),
+               #                "ylimits": (27.5, 30.5),
+               #                "figsize": (8, 2.7)}}
+               
     for (name, region_dict) in regions.items():
 
         # Surface Figure
@@ -87,7 +86,7 @@ def setplot(plotdata=None):
         plotaxes.afteraxes = surge_afteraxes
 
         surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
-        surgeplot.add_land(plotaxes)
+        surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
         plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
         plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
 
@@ -101,7 +100,7 @@ def setplot(plotdata=None):
         plotaxes.afteraxes = surge_afteraxes
 
         surgeplot.add_speed(plotaxes, bounds=speed_limits)
-        surgeplot.add_land(plotaxes,bounds=color_limits)
+        surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
         plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0] * 10
         plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
     #
@@ -111,15 +110,16 @@ def setplot(plotdata=None):
     plotfigure.show = friction_data.variable_friction and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['World']['xlimits']
-    plotaxes.ylimits = regions['World']['ylimits']
-    plotaxes.title = "Manning's N Coefficient"
+    plotaxes.xlimits = regions['Atlantic']['xlimits']
+    plotaxes.ylimits = regions['Atlantic']['ylimits']
+    # plotaxes.title = "Manning's N Coefficient"
     plotaxes.afteraxes = friction_after_axes
     plotaxes.scaled = True
+
     surgeplot.add_friction(plotaxes, bounds=friction_bounds, shrink=0.9)
     plotaxes.plotitem_dict['friction'].amr_patchedges_show = [0] * 10
     plotaxes.plotitem_dict['friction'].colorbar_label = "$n$"
-    plotfigure.kwargs = {"figsize":region_dict['figsize']}
+
     #
     #  Hurricane Forcing fields
     #
@@ -128,30 +128,27 @@ def setplot(plotdata=None):
     plotfigure.show = surge_data.pressure_forcing and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['World']['xlimits']
-    plotaxes.ylimits = regions['World']['ylimits']
+    plotaxes.xlimits = regions['Atlantic']['xlimits']
+    plotaxes.ylimits = regions['Atlantic']['ylimits']
     plotaxes.title = "Pressure Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     surgeplot.add_pressure(plotaxes, bounds=pressure_limits)
-    surgeplot.add_land(plotaxes)
-    plotaxes.plotitem_dict['pressure'].amr_patchedges_show=[0]*10
-    plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
-    plotfigure.kwargs = {"figsize":region_dict['figsize']}
+    surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
+
     # Wind field
     plotfigure = plotdata.new_plotfigure(name='Wind Speed')
     plotfigure.show = surge_data.wind_forcing and True
+
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['World']['xlimits']
-    plotaxes.ylimits = regions['World']['ylimits']
+    plotaxes.xlimits = regions['Atlantic']['xlimits']
+    plotaxes.ylimits = regions['Atlantic']['ylimits']
     plotaxes.title = "Wind Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     surgeplot.add_wind(plotaxes, bounds=wind_limits)
-    surgeplot.add_land(plotaxes)
-    plotaxes.plotitem_dict['wind'].amr_patchedges_show=[0]*10
-    plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
-    plotfigure.kwargs = {"figsize":region_dict['figsize']}
+    surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
+
     # ========================================================================
     #  Figures for gauges
     # ========================================================================
@@ -162,13 +159,34 @@ def setplot(plotdata=None):
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = [0, 8]
+    plotaxes.xlimits = [-2, 1]
     # plotaxes.xlabel = "Days from landfall"
     # plotaxes.ylabel = "Surface (m)"
-    plotaxes.ylimits = [0,4]
+    plotaxes.ylimits = [-1, 5]
     plotaxes.title = 'Surface'
     
+    #gauge data
+    #may or may not keep this? see irene example
+    #credit for below code to author of Irene example
+    try: #add proper file names, and files themselves
+        gauges = [np.loadtxt('gauge_data_1.txt'),
+            np.loadtxt('gauge_data_2.txt'),
+            np.loadtxt('gauge_data_3.txt'),
+            np.loadtxt('gauge_data_4.txt'),
+            np.loadtxt('gauge_data_5.txt')]
+        #gauge locations
+        data_names = ["St. Croix, VI, Data from NOAA",
+                "Vieques Island, PR, Data from NOAA",
+                "Fajardo, PR, just for corroboration",
+                "San Juan, PR, Data from NOAA",
+                "Arecibo, PR, Data from NOAA"]
+    except:
+        print("Add gauge files to directory")
+    
+    #May potentially need to change this function to place
+    #multiple gauges ... refer to completed examples
     def gauge_afteraxes(cd):
+
         axes = plt.gca()
         surgeplot.plot_landfall_gauge(cd.gaugesoln, axes)
 
@@ -176,15 +194,23 @@ def setplot(plotdata=None):
         axes.set_title('Station %s' % cd.gaugeno)
         axes.set_xlabel('Days relative to landfall')
         axes.set_ylabel('Surface (m)')
-        axes.set_xlim([0, 8])
-        axes.set_ylim([0,4])
-        axes.set_xticks([0, 1, 2, 3, 4, 5, 6, 7, 8])
-        axes.set_xticklabels([r"$0$",r"$1$",r"$2$", r"$3$", r"$4$", r"$5$", r"$6$", r"$7$", r"$8$"])
+        axes.set_xlim([-2, 1]) #change this?
+        axes.set_ylim([-1, 5]) #change this?
+        axes.set_xticks([-2, -1, 0, 1]) #change this if line 204 changes
+        axes.set_xticklabels([r"$-2$", r"$-1$", r"$0$", r"$1$"]) #same as 206
         axes.grid(True)
-
-    plotaxes.afteraxes = gauge_afteraxes
-        
     
+    
+    #may or may not keep this? see irene example
+    #credit for below code to author of Irene example
+    # try:
+    #     gauge_data=gaugea[cd.gaugeno-1]
+    #     axes.plot(gauge_data[:,0], gauge_data[:,1], label=data_names[cd.gaugeno-1])
+    #     axes.legend()
+    # except:
+    #         print('Gauge Data Unavailable')
+    #irene code ends here
+    plotaxes.afteraxes = gauge_afteraxes #originally line 209 - KEEP!!
 
     # Plot surface as blue curve:
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
@@ -202,24 +228,18 @@ def setplot(plotdata=None):
 
     plotfigure = plotdata.new_plotfigure(name="Gauge Locations")
     plotfigure.show = True
-    plotfigure.kwargs = {"figsize":(90,30)}
+
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Gauge Locations'
     plotaxes.scaled = True
-    plt.rcParams['font.size'] = 30
-    plt.rcParams['axes.labelsize'] = 16
-    plt.rcParams['legend.fontsize'] = 12
-    plt.rcParams['xtick.labelsize'] = 16
-    plt.rcParams['ytick.labelsize'] = 16
-    plotaxes.xlimits = [0, 360]
-    plotaxes.ylimits = [-60,60]
+    plotaxes.xlimits = [-64, -69] # change depending on gauge axes
+    plotaxes.ylimits = [17.0, 19.0] # same as line above
     plotaxes.afteraxes = gauge_location_afteraxes
     surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
-    surgeplot.add_land(plotaxes)
+    surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
     plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
     plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
-    #---------------
 
     # -----------------------------------------
     # Parameters used only when creating html and/or latex hardcopy
@@ -228,7 +248,7 @@ def setplot(plotdata=None):
     plotdata.printfigs = True                # print figures
     plotdata.print_format = 'png'            # file format
     plotdata.print_framenos = 'all'          # list of frames to print
-    plotdata.print_gaugenos = 'all'          # list of gauges to print
+    plotdata.print_gaugenos = [1, 2, 3, 4, 5]   # list of gauges to print
     plotdata.print_fignos = 'all'            # list of figures to print
     plotdata.html = True                     # create html files of plots?
     plotdata.latex = True                    # create latex file of plots?
@@ -238,4 +258,3 @@ def setplot(plotdata=None):
     plotdata.parallel = True                 # parallel plotting
 
     return plotdata
-

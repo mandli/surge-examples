@@ -64,7 +64,7 @@ ft2m = lambda x: 0.3048 * x
 
 # Gauge name translation
 gauge_landfall = []
-for i in xrange(3):
+for i in range(3):
     if storm_num == 1:
         # Storm 1
         gauge_landfall.append(datetime.datetime(1997, 11, 15, 3) - datetime.datetime(1997, 1, 1, 0))
@@ -163,7 +163,7 @@ def setplot(plotdata):
     full_xlimits = regions['Full Domain (Grids)'][0]
     full_ylimits = regions['Full Domain (Grids)'][1]
 
-    for (name, region_data) in regions.iteritems():
+    for (name, region_data) in regions.items():
 
         #
         #  Surface
@@ -251,7 +251,7 @@ def setplot(plotdata):
     # ==========================
     grids = [[0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1]]
     label = ["(No Grids)", "(Grids)"]
-    for i in xrange(2):
+    for i in range(2):
         # Pressure field
         plotfigure = plotdata.new_plotfigure(name='Pressure %s' % label[i],  
                                              figno=fig_num_counter.get_counter())

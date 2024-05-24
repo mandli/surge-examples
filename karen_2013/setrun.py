@@ -12,16 +12,10 @@ import datetime
 
 import numpy as np
 
-storm_num = 1
+import clawpack.geoclaw.surge as surge
 
-# Landfall for storm choosen
-if storm_num == 1:
-    # Storm  1
-    landfall = datetime.datetime(1997, 11, 15, 3) - datetime.datetime(1997, 1, 1, 0)
-elif storm_num == 2:
-    # Storm 2 - 2008 12 08 18 to 2008 12 20 02
-    landfall = datetime.datetime(2008, 12, 17, 1) - datetime.datetime(2008, 1, 1, 0)
-
+# Need to adjust the date a bit due to weirdness with leap year (I think)
+karen_landfall = datetime.datetime(2013,10,5,0) - datetime.datetime(2013,1,1,0)
 
 #                           days   s/hour    hours/day            
 days2seconds = lambda days: days * 60.0**2 * 24.0
@@ -74,12 +68,11 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_dim = num_dim
 
     # Lower and upper edge of computational domain:
-    # (47 W, 100 E, 31 N, -10 S) - bathy
-    clawdata.lower[0] = 47     # west longitude
-    clawdata.upper[0] = 100     # east longitude
+    clawdata.lower[0] = -99.0      # west longitude
+    clawdata.upper[0] = -70.0      # east longitude
 
-    clawdata.lower[1] = -10       # south latitude
-    clawdata.upper[1] = 31      # north latitude
+    clawdata.lower[1] = 8.0       # south latitude
+    clawdata.upper[1] = 32.0      # north latitude
 
     # Number of grid cells:
     degree_factor = 4 # (0.25º,0.25º) ~ (25237.5 m, 27693.2 m) resolution
@@ -106,8 +99,8 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
     # Initial time:
     # -------------
-    clawdata.t0 = days2seconds(landfall.days - 3) + landfall.seconds
-    # clawdata.t0 = days2seconds(landfall.days - 12) + landfall.seconds
+    clawdata.t0 = days2seconds(karen_landfall.days - 3) + karen_landfall.seconds
+    # clawdata.t0 = days2seconds(ike_landfall.days - 1) + ike_landfall.seconds
 
     # Restart from checkpoint file of a previous run?
     # Note: If restarting, you must also change the Makefile to set:
@@ -132,8 +125,7 @@ def setrun(claw_pkg='geoclaw'):
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(landfall.days + 1.0) + landfall.seconds
-        # clawdata.tfinal = days2seconds(landfall.days) + landfall.seconds
+        clawdata.tfinal = days2seconds(karen_landfall.days + 0.75) + karen_landfall.seconds
         recurrence = 24
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) 
                                             * recurrence / (60**2 * 24))
@@ -153,7 +145,9 @@ def setrun(claw_pkg='geoclaw'):
         
 
     clawdata.output_format = 'binary'      # 'ascii' or 'netcdf' 
+
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
+    # Output the bathymetry, the friction, and the computed storm fields
     clawdata.output_aux_components = 'all'
     clawdata.output_aux_onlyonce = False    # output aux arrays only at t0
 
@@ -285,19 +279,12 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 5
-    
-    # List of refinement ratios at each level (length at least mxnest-1)
-    # amrdata.refinement_ratios_x = [2,2,3,4,16]
-    # amrdata.refinement_ratios_y = [2,2,3,4,16]
-    # amrdata.refinement_ratios_t = [2,2,3,4,16]
-    # amrdata.refinement_ratios_x = [2,2,2,6,16]
-    # amrdata.refinement_ratios_y = [2,2,2,6,16]
-    # amrdata.refinement_ratios_t = [2,2,2,6,16]
-    amrdata.refinement_ratios_x = [2,2,2,6,4,4]
-    amrdata.refinement_ratios_y = [2,2,2,6,4,4]
-    amrdata.refinement_ratios_t = [2,2,2,6,4,4]
+    amrdata.amr_levels_max = 7
 
+    # List of refinement ratios at each level (length at least mxnest-1)
+    amrdata.refinement_ratios_x = [2,2,3,4,4,4]
+    amrdata.refinement_ratios_y = [2,2,3,4,4,4]
+    amrdata.refinement_ratios_t = [2,2,3,4,4,4]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -346,19 +333,82 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    # Mumbai Region
-    regions.append([2, 5, rundata.clawdata.t0, rundata.clawdata.tfinal,
-                                            70, 75, 17, 22])
-    # Mumbai
-    regions.append([4, 7, days2seconds(landfall.days - 1.0) + landfall.seconds, 
-                          rundata.clawdata.tfinal,
-                          72.6, 73, 18.80, 19.15])
+    # Latex shelf
+    regions.append([1, 3, rundata.clawdata.t0, rundata.clawdata.tfinal,
+                                            -97.5, -88.5, 27.5, 30.5])
+
+    # Galveston Sub-Domains
+    # regions.append([1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                         -95.8666, -93.4, 28.63333, 30.2])
+    # regions.append([1, 6, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    #                                         -95.3723, -94.5939, 29.2467, 29.9837])
+    # # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    # #                                             -95.25, -94.3, 28.85, 29.8])
+
+    # # Galveston Channel Entrance (galveston_channel)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                             -94.84, -94.70, 29.30, 29.40])
+    # # Galveston area (galveston)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -94.922600000000003, -94.825786176806162, 
+    #                                              29.352,  29.394523768822882])
+    # # Lower Galveston Bay channel (lower_galveston_bay)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -94.903199999999998, -94.775835119593594, 
+    #                                  29.383199999999999, 29.530588208444357])
+    # # Middle Galveston Bay Channel (upper_galveston_bay)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -94.959199999999996, -94.859496211934697, 
+    #                                  29.517700000000001,  29.617610214127549])
+    # # Upper Galveston bay channel (houston_channel_2)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -95.048400000000001, -94.903076052178108, 
+    #                                  29.602699999999999,  29.688573241894751])
+    # # Lower Houston channel (houston_channel_3)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -95.094899999999996, -94.892808885060177,
+    #                                             29.6769,  29.832958103058733])
+
+    # # Upper Houston channel (houston_harbor)
+    # regions.append([1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                                 -95.320999999999998, -95.074527281677078,
+    #                                  29.699999999999999,  29.830461271340102])
 
     # == setgauges.data values ==
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    rundata.gaugedata.gauges.append([1, 72.811790, 18.936508, rundata.clawdata.t0, rundata.clawdata.tfinal])  
-    rundata.gaugedata.gauges.append([2, 72.972316, 18.997762, rundata.clawdata.t0, rundata.clawdata.tfinal])    
-    rundata.gaugedata.gauges.append([3, 72.819311, 18.818044, rundata.clawdata.t0, rundata.clawdata.tfinal]) 
+    # rundata.gaugedata.gauges.append([121, -94.70895, 29.2812, rundata.clawdata.t0, rundata.clawdata.tfinal])  
+    # rundata.gaugedata.gauges.append([122, -94.38840, 29.4964, rundata.clawdata.t0, rundata.clawdata.tfinal])    
+    # rundata.gaugedata.gauges.append([123, -94.12530, 29.5846, rundata.clawdata.t0, rundata.clawdata.tfinal]) 
+
+    # Gauges from Ike AWR paper (2011 Dawson et al)
+    rundata.gaugedata.gauges.append([1, -95.04, 29.07, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    rundata.gaugedata.gauges.append([2, -94.71, 29.28, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    rundata.gaugedata.gauges.append([3, -94.39, 29.49, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    rundata.gaugedata.gauges.append([4, -94.13, 29.58, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([5, -95.00, 29.70, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([6, -95.14, 29.74, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([7, -95.08, 29.55, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([8, -94.75, 29.76, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([9, -95.27, 29.72, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # rundata.gaugedata.gauges.append([10, -94.51, 29.52, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    
+    # Stations from Andrew Kennedy
+    # Station R - 82
+    rundata.gaugedata.gauges.append([ord('R'),-97.1176, 27.6289, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # Station S - 83
+    rundata.gaugedata.gauges.append([ord('S'),-96.55036666666666, 28.207733333333334, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # Station U - 85
+    rundata.gaugedata.gauges.append([ord('U'),-95.75235, 28.62505, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # Station V - 86
+    rundata.gaugedata.gauges.append([ord('V'),-95.31511666666667, 28.8704, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # Station W: Same as gauge 1
+    # rundata.gaugedata.gauges.append([ord('W'),-95.03958333333334, 29.0714, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # Station X: Same as gauge 2 above
+    # rundata.gaugedata.gauges.append([ord('X'),-94.70895, 29.281266666666667, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # Station Y: Same as gauge 3 above
+    # rundata.gaugedata.gauges.append([ord('Y'),-94.3884, 29.496433333333332, rundata.clawdata.t0, rundata.clawdata.tfinal])
+    # Station Z: Same as gauge 4 above
+    # rundata.gaugedata.gauges.append([ord('Z'),-94.12533333333333, 29.584683333333334, rundata.clawdata.t0, rundata.clawdata.tfinal])
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -396,7 +446,7 @@ def setgeo(rundata):
     geo_data.friction_depth = 1e10
 
     # == Algorithm and Initial Conditions ==
-    geo_data.sea_level = 2.0  # Due to seasonal swelling of gulf
+    geo_data.sea_level = 0.27  # Due to seasonal swelling of gulf
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
@@ -406,8 +456,8 @@ def setgeo(rundata):
     # refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
     # refine_data.speed_tolerance = [0.5,1.0,1.5,2.0,2.5,3.0]
     refine_data.speed_tolerance = [1.0,2.0,3.0,4.0]
-    refine_data.deep_depth = 300.0
-    refine_data.max_level_deep = 4
+    refine_data.deep_depth = 1e6
+    refine_data.max_level_deep = 5
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
@@ -417,21 +467,29 @@ def setgeo(rundata):
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for the
     # smaller domains
-    # if os.environ.has_key("DATA_PATH"):
-    #     topo_path = os.path.join(os.environ["DATA_PATH"], "topography", "indian")
-    # else:
-    topo_path = os.path.join('..', 'bathy')
-    indian_ocean = os.path.join(topo_path, "indian_ocean.nc")
-    mumbai_topo = os.path.join(topo_path, "mumbai.tt3")
+    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+                              '../bathy/gulf_caribbean.tt3'])
+    topo_data.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal,
+                              '../bathy/NewOrleans_3s.tt3'])
+    # topo_data.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    #                           '../bathy/NOAA_Galveston_Houston.tt3'])
+    # topo_data.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal,
+    #                           '../bathy/Galveston_DEM_1072/galveston_tx.asc'])
+    # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                           '../bathy/galveston_channel.tt3'])
+    # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                           '../bathy/houston_harbor.tt3'])
+    # geodata.topofiles.append([3, 1, 7, rundata.clawdata.t0, rundata.clawdata.tfinal, 
+    #                           '../bathy/houston_channel_3.tt3'])
+    # geodata.topofiles.append([3, 1, 7, 0., 1.e10, \
+    #                           '../bathy/houston_channel_2.tt3'])
+    # geodata.topofiles.append([3, 1, 7, 0., 1.e10, \
+    #                           '../bathy/galveston.tt3'])
+    # geodata.topofiles.append([3, 1, 7, 0., 1.e10, \
+    #                           '../bathy/lower_galveston_bay.tt3'])
+    # geodata.topofiles.append([3, 1, 7, 0., 1.e10, \
+    #                           '../bathy/upper_galveston_bay.tt3'])
 
-    topo_data.topofiles.append([4, 1, 5, rundata.clawdata.t0,
-                                         rundata.clawdata.tfinal,
-                                         indian_ocean])
-
-    topo_data.topofiles.append([3, 1, 7, rundata.clawdata.t0,
-                                         rundata.clawdata.tfinal,
-                                         mumbai_topo])
-    
     # == setdtopo.data values ==
     dtopo_data = rundata.dtopo_data
     dtopo_data.dtopofiles = []
@@ -449,6 +507,12 @@ def setgeo(rundata):
     # for fixed grids append lines of the form
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]
+
+    # Set storm
+    set_storm(rundata)
+
+    # Set variable friction
+    set_friction(rundata)
 
     return rundata
     # end of function setgeo
@@ -478,16 +542,13 @@ def set_storm(rundata):
     
     # Storm parameters
     data.storm_type = 1 # Type of storm
-    data.landfall = days2seconds(landfall.days) + landfall.seconds
+    data.landfall = days2seconds(karen_landfall.days) + karen_landfall.seconds
     data.display_landfall_time = True
 
     # Storm type 1 - Idealized storm track
-    if storm_num == 1:
-        data.storm_file = os.path.expandvars(os.path.join(os.getcwd(), 'mumbai_1.storm'))
-    elif storm_num == 2:
-        data.storm_file = os.path.expandvars(os.path.join(os.getcwd(), 'mumbai_2.storm'))
+    data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),'karen.storm'))
 
-    return rundata
+    return data
 
 
 def set_friction(rundata):
@@ -504,7 +565,12 @@ def set_friction(rundata):
                                   [np.infty,0.0,-np.infty],
                                   [0.030, 0.022]])
 
-    return rundata
+    # La-Tex Shelf
+    data.friction_regions.append([(-98, 25.25), (-90, 30),
+                                  [np.infty,-10.0,-200.0,-np.infty],
+                                  [0.030, 0.012, 0.022]])
+
+    return data
 
 
 if __name__ == '__main__':
@@ -514,7 +580,5 @@ if __name__ == '__main__':
         rundata = setrun(sys.argv[1])
     else:
         rundata = setrun()
-    rundata = set_storm(rundata)
-    rundata = set_friction(rundata)
 
     rundata.write()
