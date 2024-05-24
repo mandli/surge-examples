@@ -20,6 +20,7 @@ import pandas as pd
 
 from clawpack.geoclaw.surge.storm import Storm
 import clawpack.clawutil as clawutil
+import clawpack.geoclaw.units as units
 import clawpack.geoclaw.etopotools as etopotools
 
 
@@ -437,7 +438,8 @@ def setgeo(rundata):
                 + (storm.max_wind_speed[n] / 10.9884)**2 
                 - (storm.max_wind_speed[n] / 35.3052)**3 
                 - 145.5090 * np.cos(storm.eye_location[n, 1] * 0.0174533) )
-        return max_wind_radius
+
+        return units.convert(max_wind_radius, 'nmi', 'm')
     
     def fill_storm_radius(t, storm):
         return 500e3

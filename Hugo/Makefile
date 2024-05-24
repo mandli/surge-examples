@@ -21,7 +21,7 @@ PLOTDIR = _plots               # Directory for plots
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
 # FFLAGS ?=
-FFLAGS = -w -fallow-argument-mismatch -O2
+# FFLAGS = -w -fallow-argument-mismatch -O2
 # FFLAGS += -DNETCDF -I$(NETCDF4_DIR)/include -L$(NETCDF4_DIR)/lib -lnetcdff -lnetcdf
 # LFLAGS += $(FFLAGS) -L$(NETCDF4_DIR)/lib
 
