@@ -343,7 +343,7 @@ def setrun(claw_pkg='geoclaw'):
 
     #Specification of the Ruled Rectangle
     from clawpack.amrclaw import region_tools
-    slu = vstack(([26.4225, 26.5222, 26.5322, 26.6744], [-82.2194, -82.1958, -82.1033, -81.8778], [-81.9767, -81.9127, -81.9833, -81.8283])).T
+    slu = np.vstack(([26.4225, 26.5222, 26.5322, 26.6744], [-82.2194, -82.1958, -82.1033, -81.8778], [-81.9767, -81.9127, -81.9833, -81.8283])).T
     rr = region_tools.RuledRectangle(slu=slu)
     rr.method = 1
     rr.ixy = 'y'

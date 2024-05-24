@@ -203,12 +203,12 @@ def setplot(plotdata=None):
     
     #may or may not keep this? see irene example
     #credit for below code to author of Irene example
-    try:
-        gauge_data=gaugea[cd.gaugeno-1]
-        axes.plot(gauge_data[:,0], gauge_data[:,1], label=data_names[cd.gaugeno-1])
-        axes.legend()
-    except:
-            print('Gauge Data Unavailable')
+    # try:
+    #     gauge_data=gaugea[cd.gaugeno-1]
+    #     axes.plot(gauge_data[:,0], gauge_data[:,1], label=data_names[cd.gaugeno-1])
+    #     axes.legend()
+    # except:
+    #         print('Gauge Data Unavailable')
     #irene code ends here
     plotaxes.afteraxes = gauge_afteraxes #originally line 209 - KEEP!!
 

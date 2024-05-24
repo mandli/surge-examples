@@ -14,6 +14,7 @@ import clawpack.clawutil.data as clawutil
 import clawpack.amrclaw.data as amrclaw
 import clawpack.geoclaw.data as geodata
 import clawpack.geoclaw.surge.plot as surgeplot
+import clawpack.geoclaw.topotools as topotools
 import csv
 from clawpack.geoclaw.util import fetch_noaa_tide_data
 

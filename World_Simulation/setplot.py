@@ -181,14 +181,7 @@ def setplot(plotdata=None):
         axes.set_xticks([0, 1, 2, 3, 4, 5, 6, 7, 8])
         axes.set_xticklabels([r"$0$",r"$1$",r"$2$", r"$3$", r"$4$", r"$5$", r"$6$", r"$7$", r"$8$"])
         axes.grid(True)
-        
-        
-    try:
-        gauge_data=gauges[cd.gaugeno-1]
-        axes.plot(gauge_data[:,0], gauge_data[:,1], label=data_names[cd.gaugeno-1])
-        axes.legend()
-    except:
-            print('Gauge Data Unavailable')
+
     plotaxes.afteraxes = gauge_afteraxes
         
     

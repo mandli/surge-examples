@@ -71,7 +71,7 @@ def read_tide_gauge_data(base_path, skiprows=5, verbose=False):
     station_info_file = open(os.path.join(base_path,'Ike_Gauges_web.txt'),'r')
 
     # Skip past header
-    for i in xrange(skiprows):
+    for i in range(skiprows):
         station_info_file.readline()
 
     # Read in each station
@@ -88,7 +88,7 @@ def read_tide_gauge_data(base_path, skiprows=5, verbose=False):
             else:
                 stations[data_line[0]]['gauge_no'] = int(data_line[1])
             if verbose:
-                print "Station %s: %s" % (data_line[0],stations[data_line[0]])
+                print("Station %s: %s" % (data_line[0],stations[data_line[0]]))
             
             # Load and extract real station data
             data = scipy.io.loadmat(os.path.join(base_path,'result_%s.mat' % data_line[0]))
@@ -116,7 +116,7 @@ def read_adcirc_gauge_data(only_gauges=None, base_path="", verbose=False):
         data = numpy.loadtxt(gauge_file)
         stations[i+1] = data
         if verbose:
-            print "Read in ADCIRC gauge file %s" % gauge_file
+            print("Read in ADCIRC gauge file %s" % gauge_file)
 
     return stations
 
@@ -144,7 +144,7 @@ try:
     adcirc_path = "./gauge_data"
     ADCIRC_gauges = read_adcirc_gauge_data(base_path=os.path.join(adcirc_path,'new_data'))
 except:
-    print "Could not load external gauge files, ignoring."
+    print("Could not load external gauge files, ignoring.")
     pass
 
 

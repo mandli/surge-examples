@@ -399,7 +399,7 @@ def setgeo(rundata):
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
     topo_data.topofiles.append([3, topo_path])
 
-clawutil.data.get_remote_file(
+    clawutil.data.get_remote_file(
            "https://www.jumbomail.me/l/en/gallery/6C697261515A333163756E464B3342347436653838673D3D/715049578")
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
     topo_data.topofiles.append([3, topo_path])

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+
 
 import sys
 import os
@@ -50,7 +50,7 @@ def create_storm_file(storm, output_path="mumbai.storm"):
         # "(8x      i4  i2i2i26x    a4  2x,i3,1x,i4,a1,2x,i4,a1,2x,i3,2x,i4,47x,i3,2x,i3)"
         # "(8x      i4  i2i2i26x    a4  2xi3 xi4  a i4   a i3 2x,i4,47x,i3,2x,i3)"
         # "(        YYYYMMDDHH      BEST  FOR lat_D long_D max  cpre                                               rrp  rad"
-        for n in xrange(len(storm['track'][0])):
+        for n in range(len(storm['track'][0])):
             # AL, 00, HHHHMMDDHH,   , BEST,  0, LATN, LONW, XX, CPRE, TS,  , 0, 0, 0, 0,
             date = "%s%s%s%s" % (    storm['time'][n].year, 
                                  str(storm['time'][n].month).zfill(2),
@@ -94,7 +94,7 @@ def plot_tracks(storms, plot_cat=True):
         # print(storm['track'])
         # print(longitude, latitude)
         # import pdb; pdb.set_trace()
-        for i in xrange(len(longitude)):
+        for i in range(len(longitude)):
             if plot_cat:
                 color = category_color[storm['category'][i]]
             else:
@@ -146,7 +146,7 @@ def extract_data(path, mask_dist=numpy.infty, mask_category=0):
 
     # Convert into storms and truncate zeros
     storms = []
-    for n in xrange(lon.shape[0]):
+    for n in range(lon.shape[0]):
         m = len(lon[n].nonzero()[0])
 
         distance = numpy.sqrt(  (lon[n, :m] - mumbai[0])**2
@@ -156,7 +156,7 @@ def extract_data(path, mask_dist=numpy.infty, mask_category=0):
                  'time': [datetime.datetime(year[0, n],
                                             month[n, i],
                                             day[n, i],
-                                            hour[n, i]) for i in xrange(m)],
+                                            hour[n, i]) for i in range(m)],
                  'max_winds': max_winds[n, :m],
                  'radius_max_winds': radius_max_winds[n, :m],
                  'central_pressure': central_pressure[n, :m],

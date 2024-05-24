@@ -215,12 +215,12 @@ def setplot(plotdata=None):
         axes.grid(True)
         
         
-    try:
-        gauge_data=gauges[cd.gaugeno-1]
-        axes.plot(gauge_data[:,0], gauge_data[:,1], label=data_names[cd.gaugeno-1])
-        axes.legend()
-    except:
-            print('Gauge Data Unavailable')
+    # try:
+    #     gauge_data=gauges[cd.gaugeno-1]
+    #     axes.plot(gauge_data[:,0], gauge_data[:,1], label=data_names[cd.gaugeno-1])
+    #     axes.legend()
+    # except:
+    #         print('Gauge Data Unavailable')
     plotaxes.afteraxes = gauge_afteraxes
         
     

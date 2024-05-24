@@ -13,7 +13,7 @@ import clawpack.visclaw.gaugetools as gaugetools
 import clawpack.clawutil.data as clawutil
 import clawpack.amrclaw.data as amrclaw
 import clawpack.geoclaw.data as geodata
-
+import clawpack.geoclaw.util as geoutil
 
 import clawpack.geoclaw.surge.plot as surgeplot
 

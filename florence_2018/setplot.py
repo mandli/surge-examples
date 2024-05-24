@@ -6,6 +6,8 @@ function setplot is called to set the plot parameters.
     
 """
 import os
+import io
+import urllib.request
 
 import numpy as np
 import matplotlib
@@ -43,7 +45,7 @@ def setplot(plotdata):
 
     # Load data from output
     clawdata = clawpack.clawutil.data.ClawInputData(2)
-    clawdata.read('claw.data')
+    clawdata.read(os.path.join(plotdata.outdir,'claw.data'))
     physics = clawpack.geoclaw.data.GeoClawData()
     physics.read(os.path.join(plotdata.outdir,'geoclaw.data'))
     surge_data = clawpack.geoclaw.data.SurgeData()
@@ -388,8 +390,8 @@ def setplot(plotdata):
             if verbose:
                 print('Fetching {} data from NOAA for station {}'.format(
                     product, station))
-            full_url = '{}?{}'.format(NOAA_API_URL, urlencode(noaa_params))
-            with urlopen(full_url) as response:
+            full_url = '{}?{}'.format(NOAA_API_URL, urllib.request.urlencode(noaa_params))
+            with urllib.request.urlopen(full_url) as response:
                 text = response.read().decode('utf-8')
                 with io.StringIO(text) as data:
                     # ensure that received header is correct
@@ -633,7 +635,7 @@ def setplot(plotdata):
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     try:
-        plotaxes.xlimits = [amrdata.t0,amrdata.tfinal]
+        plotaxes.xlimits = [clawdata.t0, clawdata.tfinal]
     except:
         pass
     plotaxes.ylimits = surface_limits

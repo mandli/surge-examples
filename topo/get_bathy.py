@@ -18,21 +18,9 @@ storm_topo = {"global": None,
               "katrina": ["carribean", "nola"]
              }
 
-def plot_topo(path, stride=[1, 1], ax=None):
-    """Plot topography files"""
-    
-    if ax is None:
-        fig, ax = plt.subplots()
 
-    topo = topotools.Topography(path=path)
-
-    for i in range(len(strips)):
-        topo = topotools.Topography(
-                           path=os.path.join(output_dir, "strip%s.nc" % i))
-        topo.read(stride=stride)
-        topo.plot(axes=axes)
-    
-    return fig, ax
+def plot_topo():
+    pass
 
 
 if __name__ == "__main__":

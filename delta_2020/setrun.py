@@ -443,7 +443,7 @@ def setgeo(rundata):
 
     # Convert ATCF data to GeoClaw format
     clawutil.data.get_remote_file("http://ftp.nhc.noaa.gov/atcf/archive/2020/bal262020.dat.gz")
-    atcf_path = os.path.join(data_dir, "bal262020.dat")
+    atcf_path = os.path.join(scratch_dir, "bal262020.dat")
     # Note that the get_remote_file function does not support gzip files which
     # are not also tar files.  The following code handles this
     with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \

@@ -49,7 +49,7 @@ def read_tide_gauge_data(base_path, skiprows=5, verbose=True):
     station_info_file = open(os.path.join(base_path,'Ike_Gauges_web.txt'),'r')
 
     # Skip past header
-    for i in xrange(skiprows):
+    for i in range(skiprows):
         station_info_file.readline()
 
     # Read in each station
@@ -66,7 +66,7 @@ def read_tide_gauge_data(base_path, skiprows=5, verbose=True):
             else:
                 stations[data_line[0]]['gauge_no'] = int(data_line[1])
             if verbose:
-                print "Station %s: %s" % (data_line[0],stations[data_line[0]])
+                print("Station %s: %s" % (data_line[0],stations[data_line[0]]))
             
             # Load and extract real station data
             data = scipy.io.loadmat(os.path.join(base_path,'result_%s.mat' % data_line[0]))
@@ -94,7 +94,7 @@ def read_adcirc_gauge_data(only_gauges=None, base_path="", verbose=True):
         data = np.loadtxt(gauge_file)
         stations[i+1] = data
         if verbose:
-            print "Read in ADCIRC gauge file %s" % gauge_file
+            print("Read in ADCIRC gauge file %s" % gauge_file)
 
     return stations
 
@@ -129,10 +129,10 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
     try:
         file_path = os.path.join(base_path,'fort.gauge')
         if not os.path.exists(file_path):
-            print '*** Warning: cannot find gauge data file %s'%file_path
+            print('*** Warning: cannot find gauge data file %s'%file_path)
             pass
         else:
-            print "Reading gauge data from %s" % file_path
+            print("Reading gauge data from %s" % file_path)
             raw_data = np.loadtxt(file_path)
 
             gauge_read_string = ""
@@ -151,11 +151,11 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
                 gauges[n] = gauge
 
             if verbose:
-                print "Read in GeoClaw gauge [%s]" % gauge_read_string[1:]
+                print("Read in GeoClaw gauge [%s]" % gauge_read_string[1:])
         
     except Exception as e:
-        print '*** Error reading gauges in ClawPlotData.getgauge'
-        print '*** outdir = ', base_path
+        print('*** Error reading gauges in ClawPlotData.getgauge')
+        print('*** outdir = ', base_path)
         raise e
 
     # for (i,gauge_no) in enumerate(gauge_list):
@@ -165,7 +165,7 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
 
 
     elapsed = (time.clock() - start)
-    print "Single gauge reading elapsed time = %s" % elapsed
+    print("Single gauge reading elapsed time = %s" % elapsed)
     
     start = time.clock()
     raw_data = np.loadtxt(os.path.join(base_path,'fort.gauge'))
@@ -183,7 +183,7 @@ def load_geoclaw_gauge_data(only_gauges=None, base_path="_output", verbose=True)
         # self.gaugesoln_dict[(n, outdir)] = gauge
 
     elapsed = (time.clock() - start)
-    print "All gauges reading elapsed time = %s" % elapsed
+    print("All gauges reading elapsed time = %s" % elapsed)
     return gauges
 
 

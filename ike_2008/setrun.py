@@ -7,12 +7,13 @@ that will be read in by the Fortran code.
 
 """
 
-from __future__ import print_function
-
 import os
 import datetime
 
 import numpy as np
+
+import clawpack.clawutil.data
+import clawpack.geoclaw.topotools as topotools
 
 # Need to adjust the date a bit due to weirdness with leap year (I think)
 ike_landfall = datetime.datetime(2008,9,13 - 1,7) - datetime.datetime(2008,1,1,0)
@@ -579,7 +580,7 @@ def get_topo(plot=False):
             os.path.join(base_url, "NOAA_Galveston_Houston.tt3.tar.bz2"),
             os.path.join(base_url, "galveston_tx.asc.tar.bz2")]
     for url in urls:
-        data.get_remote_file(url, verbose=True)
+        clawpack.clawutil.data.get_remote_file(url, verbose=True)
 
     # Plot if requested
     if plot:
