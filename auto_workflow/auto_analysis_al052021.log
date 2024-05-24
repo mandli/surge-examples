@@ -1,0 +1,191 @@
+2022-10-07 17:21:06,000 ===============Report of Time===============
+2022-10-07 17:21:06,000 
+
+2022-10-07 17:21:06,000 Data for the storm is available starting at 2021-06-30 18:00:00
+2022-10-07 17:21:06,000 
+
+2022-10-07 17:21:06,001 Data for the storm is NOT available after 2021-07-10 06:00:00
+2022-10-07 17:21:06,001 
+
+2022-10-07 17:21:06,002 Landfall time you selected was 2021-07-07 14:00:00
+2022-10-07 17:21:06,002 
+
+2022-10-07 17:21:06,002 9.5 days are ready to be simulated
+2022-10-07 17:21:06,002 6.83 days before landfall
+2022-10-07 17:21:06,002 2.67 days after landfall
+2022-10-07 17:21:06,002 
+
+2022-10-07 17:21:06,002 ============================================
+2022-10-07 17:21:06,002 
+
+2022-10-07 17:21:06,327 ==============Search for Gauge==============
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 Key West: Station ID: 8724580, Latitude: 24.56, Longitude: -81.81, Distance: 90.35 kilometers
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 Port Manatee: Station ID: 8726384, Latitude: 27.64, Longitude: -82.56, Distance: 94.016 kilometers
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 St. Petersburg, Tampa Bay: Station ID: 8726520, Latitude: 27.76, Longitude: -82.63, Distance: 85.996 kilometers
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 Old Port Tampa: Station ID: 8726607, Latitude: 27.86, Longitude: -82.55, Distance: 93.364 kilometers
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 Clearwater Beach: Station ID: 8726724, Latitude: 27.98, Longitude: -82.83, Distance: 68.612 kilometers
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 
+
+2022-10-07 17:21:06,327 Cedar Key: Station ID: 8727520, Latitude: 29.14, Longitude: -83.03, Distance: 55.343 kilometers
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 Yorktown USCG Training Center: Station ID: 8637689, Latitude: 37.23, Longitude: -76.48, Distance: 94.545 kilometers
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 Lewes: Station ID: 8557380, Latitude: 38.78, Longitude: -75.12, Distance: 53.917 kilometers
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 Ocean City Inlet: Station ID: 8570283, Latitude: 38.33, Longitude: -75.09, Distance: 36.533 kilometers
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 Bishops Head: Station ID: 8571421, Latitude: 38.22, Longitude: -76.04, Distance: 51.057 kilometers
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 Cambridge: Station ID: 8571892, Latitude: 38.57, Longitude: -76.06, Distance: 52.515 kilometers
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 Solomons Island: Station ID: 8577330, Latitude: 38.32, Longitude: -76.45, Distance: 83.415 kilometers
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 Lewisetta: Station ID: 8635750, Latitude: 38.0, Longitude: -76.46, Distance: 95.562 kilometers
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 The Battery: Station ID: 8518750, Latitude: 40.7, Longitude: -74.01, Distance: 89.209 kilometers
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 
+
+2022-10-07 17:21:06,328 Sandy Hook: Station ID: 8531680, Latitude: 40.47, Longitude: -74.01, Distance: 79.227 kilometers
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 New London: Station ID: 8461490, Latitude: 41.37, Longitude: -72.1, Distance: 33.147 kilometers
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 New Haven: Station ID: 8465705, Latitude: 41.28, Longitude: -72.91, Distance: 66.451 kilometers
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 Bridgeport: Station ID: 8467150, Latitude: 41.18, Longitude: -73.18, Distance: 80.233 kilometers
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 Montauk: Station ID: 8510560, Latitude: 41.05, Longitude: -71.96, Distance: 33.007 kilometers
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 Fall River: Station ID: 8447386, Latitude: 41.7, Longitude: -71.16, Distance: 35.579 kilometers
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 Newport: Station ID: 8452660, Latitude: 41.5, Longitude: -71.33, Distance: 33.248 kilometers
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 Conimicut Light: Station ID: 8452944, Latitude: 41.72, Longitude: -71.35, Distance: 42.504 kilometers
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 Providence: Station ID: 8454000, Latitude: 41.81, Longitude: -71.4, Distance: 39.488 kilometers
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 
+
+2022-10-07 17:21:06,329 Quonset Point: Station ID: 8454049, Latitude: 41.59, Longitude: -71.41, Distance: 31.867 kilometers
+2022-10-07 17:21:06,330 
+
+2022-10-07 17:21:06,330 
+
+2022-10-07 17:21:06,330 Boston: Station ID: 8443970, Latitude: 42.35, Longitude: -71.05, Distance: 39.569 kilometers
+2022-10-07 17:21:06,330 
+
+2022-10-07 17:21:06,330 
+
+2022-10-07 17:21:06,330 Woods Hole: Station ID: 8447930, Latitude: 41.52, Longitude: -70.67, Distance: 59.583 kilometers
+2022-10-07 17:21:06,330 
+
+2022-10-07 17:21:06,330 
+
+2022-10-07 17:21:06,330 Bar Harbor: Station ID: 8413320, Latitude: 44.39, Longitude: -68.2, Distance: 44.273 kilometers
+2022-10-07 17:21:06,330 
+
+2022-10-07 17:21:06,330 ==========================================
+2022-10-07 17:21:06,330 
+
+2022-10-07 17:21:07,326 
+ 
+ ===========================Report Storm Significance===========================
+2022-10-07 17:21:07,336 
+ 
+ 
+            Key West  Port Manatee  St. Petersburg, Tampa Bay  Old Port Tampa  \
+max surge     0.236         0.384                      0.463           0.542   
+distance     90.350        94.016                     85.996          93.364   
+
+           Clearwater Beach  Cedar Key  Yorktown USCG Training Center   Lewes  \
+max surge             0.404      0.646                          0.291   0.387   
+distance             68.612     55.343                         94.545  53.917   
+
+           Ocean City Inlet  Bishops Head  Cambridge  Solomons Island  \
+max surge             0.267         0.290      0.281            0.340   
+distance             36.533        51.057     52.515           83.415   
+
+           Lewisetta  The Battery  Sandy Hook  New London  New Haven  \
+max surge      0.346        0.409       0.393       0.478      0.443   
+distance      95.562       89.209      79.227      33.147     66.451   
+
+           Bridgeport  Montauk  Fall River  Newport  Conimicut Light  \
+max surge       0.478    0.422       0.461    0.445            0.461   
+distance       80.233   33.007      35.579   33.248           42.504   
+
+           Providence  Quonset Point  Boston  Woods Hole  Bar Harbor  
+max surge       0.518          0.443   0.241       0.531       0.186  
+distance       39.488         31.867  39.569      59.583      44.273  
+2022-10-07 17:21:07,336 
+ 
+ ===============================================================================
