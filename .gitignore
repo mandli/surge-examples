@@ -1,3 +1,6 @@
+# MacOS
+.DS_store
+
 # Bathymetry
 *.tt3
 *.xyz
@@ -9,6 +12,7 @@
 *.lo
 *.o
 *.obj
+__pycache__
 
 # Precompiled Headers
 *.gch
@@ -32,3 +36,14 @@
 *.exe
 *.out
 *.app
+
+# Clawpack
+*.data
+*.storm
+pyclaw.log
+.output
+.plots
+.data
+_output
+_plots
+xgeoclaw
