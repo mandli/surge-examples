@@ -152,36 +152,6 @@ def setplot(plotdata=None):
     # ========================================================================
     #  Figures for gauges
     # ========================================================================
-    # def load_station_data(station_id, base_path="./"):
-    #     """Fetch data from local file in the format of a NOAA gauge station"""
-        
-    #     path = os.path.abspath(os.path.join(base_path, 
-    #                                         "{}_data.csv".format(station_id)))
-
-    #     data = pd.read_csv(path, engine="python", sep=",+", header=0, names=[
-    #         "Date", "Time(GMT)", "Predicted(m)", "Verified(m)",
-    #         "Preliminary(m)",
-    #         "Forecast Guidance(m)", ],
-    #                        converters={
-    #                            "Date": lambda d: datetime.datetime(
-    #                                int(d[0:4]), int(d[5:7]), int(d[8:10])),
-    #                            "Time(GMT)": lambda d: datetime.timedelta(
-    #                                hours=int(d[0:2])),
-    #                        },
-    #                        dtype={
-    #                            "Predicted(m)": float,
-    #                            "Verified(m)": float,
-    #                        })
-
-    #     data['DATE'] = data["Date"] + data["Time(GMT)"]
-    #     date_time = data['DATE']
-    #     actual_level = data['Verified(m)']
-    #     predicted_level = data['Predicted(m)']
-
-    #     # secs_rel_landfall = (date_time - landfall_time) / numpy.timedelta64(1, 's')
-
-    #     return secs_rel_landfall, actual_level, predicted_level
-
     def plot_observed(current_data):
         """Fetch and plot gauge data for gauges used."""
 
@@ -200,7 +170,8 @@ def setplot(plotdata=None):
         end_date = datetime.datetime(1989, 9, 23)
 
         # Load in local data
-        path = os.path.abspath(os.path.join(".", "gauges", 
+        path = os.path.abspath(os.path.join(current_data.plotdata.rundir, 
+                                            "gauges", 
                                             "{}_data.csv".format(station_id)))
 
         data = pd.read_csv(path, engine="python", sep=",+", header=0, names=[

@@ -445,8 +445,8 @@ def setgeo(rundata):
         return 500e3
 
     hugo.write(data.storm_file, file_format='geoclaw', 
-                                max_wind_radius_fill=fill_max_wind_radius,
-                                storm_radius_fill=fill_storm_radius)
+                                fill_dict={"max_wind_radius": fill_max_wind_radius,
+                                           "storm_radius": fill_storm_radius})
 
     # =======================
     #  Set Variable Friction
