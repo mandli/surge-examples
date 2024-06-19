@@ -47,3 +47,6 @@ pyclaw.log
 _output
 _plots
 xgeoclaw
+
+# Jupyter
+.ipynb_checkpoints
