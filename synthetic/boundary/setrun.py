@@ -1,14 +1,4 @@
 # encoding: utf-8
-"""
-Module to set up run time parameters for Clawpack.
-
-The values set in the function setrun are then written out to data files
-that will be read in by the Fortran code.
-
-"""
-
-from __future__ import absolute_import
-from __future__ import print_function
 
 import os
 import datetime
@@ -26,11 +16,10 @@ import clawpack.clawutil as clawutil
 def days2seconds(days):
     return days * 60.0**2 * 24.0
 
-
 # Scratch directory for storing topo and storm files:
 scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
 
-
+# Custom clawdata class to handle the boundary condition
 class BCTestData(data.ClawData):
 
     def __init__(self):
@@ -50,8 +39,6 @@ class BCTestData(data.ClawData):
                         description="(Incoming momentum flux modification)")
 
         self.close_data_file()
-
-# ------------------------------
 
 
 def setrun(claw_pkg='geoclaw'):
@@ -97,8 +84,8 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.upper[1] = 500e3     # north latitude
 
     # Number of grid cells:
-    clawdata.num_cells[0] = 200
-    clawdata.num_cells[1] = 200
+    clawdata.num_cells[0] = 100
+    clawdata.num_cells[1] = 100
 
     # ---------------
     # Size of system:
@@ -247,11 +234,18 @@ def setrun(claw_pkg='geoclaw'):
     #   2 => periodic (must specify this at both boundaries)
     #   3 => solid wall for systems where q(2) is normal velocity
 
+    # Setting these to 'user' to use the custom boundary condition
     clawdata.bc_lower[0] = 'extrap'
-    clawdata.bc_upper[0] = 'extrap'
+    clawdata.bc_upper[0] = 'user'
 
     clawdata.bc_lower[1] = 'extrap'
     clawdata.bc_upper[1] = 'extrap'
+
+    # BC Test source term splitting
+    #  0 = no momentum flux
+    #  1 = zero-extrapolation
+    rundata.add_data(BCTestData(), 'bc_test_data')
+    rundata.bc_test_data.alpha_bc = 0.95
 
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
@@ -281,7 +275,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 1
+    amrdata.amr_levels_max = 2
 
     # List of refinement ratios at each level (length at least mxnest-1)
     amrdata.refinement_ratios_x = [2, 2, 2, 6, 16]
@@ -388,6 +382,7 @@ def setgeo(rundata):
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
+    # Set flat bathymetry
     topo_data = rundata.topo_data
     topo_data.test_topography = 2
 
@@ -413,6 +408,9 @@ def setgeo(rundata):
     data.wind_forcing = True
     data.drag_law = 1
     data.pressure_forcing = True
+
+    # This sets the spin of the storm to always be as if it was in 
+    # the Northern Hemisphere
     data.rotation_override = "N"
 
     data.display_landfall_time = True
@@ -421,7 +419,7 @@ def setgeo(rundata):
     data.wind_refine = [20.0, 40.0, 60.0]
     data.R_refine = [60.0e3, 40e3, 20e3]
 
-    # Storm parameters - Parameterized storm (Holland 1980)
+    # Storm parameters
     data.storm_specification_type = 'holland80'  # (type 1)
     data.storm_file = os.path.join(os.getcwd(), 'synthetic.storm')
 
@@ -432,22 +430,24 @@ def setgeo(rundata):
     storm.t = np.linspace(rundata.clawdata.t0, rundata.clawdata.tfinal,
                              num_forecasts)
 
+    # Provides a ramp up of the strength of the storm so that it is at full
+    # strength at t = 0
     def ramp_function(t):
         c = days2seconds(1)
         return np.where(t < 0.0,
                            -2 / c**3 * t**3 - 3 / c**2 * t**2 + 1,
                            np.ones(t.shape))
 
+    # Translate in the positive x-direction at 15 km/hr
     def storm_x(t):
-        # 15 km/h storm speed
         storm_v = 15 / 3.6
         x0 = 0.0
         return x0 + storm_v * t
 
     storm.eye_location = np.array([[storm_x(t), 0.0] for t in storm.t])
-    storm.max_wind_speed = np.array([64.0 for t in storm.t])
+    storm.max_wind_speed = 64.0 * np.ones(storm.t.shape)
 
-    # Max Wind Radius
+    # Max wind radius based on wind speed
     C0 = 218.3784
     storm.max_wind_radius = np.empty(num_forecasts)
     for (n, t) in enumerate(storm.t):
@@ -465,20 +465,15 @@ def setgeo(rundata):
     #     storm.central_pressure[n] = ( a * storm.max_wind_speed[n]**2
     #             + b * storm.max_wind_speed[n] + c) * ramp_function(t)
 
+    # Constant central pressure once at full strength
     storm.central_pressure = geo_data.ambient_pressure - \
         (geo_data.ambient_pressure - 940e2) * ramp_function(storm.t)
 
-    # Extent of storm set to 300 km
+    # Radius of storm set to 300 km
     storm.storm_radius = 300e3 * np.ones(num_forecasts)
 
     # Write out storm
     storm.write(data.storm_file, file_format='geoclaw')
-
-    # BC Test source term splitting
-    #  0 = no momentum flux
-    #  1 = zero-extrapolation
-    rundata.add_data(BCTestData(), 'bc_test_data')
-    rundata.bc_test_data.alpha_bc = 1.0
 
     return rundata
     # end of function setgeo

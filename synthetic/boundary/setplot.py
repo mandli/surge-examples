@@ -53,17 +53,6 @@ def setplot(plotdata=None):
         surgeplot.surge_afteraxes(cd, track, plot_direction=False,
                                              kwargs={"markersize": 4})
 
-    # def storm_radius(cd):
-    #     # Plot 300 km circle around eye to indicate outer edge of storm radius
-    #     track_data = track.get_track(cd.frameno)
-    #     return np.sqrt((cd.x - track_data[0])**2 + (cd.y - track_data[1])**2)
-
-    # def add_storm_radius(ax, radius=[100e3]):
-    #     plotitem = plotaxes.new_plotitem(name="storm radius", plot_type="2d_contour")
-    #     plotitem.plot_var = storm_radius
-    #     plotitem.contour_levels = radius
-    #     plotitem.contour_colors = 'r'
-
     # Color limits
     surface_limits = [-1.0, 1.0]
     H = 3e3
@@ -84,7 +73,7 @@ def setplot(plotdata=None):
     plotaxes.scaled = True
     plotaxes.afteraxes = surge_afteraxes
     surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
-    surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
+    # surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
     surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
     plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
     plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
@@ -98,7 +87,7 @@ def setplot(plotdata=None):
     plotaxes.scaled = True
     plotaxes.afteraxes = surge_afteraxes
     surgeplot.add_speed(plotaxes, bounds=speed_limits)
-    surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
+    # surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
     surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
     plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0] * 10
     plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
@@ -117,7 +106,7 @@ def setplot(plotdata=None):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     surgeplot.add_pressure(plotaxes, bounds=pressure_limits)
-    surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
+    # surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
     surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
 
     # Wind field
@@ -131,48 +120,12 @@ def setplot(plotdata=None):
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
     surgeplot.add_wind(plotaxes, bounds=wind_limits)
-    surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
+    # surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
     surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
     plotitem = plotaxes.new_plotitem(plot_type='2d_contour')
     plotitem.plot_var = surgeplot.wind_speed
     plotitem.contour_levels = [10, 20, 30, 40, 50, 60]
     plotitem.contour_colors = ['blue']
-
-    # plotfigure = plotdata.new_plotfigure(name='Wind Speed X')
-    # plotfigure.show = surge_data.wind_forcing and True
-    # plotaxes = plotfigure.new_plotaxes()
-    # plotaxes.xlimits = (clawdata.lower[0], clawdata.upper[0])
-    # plotaxes.ylimits = (clawdata.lower[1], clawdata.upper[1])
-    # plotaxes.title = "Wind Field X"
-    # plotaxes.afteraxes = surge_afteraxes
-    # plotaxes.scaled = True    
-    # plotitem = plotaxes.new_plotitem(name='wind', plot_type='2d_pcolor')
-    # plotitem.plot_var = surgeplot.wind_x
-    # plotitem.pcolor_cmap = surgeplot.velocity_cmap    
-    # plotitem.pcolor_cmin = -wind_limits[1]
-    # plotitem.pcolor_cmax = wind_limits[1]
-    # plotitem.add_colorbar = True
-    # plotitem.colorbar_label = "Wind Speed (m/s)"
-    # surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
-    # surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
-
-    # plotfigure = plotdata.new_plotfigure(name='Wind Speed Y')
-    # plotfigure.show = surge_data.wind_forcing and True
-    # plotaxes = plotfigure.new_plotaxes()
-    # plotaxes.xlimits = (clawdata.lower[0], clawdata.upper[0])
-    # plotaxes.ylimits = (clawdata.lower[1], clawdata.upper[1])
-    # plotaxes.title = "Wind Field Y"
-    # plotaxes.afteraxes = surge_afteraxes
-    # plotaxes.scaled = True    
-    # plotitem = plotaxes.new_plotitem(name='wind', plot_type='2d_pcolor')
-    # plotitem.plot_var = surgeplot.wind_y
-    # plotitem.pcolor_cmap = surgeplot.velocity_cmap    
-    # plotitem.pcolor_cmin = -wind_limits[1]
-    # plotitem.pcolor_cmax = wind_limits[1]
-    # plotitem.add_colorbar = True
-    # plotitem.colorbar_label = "Wind Speed (m/s)"
-    # surgeplot.add_storm_radii(plotaxes, track, radii=storm_radii)
-    # surgeplot.add_land(plotaxes, bounds=[0.0, 20.0])
 
     # ===========
     #  Transects
@@ -251,11 +204,13 @@ def setplot(plotdata=None):
     plotaxes.grid = True
     plotaxes.afteraxes = lambda cd: compute_max(cd, field=1)
 
+    # Momentum
     # plotitem = plotaxes.new_plotitem(plot_type="1d_from_2d_data")
     # plotitem.map_2d_to_1d = lambda cd: transect(cd, field=1)
     # plotitem.plotstyle = "ko-"
     # plotitem.kwargs = {"markersize": 3}
 
+    # Velocity
     plotitem = plotaxes.new_plotitem(plot_type="1d_from_2d_data")
     plotitem.map_2d_to_1d = lambda cd: transect(cd, field=-1)
     plotitem.plotstyle = "bx-"

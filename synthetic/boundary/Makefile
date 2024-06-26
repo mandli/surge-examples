@@ -48,11 +48,11 @@ EXCLUDE_SOURCES = \
 RIEMANN = $(CLAW)/riemann/src
 
 MODULES = \
-  ./bc_module.f90
+  bc_module.f90
 
 SOURCES = \
-  ./setprob.f90 \
-  ./bc2amr.f90 \
+  setprob.f90 \
+  bc2amr.f90 \
   $(RIEMANN)/rpn2_geoclaw.f \
   $(RIEMANN)/rpt2_geoclaw.f \
   $(RIEMANN)/geoclaw_riemann_utils.f
