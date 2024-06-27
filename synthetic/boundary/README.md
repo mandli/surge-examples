@@ -13,5 +13,8 @@ $\alpha_{\text{bc}}$
  - $0 < \alpha_{\text{bc}} < 1$: Decaying value of the incoming flux
  - $\alpha_{\text{bc}}=1$: zero-order extrapolation
 
-The additional scripts `run_tests.py` and `plot_comparison.py` will run a number
-of values for $\alpha_{\text{bc}}$ and plot comparisons between the gauges.
+The additional scripts `run_tests.py` will run a number of values for 
+$\alpha_{\text{bc}}$ and plot comparisons between the gauges.
+
+A Jupyter notebook is also provided to give examples of how to plot storms from
+various data sources and look at how their extents compare with boundaries.
