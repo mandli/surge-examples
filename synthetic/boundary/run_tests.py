@@ -76,25 +76,25 @@ def plot_gauge(gauge_num, controller):
                                                   f"{job.prefix}_output")
         gauge = clawpack.pyclaw.gauges.GaugeSolution(gauge_id=gauge_num, 
                                                      path=path)
-        print(job.rundata.clawdata.bc_upper[0])
-        if job.rundata.clawdata.bc_upper[0] == 'wall':
-            kwargs = {"color": 'black', "label": "wall"}
-        elif job.rundata.clawdata.bc_upper[0] == 'user':
+        if job.rundata.clawdata.bc_upper[0] in ['user', 0]:
             if job.rundata.bc_test_data.alpha_bc == 0.0:
-                kwargs = {"color": 'blue', 
-                          "marker": ".", 
+                kwargs = {"color": 'blue',
+                          "linewidth": 2,
                           "label": "zero momentum"}
             else:
-                kwargs = {"color": 'lightgray', "label": None}
-        elif job.rundata.clawdata.bc_upper[0] == 'extrap':
-            kwargs = {"color": 'red', "label": "extrap"}
+                kwargs = {"color": 'lightgray', "alpha": 0.5, "label": None}
+        elif job.rundata.clawdata.bc_upper[0] in ['extrap', 1]:
+            kwargs = {"color": 'red', "linewidth": 2, "label": "extrap"}
+        elif job.rundata.clawdata.bc_upper[0] in ['wall', 3]:
+            kwargs = {"color": 'black', "linewidth": 2, "label": "wall"}
         else:
-            raise ValueError("Invalid test type.")
+            raise ValueError(f"Invalid test type.")
         ax.plot(surgeplot.sec2days(gauge.t), gauge.q[3, :], **kwargs)
 
-    ax.set_title('Station %s' % gauge_num)
+    gauge_titles = ['Left Boundary', 'Center', 'Right Boundary']
+    ax.set_title(gauge_titles[gauge_num])
     ax.set_xlim([-1, 3])
-    ax.set_xlabel('Days relative to landfall')
+    ax.set_xlabel('Days relative to Full Strength')
     t_labels = [-1, 0, 1, 2, 3]
     ax.set_xticks(t_labels)
     ax.set_xticklabels([r"${}$".format(x) for x in t_labels])
@@ -107,13 +107,14 @@ def plot_gauge(gauge_num, controller):
 if __name__ == '__main__':
 
     jobs = []
-    alphas = [0.000, 0.100, 0.200, 0.250, 0.300, 0.400, 0.500, 0.600, 0.700, 
+    alphas = [0.100, 0.200, 0.250, 0.300, 0.400, 0.500, 0.600, 0.700, 
               0.750, 0.800, 0.900, 0.950, 0.955, 0.960, 0.965, 0.970, 0.975, 
               0.980, 0.985, 0.990, 0.995]
-    jobs.append(BoundaryJob('wall'))
-    jobs.append(BoundaryJob('extrap'))
     for alpha in alphas:
         jobs.append(BoundaryJob('test', alpha=alpha))
+    jobs.append(BoundaryJob('test', alpha=0.0))
+    jobs.append(BoundaryJob('wall'))
+    jobs.append(BoundaryJob('extrap'))
     
     controller = batch.batch.BatchController(jobs)
     controller.plot = False
