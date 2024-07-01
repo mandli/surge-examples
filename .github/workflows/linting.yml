@@ -33,11 +33,11 @@ jobs:
       with:
         repository: clawpack/clawpack
         submodules: true
-    - name: Checkout surge-examples
-      uses: actions/checkout@v4.1.5
     - name: Install clawpack
       run: |
         pip install --no-build-isolation --editable .
+    - name: Checkout surge-examples
+      uses: actions/checkout@v4.1.5
         
     - name: Lint with flake8
       run: |
