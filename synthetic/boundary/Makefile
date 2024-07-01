@@ -21,7 +21,7 @@ PLOTDIR = _plots               # Directory for plots
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
 FFLAGS ?=
-CLAW_PYTHON=python3
+
 # ---------------------------------
 # package sources for this program:
 # ---------------------------------
@@ -35,9 +35,11 @@ include $(GEOLIB)/Makefile.geoclaw
 #  under a different name is provided)
 # ---------------------------------------
 
-EXCLUDE_MODULES = \
+EXCLUDE_MODULES = 
 
 EXCLUDE_SOURCES = \
+  setprob.f90 \
+  bc2amr.f90
 
 # ----------------------------------------
 # List of custom sources for this program:
@@ -46,11 +48,15 @@ EXCLUDE_SOURCES = \
 RIEMANN = $(CLAW)/riemann/src
 
 MODULES = \
+  bc_module.f90
 
 SOURCES = \
+  setprob.f90 \
+  bc2amr.f90 \
   $(RIEMANN)/rpn2_geoclaw.f \
   $(RIEMANN)/rpt2_geoclaw.f \
-  $(RIEMANN)/geoclaw_riemann_utils.f \
+  $(RIEMANN)/geoclaw_riemann_utils.f
+
 
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:

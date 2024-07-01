@@ -419,11 +419,6 @@ def setgeo(rundata):
 
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0
-
-    # == setfixedgrids.data values ==
-    rundata.fixed_grid_data.fixedgrids = []
-    # for fixed grids append lines of the form
-    # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,ioutarrivaltimes,ioutsurfacemax]
     
     # ================
     #  Set Surge Data
