@@ -7,9 +7,6 @@ that will be read in by the Fortran code.
 
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 import clawpack.geoclaw.topotools as topo
 import os
 import datetime
@@ -21,15 +18,12 @@ import numpy as np
 from clawpack.geoclaw.surge.storm import Storm
 import clawpack.clawutil as clawutil
 
+# Scratch directory for storing topo and storm files:
+scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
 
 # Time Conversions
 def days2seconds(days):
     return days * 60.0**2 * 24.0
-
-
-# Scratch directory for storing topo and storm files:
-scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
-
 
 # ------------------------------
 def setrun(claw_pkg='geoclaw'):
@@ -140,7 +134,7 @@ def setrun(claw_pkg='geoclaw'):
         clawdata.total_steps = 1
         clawdata.output_t0 = True
 
-    clawdata.output_format = 'ascii'      # 'ascii' or 'binary'
+    clawdata.output_format = 'binary'      # 'ascii' or 'binary'
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'all'
     clawdata.output_aux_onlyonce = False    # output aux arrays only at t0
@@ -177,7 +171,7 @@ def setrun(claw_pkg='geoclaw'):
     # Maximum number of time steps to allow between output times:
     # may need to adjust this value ... refer to examples
     #irene uses 10k
-    clawdata.steps_max = 5000
+    clawdata.steps_max = 2**16
 
     # ------------------
     # Method to be used:
@@ -391,20 +385,9 @@ def setgeo(rundata):
     topo_data.topofiles = []
     # for topography, append lines of the form
     #   [topotype, fname]
-    # See regions for control over these regions, need better bathy data for
-    # the smaller domains
-    
-    # insert own topography file here
-    # maria_path=os.path.join(DATA, 'maria-atlantic17.asc')
-    topo_path = os.path.join(scratch_dir, 'maria-atlantic17.asc')
-    topo_data.topofiles.append([3, topo_path])
-    # adjust above code for Maria topography - see Irene
-
-    # == setfixedgrids.data values ==
-    rundata.fixed_grid_data.fixedgrids = []
-    # for fixed grids append lines of the form
-    # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
-    #  ioutarrivaltimes,ioutsurfacemax]
+    topo_path = os.path.join(os.environ['DATA_PATH'], 
+                             'topography', 'GEBCO', 'GEBCO_2023.nc')
+    topo_data.topofiles.append([4, topo_path])
 
     # ================
     #  Set Surge Data
@@ -426,20 +409,24 @@ def setgeo(rundata):
     data.storm_specification_type = 'holland80'  # (type 1)
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
                                          'maria.storm'))
-    #create data.storm file for Maria here ^
-    
     
     # Convert ATCF data to GeoClaw format
-    # clawutil.data.get_remote_file("http://ftp.nhc.noaa.gov/atcf/archive/2017/bal152017.dat.gz")
+    clawutil.data.get_remote_file("http://ftp.nhc.noaa.gov/atcf/archive/2017/bal152017.dat.gz")
     atcf_path = os.path.join(scratch_dir, "bal152017.dat")
     # Note that the get_remote_file function does not support gzip files which
     # are not also tar files.  The following code handles this
     with gzip.open(".".join((atcf_path, 'gz')), 'rb') as atcf_file,    \
             open(atcf_path, 'w') as atcf_unzipped_file:
         atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
+    # Remove first 2 rows of file (transition makred in file)
+    with open(atcf_path, 'r') as storm_file:
+        storm_data = storm_file.readlines()
+    with open(atcf_path, 'w') as storm_file:
+        for (n, line) in enumerate(storm_data):
+            if n > 1:
+                storm_file.write(line)
 
     # Uncomment/comment out to use the old version of the Maria storm file
-    # maria = Storm(path="old_maria.storm", file_format="ATCF")
     maria = Storm(path=atcf_path, file_format="ATCF")
 
     # Calculate landfall time - Need to specify as the file above does not
@@ -460,17 +447,13 @@ def setgeo(rundata):
     # Entire domain
     data.friction_regions.append([rundata.clawdata.lower,
                                   rundata.clawdata.upper,
-                                  [np.infty, 0.0, -np.infty],
+                                  [np.inf, 0.0, -np.inf],
                                   [0.030, 0.022]])
     #Puerto Rico
     data.friction_regions.append([(-69, 17), (-64, 19),
-                                  [np.infty, -10.0, -200.0, -np.infty],
+                                  [np.inf, -10.0, -200.0, -np.inf],
                                   [0.030, 0.012, 0.022]])
     
-    # La-Tex Shelf
-    #data.friction_regions.append([(-98, 25.25), (-90, 30),
-    #                              [np.infty, -10.0, -200.0, -np.infty],
-    #                              [0.030, 0.012, 0.022]])
 
     return rundata
     # end of function setgeo

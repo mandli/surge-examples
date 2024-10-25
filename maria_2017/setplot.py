@@ -52,8 +52,8 @@ def setplot(plotdata=None):
                                              kwargs={"markersize": 4})
 
     # Color limits
-    surface_limits = [-5.0, 5.0]
-    speed_limits = [0.0, 3.0]
+    surface_limits = [-2.0, 2.0]
+    speed_limits = [0.0, 2.0]
     wind_limits = [0, 64]
     pressure_limits = [935, 1013]
     friction_bounds = [0.01, 0.04]
@@ -69,10 +69,8 @@ def setplot(plotdata=None):
                         "figsize": (6.4, 4.8)},
                 "Puerto Rico": {"xlimits": (-69, -64),
                                 "ylimits": (17, 19),
-                                "figsize": (5, 6)}}
-               #"LaTex Shelf": {"xlimits": (-97.5, -88.5),
-               #                "ylimits": (27.5, 30.5),
-               #                "figsize": (8, 2.7)}}
+                                "figsize": (6.4, 2.56)}
+              }
                
     for (name, region_dict) in regions.items():
 
