@@ -443,12 +443,6 @@ def setgeo(rundata):
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
     topo_data.topofiles.append([3, topo_path])
 
-    # == setfixedgrids.data values ==
-    rundata.fixed_grid_data.fixedgrids = []
-    # for fixed grids append lines of the form
-    # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
-    #  ioutarrivaltimes,ioutsurfacemax]
-
     # ================
     #  Set Surge Data
     # ================
@@ -502,17 +496,17 @@ def setgeo(rundata):
     # Entire domain
     data.friction_regions.append([rundata.clawdata.lower,
                                   rundata.clawdata.upper,
-                                  [numpy.infty, 0.0, -numpy.infty],
+                                  [numpy.inf, 0.0, -numpy.inf],
                                   [0.030, 0.022]])
 
     # Texas gulf coast
     data.friction_regions.append([(-99.2, 26.4), (-94.2, 30.4),
-                                  [numpy.infty, -10.0, -200.0, -numpy.infty],
+                                  [numpy.inf, -10.0, -200.0, -numpy.inf],
                                   [0.030, 0.012, 0.022]])    
     
     # La-Tex Shelf
     # data.friction_regions.append([(-98, 25.25), (-90, 30),
-    #                              [numpy.infty, -10.0, -200.0, -numpy.infty],
+    #                              [numpy.inf, -10.0, -200.0, -numpy.inf],
     #                              [0.030, 0.012, 0.022]])
 
     return rundata
