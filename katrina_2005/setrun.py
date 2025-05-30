@@ -7,9 +7,6 @@ that will be read in by the Fortran code.
 
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
-
 import os
 import sys
 import datetime
@@ -404,8 +401,6 @@ def setgeo(rundata):
     # refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
     # refine_data.speed_tolerance = [0.5,1.0,1.5,2.0,2.5,3.0]
     refine_data.speed_tolerance = [1.0,2.0,3.0,4.0]
-    refine_data.deep_depth = 1e6
-    refine_data.max_level_deep = 5
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
@@ -414,15 +409,18 @@ def setgeo(rundata):
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
 
     # Fetch topography if needed
-    topo_files = get_topo()
+    # topo_files = get_topo()
 
-    for topo_file in topo_files:
-        topo_data.topofiles.append([4, 1, 5,
-                                    rundata.clawdata.t0, rundata.clawdata.tfinal,
-                                    topo_file])
-    topo_data.topofiles.append([3, 1, 5,
-                                rundata.clawdata.t0, rundata.clawdata.tfinal,
-                                os.path.join(os.environ['CLAW'], 'geoclaw', 'scratch', 'NewOrleans_3s.tt3')])
+    scratch_dir = os.path.join(os.environ['CLAW'], 'geoclaw', 'scratch')
+    topo_data.topofiles.append([4, os.path.join(scratch_dir, "gulf.nc")])
+
+    # for topo_file in topo_files:
+    #     topo_data.topofiles.append([4, 1, 5,
+    #                                 rundata.clawdata.t0, rundata.clawdata.tfinal,
+    #                                 topo_file])
+    # topo_data.topofiles.append([3, 1, 5,
+    #                             rundata.clawdata.t0, rundata.clawdata.tfinal,
+    #                             os.path.join(os.environ['CLAW'], 'geoclaw', 'scratch', 'NewOrleans_3s.tt3')])
 
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0
@@ -430,13 +428,6 @@ def setgeo(rundata):
     # for qinit perturbations, append lines of the form: (<= 1 allowed for now!)
     #   [minlev, maxlev, fname]
     # geodata.qinitfiles.append([1, 5, 'hump.xyz'])
-
-    # == setfixedgrids.data values ==
-    rundata.fixed_grid_data.fixedgrids = []
-    # for fixed grids append lines of the form
-    # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
-    #  ioutarrivaltimes,ioutsurfacemax]
-    # geodata.fixedgrids.append([1e3,3.24e4,10,-90,-80,-30,-15,100,100,0,1])
 
     return rundata
     # end of function setgeo
@@ -481,12 +472,12 @@ def set_friction(rundata):
     # Entire domain
     data.friction_regions.append([rundata.clawdata.lower,
                                   rundata.clawdata.upper,
-                                  [np.infty, 0.0, -np.infty],
+                                  [np.inf, 0.0, -np.inf],
                                   [0.030, 0.022]])
 
     # # La-Tex Shelf
     # data.friction_regions.append([(-98, 25.25), (-90, 30),
-    #                               [np.infty, -10.0, -200.0, -np.infty],
+    #                               [np.inf, -10.0, -200.0, -np.inf],
     #                               [0.030, 0.012, 0.022]])
 
     return data

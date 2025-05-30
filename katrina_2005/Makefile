@@ -20,8 +20,8 @@ SETPLOT_FILE = setplot.py      # File containing function to set plots
 PLOTDIR = _plots               # Directory for plots
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
-FFLAGS += -DNETCDF -lnetcdff -I$(NETCDF4_DIR)/include -O3 -funroll-loops -finline-functions -fopenmp
-LFLAGS += $(FFLAGS)
+FFLAGS += -DNETCDF $(shell nf-config --fflags)
+LFLAGS += $(shell nf-config --flibs) $(shell nc-config --libs)
 
 # ---------------------------------
 # package sources for this program:
