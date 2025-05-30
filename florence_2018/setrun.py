@@ -7,6 +7,7 @@ that will be read in by the Fortran code.
 
 """
 
+from pathlib import Path
 import os
 import datetime
 
@@ -30,6 +31,7 @@ days2seconds = lambda days: days * 60.0**2 * 24.0
 seconds2days = lambda seconds: seconds / (60.0**2 * 24.0)
 
 scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
+topo_path = Path(os.environ["DATA_PATH"]) / "topography" / "atlantic_1min.tt3"
 
 #------------------------------
 def setrun(claw_pkg='geoclaw'):
@@ -158,7 +160,7 @@ def setrun(claw_pkg='geoclaw'):
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
     #   (E.g. verbosity == 2 means print only on levels 1 and 2.)
-    clawdata.verbosity = 0
+    clawdata.verbosity = 1
     
     # --------------
     # Time stepping:
@@ -266,9 +268,8 @@ def setrun(claw_pkg='geoclaw'):
     # ---------------
     amrdata = rundata.amrdata
 
-
     # max number of refinement levels:
-    amrdata.amr_levels_max = 6
+    amrdata.amr_levels_max = 2
 
     # List of refinement ratios at each level (length at least mxnest-1)
     amrdata.refinement_ratios_x = [2,2,2,6,8,10,8]
@@ -363,7 +364,7 @@ def setrun(claw_pkg='geoclaw'):
     flagregions.append(flagregion)
 
     # make Ruled Rectangle flagregions
-    topo_path = os.path.join(scratch_dir, 'atlantic_1min.tt3')
+    # topo_path = os.path.join(scratch_dir, 'atlantic_1min.tt3')
     topo = topotools.Topography()
     topo.read(topo_path)
     
@@ -523,8 +524,6 @@ def setgeo(rundata):
     # refine_data.speed_tolerance = [0.25,0.5,1.0,2.0,3.0,4.0]
     # refine_data.speed_tolerance = [0.5,1.0,1.5,2.0,2.5,3.0]
     refine_data.speed_tolerance = [1.0,2.0,3.0,4.0]
-    refine_data.deep_depth = 1e6
-    refine_data.max_level_deep = 4
     refine_data.variable_dt_refinement_ratios = True
     
     # == settopo.data values ==
@@ -532,8 +531,7 @@ def setgeo(rundata):
     topo_data.topofiles = []
     # for topography, append lines of the form
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
-    topo_path = os.path.join('..', 'bathy')
-    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, os.path.join(topo_path, 'atlantic_1min.tt3')])
+    topo_data.topofiles.append([3, topo_path])
     
     # == setqinit.data values ==
     rundata.qinit_data.qinit_type = 0
@@ -541,12 +539,6 @@ def setgeo(rundata):
     # for qinit perturbations, append lines of the form: (<= 1 allowed for now!)
     #   [minlev, maxlev, fname]
 
-    # == setfixedgrids.data values ==
-    rundata.fixed_grid_data.fixedgrids = []
-    # for fixed grids append lines of the form
-    # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
-    #  ioutarrivaltimes,ioutsurfacemax]
-    
     # Set storm
     set_storm(rundata)
 
@@ -601,7 +593,7 @@ def set_friction(rundata):
     # Entire domain
     data.friction_regions.append([rundata.clawdata.lower, 
                                   rundata.clawdata.upper,
-                                  [np.infty,0.0,-np.infty],
+                                  [np.inf,0.0,-np.inf],
                                   [0.050, 0.025]])
 
     return data
