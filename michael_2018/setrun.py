@@ -7,9 +7,6 @@ that will be read in by the Fortran code.
 
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 import os
 import datetime
 import shutil
@@ -19,7 +16,7 @@ import numpy as np
 
 from clawpack.geoclaw.surge.storm import Storm
 import clawpack.clawutil as clawutil
-
+import clawpack.geoclaw.topotools as topotools
 
 # Time Conversions
 def days2seconds(days):
@@ -153,7 +150,7 @@ def setrun(claw_pkg='geoclaw'):
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
     #   (E.g. verbosity == 2 means print only on levels 1 and 2.)
-    clawdata.verbosity = 0
+    clawdata.verbosity = 1
 
     # --------------
     # Time stepping:
@@ -265,7 +262,7 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 6
+    amrdata.amr_levels_max = 5
 
     
     # List of refinement ratios at each level (length at least mxnest-1)
@@ -331,14 +328,14 @@ def setrun(claw_pkg='geoclaw'):
     # gauge = 7;-82.5518544;27.8602907; 8726607; OPTF1, Old Port Tampa, FL, A
     # gauge = 8;-87.21;30.40;           8729840; PCLF1, Pensacola, FL, O
     # region
-    regions.append([6,6,clawdata.t0, clawdata.tfinal,-84.980-0.25,-84.980+0.25,29.724-0.25,29.724+0.25])
-    regions.append([6,6,clawdata.t0, clawdata.tfinal,-80.903-0.25,-80.903+0.25,32.035-0.25,32.035+0.25])
-    regions.append([6,6,clawdata.t0, clawdata.tfinal,-82.8532264-0.25,-82.8532264+0.25,27.9841164-0.25,27.9841164+0.25])
-    regions.append([6,6,clawdata.t0, clawdata.tfinal,-85.6667-0.25,-85.6667+0.25,30.1517-0.25,30.1517+0.25])
-    regions.append([6,6,clawdata.t0, clawdata.tfinal,-87.21-0.25,-87.21+0.25,30.40-0.25,30.40+0.25])
-    regions.append([6,6,clawdata.t0, clawdata.tfinal,-85.8808554-0.25,-85.8808554+0.25,30.2095418-0.25,30.2095418+0.25])
-    regions.append([6,6,clawdata.t0, clawdata.tfinal,-82.5518544-0.25,-82.5518544+0.25,27.8602907-0.25,27.8602907+0.25])
-    regions.append([6,6,clawdata.t0, clawdata.tfinal,-87.21-0.25,-87.21+0.25,30.40-0.25,30.40+0.25])
+    regions.append([5,6,clawdata.t0, clawdata.tfinal,-84.980-0.25,-84.980+0.25,29.724-0.25,29.724+0.25])
+    regions.append([5,6,clawdata.t0, clawdata.tfinal,-80.903-0.25,-80.903+0.25,32.035-0.25,32.035+0.25])
+    regions.append([5,6,clawdata.t0, clawdata.tfinal,-82.8532264-0.25,-82.8532264+0.25,27.9841164-0.25,27.9841164+0.25])
+    regions.append([5,6,clawdata.t0, clawdata.tfinal,-85.6667-0.25,-85.6667+0.25,30.1517-0.25,30.1517+0.25])
+    regions.append([5,6,clawdata.t0, clawdata.tfinal,-87.21-0.25,-87.21+0.25,30.40-0.25,30.40+0.25])
+    regions.append([5,6,clawdata.t0, clawdata.tfinal,-85.8808554-0.25,-85.8808554+0.25,30.2095418-0.25,30.2095418+0.25])
+    regions.append([5,6,clawdata.t0, clawdata.tfinal,-82.5518544-0.25,-82.5518544+0.25,27.8602907-0.25,27.8602907+0.25])
+    regions.append([5,6,clawdata.t0, clawdata.tfinal,-87.21-0.25,-87.21+0.25,30.40-0.25,30.40+0.25])
 
     # == set gauges ==    
     rundata.gaugedata.gauges.append([1, -84.980, 29.724, rundata.clawdata.t0, rundata.clawdata.tfinal])
@@ -406,14 +403,16 @@ def setgeo(rundata):
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
     
-    topo_path = os.path.join(scratch_dir, "North45_South0_West-105._East-35.tt3")
+    GEBCO_path = os.path.join(os.environ["DATA_PATH"], "topography", "GEBCO", "GEBCO_2023.nc")
+    topo_path = os.path.join(scratch_dir, "gebco_2023_n45_s00_w-105_e-35.tt3")
+    if not os.path.exists(topo_path):
+        topo_file = topotools.Topography()
+        topo_file.read(GEBCO_path, topo_type=4)
+        topo_file = topo_file.crop((-105.5, -34.5, -0.5, 45.5))
+        topo_file.write(path=topo_path, topo_type=3)
+    topo_data.topofiles.append([3, topo_path])
     topo_data.topofiles.append([3, topo_path])
 
-    # == setfixedgrids.data values ==
-    rundata.fixed_grid_data.fixedgrids = []
-    # for fixed grids append lines of the form
-    # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
-    #  ioutarrivaltimes,ioutsurfacemax]
 
     # ================
     #  Set Surge Data
@@ -434,7 +433,7 @@ def setgeo(rundata):
     # Storm parameters - Parameterized storm (Holland 1980)
     data.storm_specification_type = 'holland80'  # (type 1)
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-                                         "Michael"))
+                                         "michael.storm"))
 
     # Convert ATCF data to GeoClaw format
     clawutil.data.get_remote_file(
@@ -468,12 +467,12 @@ def setgeo(rundata):
     # Entire domain
     data.friction_regions.append([rundata.clawdata.lower,
                                   rundata.clawdata.upper,
-                                  [np.infty, 0.0, -np.infty],
+                                  [np.inf, 0.0, -np.inf],
                                   [0.030, 0.022]])
 
     # La-Tex Shelf
     data.friction_regions.append([(-98, 25.25), (-90, 30),
-                                  [np.infty, -10.0, -200.0, -np.infty],
+                                  [np.inf, -10.0, -200.0, -np.inf],
                                   [0.030, 0.012, 0.022]])
 
     return rundata

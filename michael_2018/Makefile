@@ -57,5 +57,3 @@ SOURCES = \
 include $(CLAWMAKE)
 
 ### DO NOT remove this line - make depends on it ###
-Footer
-
